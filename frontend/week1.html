@@ -373,7 +373,7 @@
             <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-4">SUBMIT YOUR WORK</h2>
             <div class="submit-card rounded-3xl p-8">
                 <!-- Instructions -->
-                <div class="mb-8 p-6 bg-dark-800/50 rounded-2xl border border-white/5">
+                <div id="instructionsContainer" class="hidden mb-8 p-6 bg-dark-800/50 rounded-2xl border border-white/5">
                     <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
                         <span>📋</span> How to Submit
                     </h3>
@@ -406,19 +406,23 @@
 
                 <!-- Form -->
                 <form id="submitForm" class="space-y-6">
-                    <div>
+                    <div id="githubUrlContainer" class="hidden">
                         <label class="block text-sm font-medium mb-2 text-gray-300">GitHub Repository URL</label>
                         <input type="url" id="githubUrl" required
                                class="w-full bg-dark-800 border border-white/10 rounded-xl px-5 py-4 focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent/50 transition-all text-lg mono"
                                placeholder="https://github.com/username/repo">
                     </div>
                     <div class="flex flex-col sm:flex-row gap-4 pt-4">
+                        <!-- Timer not started hint -->
+                        <div id="timerNotStartedHint" class="flex-1 p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl text-amber-400 text-center">
+                            <span>⏱️ 타이머를 시작하면 제출 폼이 나타납니다</span>
+                        </div>
                         <button type="button" id="startBtn" onclick="startChallenge()"
                                 class="btn-secondary flex-1 text-white font-bold py-4 px-6 rounded-xl text-lg flex items-center justify-center gap-2">
                             <span>⏱️</span> Start Timer
                         </button>
                         <button type="submit" id="submitBtn"
-                                class="btn-primary flex-1 text-white font-bold py-4 px-6 rounded-xl text-lg flex items-center justify-center gap-2">
+                                class="hidden btn-primary flex-1 text-white font-bold py-4 px-6 rounded-xl text-lg flex items-center justify-center gap-2">
                             <span>🚀</span> Submit
                         </button>
                     </div>
@@ -462,6 +466,9 @@
                 startBtn.classList.add('opacity-50', 'cursor-not-allowed');
                 submitBtn.disabled = true;
                 submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                // Hide timer hint when not logged in (login warning is shown instead)
+                const hint = document.getElementById('timerNotStartedHint');
+                if (hint) hint.classList.add('hidden');
                 return;
             }
 
@@ -485,6 +492,9 @@
                     startBtn.classList.add('opacity-50', 'cursor-not-allowed');
                     submitBtn.disabled = true;
                     submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                    // Hide timer hint when not logged in
+                    const hint = document.getElementById('timerNotStartedHint');
+                    if (hint) hint.classList.add('hidden');
                 }
             } catch (e) {
                 console.error('Auth check failed:', e);
@@ -527,6 +537,9 @@
                         timerInterval = setInterval(updateTimer, 1000);
                         updateTimer();
 
+                        // 제출 폼 표시
+                        showChallengeForm();
+
                         // 제출 완료 상태면 제출 버튼도 비활성화
                         if (data.personal_status === 'submitted') {
                             document.getElementById('submitBtn').disabled = true;
@@ -556,6 +569,14 @@
             document.getElementById('timerDisplay').textContent = `${minutes}:${seconds}`;
         }
 
+        function showChallengeForm() {
+            document.getElementById('instructionsContainer').classList.remove('hidden');
+            document.getElementById('githubUrlContainer').classList.remove('hidden');
+            document.getElementById('submitBtn').classList.remove('hidden');
+            const hint = document.getElementById('timerNotStartedHint');
+            if (hint) hint.classList.add('hidden');
+        }
+
         async function startChallenge() {
             if (!currentUser) {
                 showStatus('⚠️ Please login first', 'text-amber-400');
@@ -582,6 +603,9 @@
                     document.getElementById('startBtn').disabled = true;
                     document.getElementById('startBtn').classList.add('opacity-50', 'cursor-not-allowed');
                     document.getElementById('startBtn').innerHTML = '✅ Timer Started';
+
+                    // 제출 폼 표시
+                    showChallengeForm();
 
                     showStatus('⏱️ Timer started! Good luck!', 'text-green-400');
                 } else {
