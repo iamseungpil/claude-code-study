@@ -372,11 +372,6 @@
         <section class="mb-16" id="submit">
             <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-4">SUBMIT YOUR WORK</h2>
             <div class="submit-card rounded-3xl p-8">
-                <!-- Login Warning -->
-                <div id="login-required-warning" class="mb-6 bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 text-amber-400 hidden">
-                    <span>⚠️ Please <a href="index.html" class="text-accent underline hover:text-accent/80">login</a> to start the timer and submit your solution.</span>
-                </div>
-
                 <!-- Instructions -->
                 <div class="mb-8 p-6 bg-dark-800/50 rounded-2xl border border-white/5">
                     <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
@@ -451,6 +446,7 @@
         let timerInterval = null;
         let startTime = null;
         let currentUser = null;
+        let personalStartTime = null;  // 서버에서 받은 개인 시작 시간 (ISO string)
 
         // Check login status on page load
         async function checkLoginStatus() {
@@ -496,35 +492,105 @@
             }
         }
 
+        // Load personal timer status from server
+        async function loadPersonalStatus() {
+            const token = localStorage.getItem('auth_token');
+            if (!token || !currentUser) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/api/challenge/${WEEK}/my-status`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+
+                    // 챌린지가 시작되지 않은 경우
+                    if (data.challenge_status !== 'started') {
+                        showStatus('⏳ Challenge not started yet. Wait for admin.', 'text-gray-400');
+                        document.getElementById('startBtn').disabled = true;
+                        document.getElementById('startBtn').classList.add('opacity-50', 'cursor-not-allowed');
+                        return;
+                    }
+
+                    // 이미 개인 타이머를 시작한 경우
+                    if (data.personal_status === 'in_progress' || data.personal_status === 'submitted') {
+                        personalStartTime = data.personal_start_time;
+
+                        // 타이머 UI 표시
+                        document.getElementById('timerContainer').classList.remove('hidden');
+                        document.getElementById('startBtn').disabled = true;
+                        document.getElementById('startBtn').classList.add('opacity-50', 'cursor-not-allowed');
+                        document.getElementById('startBtn').innerHTML = '✅ Timer Started';
+
+                        // 타이머 시작
+                        timerInterval = setInterval(updateTimer, 1000);
+                        updateTimer();
+
+                        // 제출 완료 상태면 제출 버튼도 비활성화
+                        if (data.personal_status === 'submitted') {
+                            document.getElementById('submitBtn').disabled = true;
+                            document.getElementById('submitBtn').classList.add('opacity-50', 'cursor-not-allowed');
+                            document.getElementById('submitBtn').innerHTML = '✅ Submitted';
+                            showStatus('✅ Already submitted for this week', 'text-green-400');
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error('Failed to load personal status:', e);
+            }
+        }
+
         // Run on page load
-        document.addEventListener('DOMContentLoaded', checkLoginStatus);
+        document.addEventListener('DOMContentLoaded', async () => {
+            await checkLoginStatus();
+            await loadPersonalStatus();
+        });
 
         function updateTimer() {
-            if (!startTime) return;
-            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            if (!personalStartTime) return;
+            const startDate = new Date(personalStartTime);
+            const elapsed = Math.floor((Date.now() - startDate.getTime()) / 1000);
             const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
             const seconds = (elapsed % 60).toString().padStart(2, '0');
             document.getElementById('timerDisplay').textContent = `${minutes}:${seconds}`;
         }
 
         async function startChallenge() {
-            // Check login
             if (!currentUser) {
                 showStatus('⚠️ Please login first', 'text-amber-400');
                 return;
             }
 
-            // Start local timer (challenge timing is managed by admin on server)
-            startTime = Date.now();
-            document.getElementById('timerContainer').classList.remove('hidden');
-            timerInterval = setInterval(updateTimer, 1000);
-            updateTimer();
+            const token = localStorage.getItem('auth_token');
 
-            document.getElementById('startBtn').disabled = true;
-            document.getElementById('startBtn').classList.add('opacity-50', 'cursor-not-allowed');
-            document.getElementById('startBtn').innerHTML = '✅ Timer Started';
+            try {
+                const response = await fetch(`${API_BASE}/api/challenge/${WEEK}/start-personal`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
 
-            showStatus('⏱️ Timer started. Good luck!', 'text-green-400');
+                if (response.ok) {
+                    const data = await response.json();
+                    personalStartTime = data.started_at;
+
+                    // 타이머 UI 표시
+                    document.getElementById('timerContainer').classList.remove('hidden');
+                    timerInterval = setInterval(updateTimer, 1000);
+                    updateTimer();
+
+                    document.getElementById('startBtn').disabled = true;
+                    document.getElementById('startBtn').classList.add('opacity-50', 'cursor-not-allowed');
+                    document.getElementById('startBtn').innerHTML = '✅ Timer Started';
+
+                    showStatus('⏱️ Timer started! Good luck!', 'text-green-400');
+                } else {
+                    const error = await response.json();
+                    showStatus('❌ ' + (error.detail || 'Failed to start timer'), 'text-red-400');
+                }
+            } catch (e) {
+                showStatus('❌ Connection error', 'text-red-400');
+            }
         }
 
         document.getElementById('submitForm').addEventListener('submit', async (e) => {

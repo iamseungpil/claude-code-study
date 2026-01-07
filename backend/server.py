@@ -11,7 +11,7 @@ import re
 import subprocess
 import shutil
 import secrets
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Optional
 from contextlib import asynccontextmanager
@@ -572,6 +572,62 @@ async def admin_end_challenge(week: int, admin: dict = Depends(require_admin)):
     }
 
 
+# ============== User Management (Admin) ==============
+
+@app.get("/api/admin/users")
+async def admin_list_users(admin: dict = Depends(require_admin)):
+    """Admin gets list of all registered users."""
+    users_file = DATA_DIR / "users.json"
+
+    try:
+        with open(users_file) as f:
+            db = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return []
+
+    # Return user info without password_hash
+    return [
+        {
+            "user_id": u.get("user_id"),
+            "full_name": u.get("full_name"),
+            "first_name": u.get("first_name"),
+            "last_name": u.get("last_name"),
+            "role": u.get("role", "participant"),
+            "profile_image": u.get("profile_image"),
+            "registered_at": u.get("registered_at")
+        }
+        for u in db.get("users", [])
+    ]
+
+
+@app.delete("/api/admin/users/{user_id}")
+async def admin_delete_user(user_id: str, admin: dict = Depends(require_admin)):
+    """Admin deletes a user."""
+    users_file = DATA_DIR / "users.json"
+
+    try:
+        with open(users_file) as f:
+            db = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        raise HTTPException(404, "User not found")
+
+    # Prevent self-deletion
+    if user_id.lower() == admin.get("user_id", "").lower():
+        raise HTTPException(400, "Cannot delete yourself")
+
+    # Find and remove user
+    original_len = len(db.get("users", []))
+    db["users"] = [u for u in db.get("users", []) if u.get("user_id", "").lower() != user_id.lower()]
+
+    if len(db["users"]) == original_len:
+        raise HTTPException(404, "User not found")
+
+    with open(users_file, 'w') as f:
+        json.dump(db, f, indent=2, ensure_ascii=False)
+
+    return {"status": "deleted", "user_id": user_id}
+
+
 # ============== Challenge Status (Public) ==============
 
 @app.get("/api/challenges/status")
@@ -593,6 +649,145 @@ async def get_challenge_status(week: int):
         "week": week,
         **challenges[week_key]
     }
+
+
+# ============== Personal Timer APIs ==============
+
+@app.post("/api/challenge/{week}/start-personal")
+async def start_personal_timer(
+    week: int,
+    current_user: Optional[dict] = Depends(get_current_user)
+):
+    """Start personal timer for a user in a specific week's challenge.
+
+    This allows each user to have their own start time within the global challenge window.
+    The personal timer starts when the user clicks 'Start' on their interface.
+
+    Returns:
+        - started_at: ISO timestamp of when the user started
+        - If already started, returns existing start time (idempotent)
+    """
+    # 1. JWT 인증 확인
+    if not current_user:
+        raise HTTPException(401, "Authentication required")
+
+    user_id = current_user.get("user_id")
+    if not user_id:
+        raise HTTPException(401, "Invalid user token")
+
+    # 2. week 유효성 검사
+    if not 1 <= week <= 5:
+        raise HTTPException(400, "Week must be between 1 and 5")
+
+    # 3. 챌린지 데이터 로드
+    challenges = load_challenges()
+    week_key = f"week{week}"
+    challenge = challenges[week_key]
+
+    # 4. 챌린지 상태 확인 (started인지)
+    if challenge["status"] == "not_started":
+        raise HTTPException(400, "Challenge has not started yet. Wait for admin to start.")
+
+    if challenge["status"] == "ended":
+        raise HTTPException(400, "Challenge has ended. Cannot start personal timer.")
+
+    # 5. personal_starts 딕셔너리 초기화 (하위 호환성)
+    if "personal_starts" not in challenge:
+        challenge["personal_starts"] = {}
+
+    # 6. 이미 시작했으면 기존 시간 반환 (중복 방지 - 멱등성 보장)
+    if user_id in challenge["personal_starts"]:
+        existing = challenge["personal_starts"][user_id]
+        return {
+            "status": "already_started",
+            "week": week,
+            "user_id": user_id,
+            "started_at": existing["started_at"],
+            "message": "Personal timer was already started"
+        }
+
+    # 7. 새로운 개인 시작 시간 기록 (UTC)
+    started_at = datetime.now(timezone.utc).isoformat()
+    challenge["personal_starts"][user_id] = {
+        "started_at": started_at,
+        "status": "in_progress"
+    }
+
+    # 8. challenges.json 저장
+    challenges[week_key] = challenge
+    save_challenges(challenges)
+
+    return {
+        "status": "started",
+        "week": week,
+        "user_id": user_id,
+        "started_at": started_at
+    }
+
+
+@app.get("/api/challenge/{week}/my-status")
+async def get_my_challenge_status(
+    week: int,
+    current_user: Optional[dict] = Depends(get_current_user)
+):
+    """Get current user's personal challenge status for a specific week.
+
+    Returns:
+        - challenge_status: Global challenge status (not_started/started/ended)
+        - personal_status: User's personal status (not_started/in_progress/submitted)
+        - personal_start_time: When user started (if applicable)
+        - elapsed_seconds: Seconds since user started (if in_progress)
+    """
+    # 1. JWT 인증 확인
+    if not current_user:
+        raise HTTPException(401, "Authentication required")
+
+    user_id = current_user.get("user_id")
+    if not user_id:
+        raise HTTPException(401, "Invalid user token")
+
+    # 2. week 유효성 검사
+    if not 1 <= week <= 5:
+        raise HTTPException(400, "Week must be between 1 and 5")
+
+    # 3. 챌린지 데이터 로드
+    challenges = load_challenges()
+    week_key = f"week{week}"
+    challenge = challenges[week_key]
+
+    # 4. 기본 응답 구조
+    response = {
+        "week": week,
+        "challenge_status": challenge["status"],
+        "personal_status": "not_started",
+        "personal_start_time": None,
+        "elapsed_seconds": None
+    }
+
+    # 5. personal_starts가 없으면 빈 딕셔너리 처리 (하위 호환성)
+    personal_starts = challenge.get("personal_starts", {})
+
+    # 6. 해당 사용자의 개인 시작 상태 조회
+    if user_id in personal_starts:
+        user_personal = personal_starts[user_id]
+        response["personal_status"] = user_personal.get("status", "in_progress")
+        response["personal_start_time"] = user_personal.get("started_at")
+
+        # 7. elapsed_seconds 계산 (시작했으면) - UTC 기준
+        if response["personal_start_time"] and response["personal_status"] == "in_progress":
+            try:
+                start_time = datetime.fromisoformat(response["personal_start_time"])
+                # Ensure timezone-aware comparison
+                now = datetime.now(timezone.utc)
+                if start_time.tzinfo is None:
+                    start_time = start_time.replace(tzinfo=timezone.utc)
+                elapsed = now - start_time
+                response["elapsed_seconds"] = round(elapsed.total_seconds())
+            except (ValueError, TypeError):
+                # ISO format 파싱 실패 시 None 유지
+                response["elapsed_seconds"] = None
+
+    return response
 
 
 # ============== Submissions ==============
@@ -658,33 +853,51 @@ async def submit_solution(
     # Use authenticated user's user_id as participant_id
     participant_id = current_user.get("user_id")
 
-    # Calculate elapsed time from global start
-    submission_time = datetime.now()
-    global_start_time = datetime.fromisoformat(challenge["start_time"])
-    elapsed_seconds = (submission_time - global_start_time).total_seconds()
+    # Check if user has started their personal timer
+    personal_starts = challenge.get("personal_starts", {})
+    user_personal = personal_starts.get(participant_id)
+
+    if not user_personal:
+        raise HTTPException(400, "You must start your timer first before submitting.")
+
+    if user_personal.get("status") == "submitted":
+        raise HTTPException(400, "You have already submitted for this week.")
+
+    # Calculate elapsed time from PERSONAL start (not global) - UTC 기준
+    submission_time = datetime.now(timezone.utc)
+    personal_start_time = datetime.fromisoformat(user_personal["started_at"])
+    # Ensure timezone-aware comparison
+    if personal_start_time.tzinfo is None:
+        personal_start_time = personal_start_time.replace(tzinfo=timezone.utc)
+    elapsed_seconds = (submission_time - personal_start_time).total_seconds()
     elapsed_minutes = elapsed_seconds / 60
 
     submission_dir = SUBMISSIONS_DIR / f"week{data.week}" / participant_id
     submission_dir.mkdir(parents=True, exist_ok=True)
 
-    # Create metadata with global time reference
+    # Create metadata with personal time reference
     metadata = {
         "participant_id": participant_id,
         "week": data.week,
         "github_url": data.github_url,
         "submitted_at": submission_time.isoformat(),
-        "global_start_time": challenge["start_time"],
+        "personal_start_time": user_personal["started_at"],
+        "global_start_time": challenge.get("start_time"),
         "elapsed_seconds": round(elapsed_seconds, 1),
         "elapsed_minutes": round(elapsed_minutes, 1),
         "status": "submitted"
     }
 
-    # Clone repository
+    # Clone repository FIRST (before updating status)
     code_dir = submission_dir / "code"
     success = clone_github_repo(data.github_url, code_dir)
 
     if not success:
         raise HTTPException(400, "Failed to clone repository")
+
+    # Only update status AFTER successful clone
+    challenges[week_key]["personal_starts"][participant_id]["status"] = "submitted"
+    save_challenges(challenges)
 
     metadata["status"] = "cloned"
 
@@ -828,7 +1041,7 @@ async def get_season_leaderboard():
     for i, r in enumerate(results):
         r["season_rank"] = i + 1
         if i == 0:
-            r["title"] = "🥇 Champion"
+            r["title"] = "🎸 Master of Vibe Coding"
         elif i == 1:
             r["title"] = "🥈 Runner-up"
         elif i == 2:

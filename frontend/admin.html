@@ -96,8 +96,19 @@
                     <!-- Week cards will be dynamically generated -->
                 </div>
 
-                <!-- Current Submissions Section -->
+                <!-- Registered Users Section -->
                 <div class="mt-12 bg-dark-700/30 border border-white/10 rounded-3xl p-8">
+                    <h2 class="text-xl font-bold mb-6 flex items-center gap-3">
+                        <span class="text-2xl">👥</span> Registered Users
+                        <span id="users-count" class="text-sm font-normal text-gray-400">(0)</span>
+                    </h2>
+                    <div id="users-list" class="space-y-3">
+                        <div class="text-center text-gray-500 py-4">Loading users...</div>
+                    </div>
+                </div>
+
+                <!-- Current Submissions Section -->
+                <div class="mt-8 bg-dark-700/30 border border-white/10 rounded-3xl p-8">
                     <h2 class="text-xl font-bold mb-6 flex items-center gap-3">
                         <span class="text-2xl">📊</span> Recent Submissions
                     </h2>
@@ -195,7 +206,81 @@
             document.getElementById('login-required').classList.add('hidden');
             document.getElementById('access-denied').classList.add('hidden');
             loadChallengesStatus();
+            loadUsers();
             loadRecentSubmissions();
+        }
+
+        async function loadUsers() {
+            const token = localStorage.getItem('auth_token');
+            try {
+                const response = await fetch(`${API_BASE}/api/admin/users`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (response.ok) {
+                    const users = await response.json();
+                    renderUserList(users);
+                }
+            } catch (e) {
+                console.error('Failed to load users:', e);
+            }
+        }
+
+        function renderUserList(users) {
+            const container = document.getElementById('users-list');
+            const countEl = document.getElementById('users-count');
+            countEl.textContent = `(${users.length})`;
+
+            if (users.length === 0) {
+                container.innerHTML = '<div class="text-center text-gray-500 py-4">No registered users yet.</div>';
+                return;
+            }
+
+            container.innerHTML = users.map(user => `
+                <div class="flex items-center justify-between p-4 bg-dark-800/50 rounded-xl border border-white/5">
+                    <div class="flex items-center gap-4">
+                        ${user.profile_image
+                            ? `<img src="${user.profile_image}" class="w-10 h-10 rounded-full object-cover">`
+                            : `<div class="w-10 h-10 rounded-full bg-accent-purple/30 flex items-center justify-center text-lg font-bold">${user.first_name ? user.first_name.charAt(0).toUpperCase() : '?'}</div>`
+                        }
+                        <div>
+                            <div class="font-medium">${user.full_name || user.user_id}</div>
+                            <div class="text-sm text-gray-500">@${user.user_id} ${user.role === 'admin' ? '<span class="text-accent-rose">• Admin</span>' : ''}</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <div class="text-sm text-gray-500">${user.registered_at ? new Date(user.registered_at).toLocaleDateString() : ''}</div>
+                        ${user.role !== 'admin' ? `
+                            <button onclick="deleteUser('${user.user_id}')" class="text-rose-400 hover:text-rose-300 transition-colors text-sm px-3 py-1 rounded-lg border border-rose-400/30 hover:bg-rose-400/10">
+                                Delete
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function deleteUser(userId) {
+            if (!confirm(`Are you sure you want to delete user "${userId}"?`)) {
+                return;
+            }
+
+            const token = localStorage.getItem('auth_token');
+            try {
+                const response = await fetch(`${API_BASE}/api/admin/users/${userId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    loadUsers(); // Refresh the list
+                } else {
+                    const error = await response.json();
+                    alert(error.detail || 'Failed to delete user');
+                }
+            } catch (e) {
+                console.error('Failed to delete user:', e);
+                alert('Failed to delete user');
+            }
         }
 
         async function loadChallengesStatus() {
