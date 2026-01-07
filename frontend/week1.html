@@ -200,8 +200,8 @@
             </div>
         </section>
 
-        <!-- What to Do -->
-        <section class="mb-16">
+        <!-- What to Do (hidden until timer starts) -->
+        <section id="whatToDoSection" class="hidden mb-16">
             <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-4">WHAT TO DO</h2>
             <div class="space-y-4">
                 <div class="card rounded-2xl p-6 flex gap-5">
@@ -274,8 +274,8 @@
             </div>
         </section>
 
-        <!-- Deliverables -->
-        <section class="mb-16">
+        <!-- Deliverables (hidden until timer starts) -->
+        <section id="deliverablesSection" class="hidden mb-16">
             <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-4">DELIVERABLES</h2>
             <div class="card rounded-2xl p-8">
                 <div class="grid md:grid-cols-2 gap-6">
@@ -307,8 +307,8 @@
             </div>
         </section>
 
-        <!-- Scoring -->
-        <section class="mb-16">
+        <!-- Scoring (hidden until timer starts) -->
+        <section id="scoringSection" class="hidden mb-16">
             <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-4">SCORING RUBRIC</h2>
             <div class="card rounded-2xl overflow-hidden">
                 <table class="w-full">
@@ -415,7 +415,7 @@
                     <div class="flex flex-col sm:flex-row gap-4 pt-4">
                         <!-- Timer not started hint -->
                         <div id="timerNotStartedHint" class="flex-1 p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl text-amber-400 text-center">
-                            <span>⏱️ 타이머를 시작하면 제출 폼이 나타납니다</span>
+                            <span>⏱️ Start Timer to reveal challenge details and submit form</span>
                         </div>
                         <button type="button" id="startBtn" onclick="startChallenge()"
                                 class="btn-secondary flex-1 text-white font-bold py-4 px-6 rounded-xl text-lg flex items-center justify-center gap-2">
@@ -570,9 +570,23 @@
         }
 
         function showChallengeForm() {
-            document.getElementById('instructionsContainer').classList.remove('hidden');
-            document.getElementById('githubUrlContainer').classList.remove('hidden');
-            document.getElementById('submitBtn').classList.remove('hidden');
+            // Show challenge detail sections (hidden until timer starts)
+            const whatToDo = document.getElementById('whatToDoSection');
+            const deliverables = document.getElementById('deliverablesSection');
+            const scoring = document.getElementById('scoringSection');
+            if (whatToDo) whatToDo.classList.remove('hidden');
+            if (deliverables) deliverables.classList.remove('hidden');
+            if (scoring) scoring.classList.remove('hidden');
+
+            // Show submission form elements
+            const instructions = document.getElementById('instructionsContainer');
+            const githubUrl = document.getElementById('githubUrlContainer');
+            const submitBtn = document.getElementById('submitBtn');
+            if (instructions) instructions.classList.remove('hidden');
+            if (githubUrl) githubUrl.classList.remove('hidden');
+            if (submitBtn) submitBtn.classList.remove('hidden');
+
+            // Hide the hint message
             const hint = document.getElementById('timerNotStartedHint');
             if (hint) hint.classList.add('hidden');
         }
