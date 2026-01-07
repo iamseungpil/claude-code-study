@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaderboard - Claude Code Study</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { outfit: ['Outfit', 'sans-serif'] },
+                    colors: {
+                        dark: { 900: '#0a0a0f', 800: '#12121a', 700: '#1a1a25', 600: '#252530' },
+                        accent: { blue: '#4f8cff', purple: '#a78bfa', amber: '#fbbf24', emerald: '#34d399', rose: '#fb7185' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * { font-family: 'Outfit', sans-serif; }
+        html { scroll-behavior: smooth; }
+        .nav-blur { background: rgba(10, 10, 15, 0.85); backdrop-filter: blur(20px); }
+        .hero-gradient { background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(251, 191, 36, 0.15) 0%, transparent 50%), linear-gradient(180deg, #451a03 0%, #0a0a0f 100%); }
+        .card { background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%); border: 1px solid rgba(255,255,255,0.06); }
+        .tab-btn { transition: all 0.3s ease; }
+        .tab-btn:hover { transform: translateY(-2px); }
+        .tab-btn.active { box-shadow: 0 4px 20px -4px rgba(251, 191, 36, 0.4); }
+        .rank-1 { background: linear-gradient(135deg, rgba(251, 191, 36, 0.15) 0%, rgba(251, 191, 36, 0.05) 100%); border-color: rgba(251, 191, 36, 0.3); }
+        .rank-2 { background: linear-gradient(135deg, rgba(156, 163, 175, 0.1) 0%, rgba(156, 163, 175, 0.03) 100%); border-color: rgba(156, 163, 175, 0.2); }
+        .rank-3 { background: linear-gradient(135deg, rgba(251, 146, 60, 0.1) 0%, rgba(251, 146, 60, 0.03) 100%); border-color: rgba(251, 146, 60, 0.2); }
+        .loading { animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .trophy-glow { filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.5)); }
+    </style>
+</head>
+<body class="bg-dark-900 text-white min-h-screen">
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full nav-blur border-b border-white/5 z-50">
+        <div class="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
+            <a href="index.html" class="flex items-center gap-3 text-gray-400 hover:text-white transition-colors">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                <span>Back</span>
+            </a>
+            <span class="text-accent-amber font-bold">🏆 Leaderboard</span>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <header class="hero-gradient pt-28 pb-12 px-6">
+        <div class="max-w-5xl mx-auto text-center">
+            <span class="text-7xl mb-4 block trophy-glow">🏆</span>
+            <h1 class="text-4xl md:text-5xl font-bold mb-4 tracking-tight">Leaderboard</h1>
+            <p class="text-xl text-gray-400">Who will become the Champion?</p>
+        </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-6 py-12">
+        <!-- Week Tabs -->
+        <div class="flex flex-wrap justify-center gap-2 mb-10">
+            <button onclick="loadLeaderboard('season')" id="tab-season" 
+                    class="tab-btn active bg-gradient-to-r from-amber-600 to-amber-500 text-dark-900 px-5 py-2.5 rounded-xl font-bold text-sm">
+                🏅 Season
+            </button>
+            <button onclick="loadLeaderboard(1)" id="tab-1" 
+                    class="tab-btn bg-dark-700 hover:bg-dark-600 px-5 py-2.5 rounded-xl font-medium text-sm border border-white/5">
+                Week 1
+            </button>
+            <button onclick="loadLeaderboard(2)" id="tab-2" 
+                    class="tab-btn bg-dark-700 hover:bg-dark-600 px-5 py-2.5 rounded-xl font-medium text-sm border border-white/5">
+                Week 2
+            </button>
+            <button onclick="loadLeaderboard(3)" id="tab-3" 
+                    class="tab-btn bg-dark-700 hover:bg-dark-600 px-5 py-2.5 rounded-xl font-medium text-sm border border-white/5">
+                Week 3
+            </button>
+            <button onclick="loadLeaderboard(4)" id="tab-4" 
+                    class="tab-btn bg-dark-700 hover:bg-dark-600 px-5 py-2.5 rounded-xl font-medium text-sm border border-white/5">
+                Week 4
+            </button>
+            <button onclick="loadLeaderboard(5)" id="tab-5" 
+                    class="tab-btn bg-dark-700 hover:bg-dark-600 px-5 py-2.5 rounded-xl font-medium text-sm border border-white/5">
+                Week 5
+            </button>
+        </div>
+
+        <!-- Leaderboard Content -->
+        <div id="leaderboard-content" class="card rounded-3xl overflow-hidden">
+            <div class="p-12 text-center text-gray-400 loading">
+                <div class="text-4xl mb-4">⏳</div>
+                Loading leaderboard...
+            </div>
+        </div>
+
+        <!-- Legend -->
+        <div class="mt-8 flex flex-wrap justify-center gap-6 text-sm text-gray-500">
+            <div class="flex items-center gap-2">
+                <span class="text-lg">🥇</span> <span>1st = 10pts</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="text-lg">🥈</span> <span>2nd = 7pts</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="text-lg">🥉</span> <span>3rd = 5pts</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="text-lg">✅</span> <span>Finish = 3pts</span>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-white/5 py-8 mt-12">
+        <div class="max-w-5xl mx-auto px-6 text-center">
+            <a href="index.html" class="text-gray-500 hover:text-accent-amber transition-colors">← Back to Home</a>
+        </div>
+    </footer>
+
+    <script src="config.js"></script>
+    <script>
+        // API Base URL (config.js에서 자동 설정됨)
+        const API_BASE = window.API_BASE || '';
+        
+        let currentTab = 'season';
+
+        async function loadLeaderboard(weekOrSeason) {
+            currentTab = weekOrSeason;
+            updateTabs();
+            
+            const content = document.getElementById('leaderboard-content');
+            content.innerHTML = '<div class="p-12 text-center text-gray-400 loading"><div class="text-4xl mb-4">⏳</div>Loading...</div>';
+            
+            try {
+                const endpoint = weekOrSeason === 'season' 
+                    ? `${API_BASE}/api/leaderboard/season`
+                    : `${API_BASE}/api/leaderboard/${weekOrSeason}`;
+                
+                const response = await fetch(endpoint);
+                
+                if (!response.ok) throw new Error('API error');
+                
+                const data = await response.json();
+                
+                if (data.length === 0) {
+                    content.innerHTML = `
+                        <div class="p-12 text-center text-gray-400">
+                            <div class="text-6xl mb-4">📭</div>
+                            <h3 class="text-xl font-bold mb-2">No Results Yet</h3>
+                            <p>No submissions yet.</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                if (weekOrSeason === 'season') {
+                    renderSeasonLeaderboard(data);
+                } else {
+                    renderWeekLeaderboard(data, weekOrSeason);
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                content.innerHTML = `
+                    <div class="p-12 text-center text-gray-400">
+                        <div class="text-6xl mb-4">⚠️</div>
+                        <h3 class="text-xl font-bold mb-2">Connection Error</h3>
+                        <p class="mb-4">Cannot connect to server.</p>
+                        <code class="text-xs bg-dark-700 px-4 py-2 rounded-lg">python backend/server.py</code>
+                    </div>
+                `;
+            }
+        }
+
+        function renderWeekLeaderboard(data, week) {
+            const content = document.getElementById('leaderboard-content');
+            const weekColors = { 1: 'blue', 2: 'purple', 3: 'amber', 4: 'emerald', 5: 'rose' };
+            const color = weekColors[week] || 'blue';
+            
+            let html = `
+                <div class="p-6 border-b border-white/5 bg-dark-700/30">
+                    <h2 class="text-xl font-bold">Week ${week} Results</h2>
+                </div>
+                <div class="divide-y divide-white/5">
+            `;
+            
+            data.forEach((entry, i) => {
+                const rankClass = i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : '';
+                const medal = entry.medal || '';
+                const timeClass = entry.time_bonus > 0 ? 'text-emerald-400' : entry.time_bonus < 0 ? 'text-rose-400' : 'text-gray-500';
+                
+                html += `
+                    <div class="flex items-center p-5 ${rankClass} border-l-4 ${i < 3 ? '' : 'border-transparent'}">
+                        <div class="w-16 text-center">
+                            <span class="text-2xl">${medal}</span>
+                            <span class="text-lg font-bold ${medal ? 'hidden' : ''}">${entry.rank}</span>
+                        </div>
+                        <div class="flex-1">
+                            <span class="font-semibold text-lg">${entry.participant_id}</span>
+                        </div>
+                        <div class="flex items-center gap-6 text-right">
+                            <div>
+                                <div class="text-xs text-gray-500 uppercase">Rubric</div>
+                                <div class="font-bold">${entry.rubric}</div>
+                            </div>
+                            <div>
+                                <div class="text-xs text-gray-500 uppercase">Time</div>
+                                <div class="font-bold ${timeClass}">${entry.time_bonus > 0 ? '+' : ''}${entry.time_bonus}</div>
+                            </div>
+                            <div class="min-w-[60px]">
+                                <div class="text-xs text-gray-500 uppercase">Total</div>
+                                <div class="font-bold text-xl text-accent-${color}">${entry.total}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            content.innerHTML = html;
+        }
+
+        function renderSeasonLeaderboard(data) {
+            const content = document.getElementById('leaderboard-content');
+            
+            let html = `
+                <div class="p-6 border-b border-white/5 bg-gradient-to-r from-amber-900/20 to-transparent">
+                    <h2 class="text-xl font-bold text-accent-amber">🏅 Season Standings</h2>
+                </div>
+                <div class="divide-y divide-white/5">
+            `;
+            
+            data.forEach((entry, i) => {
+                const rankClass = i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : '';
+                const title = entry.title || '';
+                const medals = ['🥇', '🥈', '🥉'];
+                const medal = medals[i] || '';
+                
+                html += `
+                    <div class="flex items-center p-5 ${rankClass} border-l-4 ${i < 3 ? '' : 'border-transparent'}">
+                        <div class="w-16 text-center">
+                            <span class="text-2xl">${medal}</span>
+                            <span class="text-lg font-bold ${medal ? 'hidden' : ''}">${entry.season_rank}</span>
+                        </div>
+                        <div class="flex-1">
+                            <span class="font-semibold text-lg">${entry.participant_id}</span>
+                            ${title ? `<span class="ml-3 text-sm text-accent-amber">${title}</span>` : ''}
+                        </div>
+                        <div class="flex items-center gap-6 text-right">
+                            <div>
+                                <div class="text-xs text-gray-500 uppercase">Weeks</div>
+                                <div class="font-bold">${entry.weeks_completed}/5</div>
+                            </div>
+                            <div class="min-w-[80px]">
+                                <div class="text-xs text-gray-500 uppercase">Total Pts</div>
+                                <div class="font-bold text-2xl text-accent-amber">${entry.total_points}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            content.innerHTML = html;
+        }
+
+        function updateTabs() {
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active', 'bg-gradient-to-r', 'from-amber-600', 'to-amber-500', 'text-dark-900', 'from-accent-blue', 'to-blue-400', 'from-accent-purple', 'to-purple-400');
+                btn.classList.add('bg-dark-700', 'text-white');
+            });
+            
+            const activeTab = document.getElementById(`tab-${currentTab}`);
+            if (activeTab) {
+                activeTab.classList.remove('bg-dark-700', 'text-white');
+                if (currentTab === 'season') {
+                    activeTab.classList.add('active', 'bg-gradient-to-r', 'from-amber-600', 'to-amber-500', 'text-dark-900');
+                } else {
+                    const colors = { 1: ['from-blue-600', 'to-blue-500'], 2: ['from-purple-600', 'to-purple-500'], 3: ['from-amber-600', 'to-amber-500'], 4: ['from-emerald-600', 'to-emerald-500'], 5: ['from-rose-600', 'to-rose-500'] };
+                    const [from, to] = colors[currentTab] || ['from-blue-600', 'to-blue-500'];
+                    activeTab.classList.add('active', 'bg-gradient-to-r', from, to, 'text-dark-900');
+                }
+            }
+        }
+
+        // Load season leaderboard on page load
+        loadLeaderboard('season');
+    </script>
+</body>
+</html>

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Week 2: CLI Tool + Hooks - Claude Code Study</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { outfit: ['Outfit', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] },
+                    colors: {
+                        dark: { 900: '#0a0a0f', 800: '#12121a', 700: '#1a1a25', 600: '#252530' },
+                        accent: '#a78bfa'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * { font-family: 'Outfit', sans-serif; }
+        code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
+        html { scroll-behavior: smooth; }
+        .hero-gradient { background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(167, 139, 250, 0.2) 0%, transparent 50%), linear-gradient(180deg, #1e1b4b 0%, #0a0a0f 100%); }
+        .nav-blur { background: rgba(10, 10, 15, 0.85); backdrop-filter: blur(20px); }
+        .card { background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%); border: 1px solid rgba(255,255,255,0.06); }
+        .step-number { width: 48px; height: 48px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.25rem; flex-shrink: 0; }
+        .submit-card { background: linear-gradient(135deg, rgba(167, 139, 250, 0.1) 0%, rgba(167, 139, 250, 0.02) 100%); border: 1px solid rgba(167, 139, 250, 0.2); }
+        .btn-primary { background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%); transition: all 0.3s ease; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 30px -10px rgba(167, 139, 250, 0.5); }
+        .btn-secondary { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); transition: all 0.3s ease; }
+        .btn-secondary:hover { background: rgba(255,255,255,0.1); }
+        .timer-display { font-variant-numeric: tabular-nums; }
+    </style>
+    <script src="config.js"></script>
+</head>
+<body class="bg-dark-900 text-white min-h-screen">
+    <nav class="fixed top-0 w-full nav-blur border-b border-white/5 z-50">
+        <div class="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
+            <a href="index.html" class="flex items-center gap-3 text-gray-400 hover:text-white transition-colors">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                <span>Back</span>
+            </a>
+            <a href="leaderboard.html" class="text-accent hover:text-purple-300 transition-colors text-sm font-medium">🏆 Leaderboard</a>
+        </div>
+    </nav>
+
+    <header class="hero-gradient pt-28 pb-16 px-6">
+        <div class="max-w-5xl mx-auto">
+            <div class="flex flex-wrap items-center gap-3 mb-6">
+                <span class="bg-accent text-dark-900 px-4 py-1.5 rounded-full text-sm font-bold">WEEK 2</span>
+                <span class="bg-gray-700 text-gray-300 px-3 py-1 rounded-full text-xs font-bold">Upcoming</span>
+            </div>
+            <h1 class="text-4xl md:text-5xl font-bold mb-4 tracking-tight">🛠️ CLI Tool + Auto Linting</h1>
+            <p class="text-xl text-gray-400 mb-8 max-w-2xl">Build a research CLI tool and set up automatic linting with Hooks.</p>
+            <div class="flex flex-wrap gap-3">
+                <div class="bg-dark-700/60 border border-white/10 rounded-xl px-5 py-3 flex items-center gap-3">
+                    <span class="text-2xl">⏱️</span>
+                    <div><div class="text-xs text-gray-500 uppercase tracking-wide">Time Limit</div><div class="font-bold text-lg">50 min</div></div>
+                </div>
+                <div class="bg-dark-700/60 border border-white/10 rounded-xl px-5 py-3 flex items-center gap-3">
+                    <span class="text-2xl">👤</span>
+                    <div><div class="text-xs text-gray-500 uppercase tracking-wide">Format</div><div class="font-bold text-lg">Solo</div></div>
+                </div>
+                <div class="bg-dark-700/60 border border-white/10 rounded-xl px-5 py-3 flex items-center gap-3">
+                    <span class="text-2xl">📊</span>
+                    <div><div class="text-xs text-gray-500 uppercase tracking-wide">Max Score</div><div class="font-bold text-lg">90 <span class="text-green-400">+10</span></div></div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-6 py-12">
+        <section class="mb-16">
+            <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-4">SITUATION</h2>
+            <div class="card rounded-2xl p-8">
+                <p class="text-lg text-gray-300 leading-relaxed">
+                    You need a <strong class="text-white">CLI tool</strong> to automate frequently used tasks in your research lab.
+                    Also, to maintain code quality, you need to set up <strong class="text-accent">Hooks</strong> for automatic linting before commits.
+                </p>
+            </div>
+        </section>
+
+        <section class="mb-16">
+            <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-4">WHAT TO DO</h2>
+            <div class="space-y-4">
+                <div class="card rounded-2xl p-6 flex gap-5">
+                    <div class="step-number bg-accent/20 text-accent">1</div>
+                    <div>
+                        <h3 class="font-bold text-xl mb-2">Design CLI Tool</h3>
+                        <p class="text-gray-400">Design useful commands like experiment result organization, paper BibTeX conversion, etc.</p>
+                    </div>
+                </div>
+                <div class="card rounded-2xl p-6 flex gap-5">
+                    <div class="step-number bg-accent/20 text-accent">2</div>
+                    <div>
+                        <h3 class="font-bold text-xl mb-2">Implement Custom Commands</h3>
+                        <p class="text-gray-400">Create reusable commands in the .claude/commands/ folder.</p>
+                    </div>
+                </div>
+                <div class="card rounded-2xl p-6 flex gap-5">
+                    <div class="step-number bg-accent/20 text-accent">3</div>
+                    <div>
+                        <h3 class="font-bold text-xl mb-2">Write Skills</h3>
+                        <p class="text-gray-400">Write skills with domain knowledge in the .claude/skills/ folder.</p>
+                    </div>
+                </div>
+                <div class="card rounded-2xl p-6 flex gap-5">
+                    <div class="step-number bg-accent/20 text-accent">4</div>
+                    <div>
+                        <h3 class="font-bold text-xl mb-2">Set Up Pre-commit Hook</h3>
+                        <p class="text-gray-400">Configure hooks in .claude/settings.json for automatic linting.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-16">
+            <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-4">WHAT YOU'LL LEARN</h2>
+            <div class="grid md:grid-cols-2 gap-4">
+                <div class="card rounded-2xl p-6">
+                    <div class="flex items-center gap-3 mb-3"><span class="text-2xl">📜</span><h3 class="font-bold text-lg">Custom Commands</h3></div>
+                    <p class="text-gray-400 text-sm mb-3">Reusable commands invoked with /project: prefix</p>
+                    <code class="text-xs bg-dark-600 px-3 py-1.5 rounded-lg text-accent">.claude/commands/*.md</code>
+                </div>
+                <div class="card rounded-2xl p-6">
+                    <div class="flex items-center gap-3 mb-3"><span class="text-2xl">🎯</span><h3 class="font-bold text-lg">Skills</h3></div>
+                    <p class="text-gray-400 text-sm mb-3">Domain expertise and best practices</p>
+                    <code class="text-xs bg-dark-600 px-3 py-1.5 rounded-lg text-accent">.claude/skills/*/SKILL.md</code>
+                </div>
+                <div class="card rounded-2xl p-6">
+                    <div class="flex items-center gap-3 mb-3"><span class="text-2xl">🪝</span><h3 class="font-bold text-lg">Hooks</h3></div>
+                    <p class="text-gray-400 text-sm mb-3">Actions that auto-execute on specific events</p>
+                    <code class="text-xs bg-dark-600 px-3 py-1.5 rounded-lg text-accent">PreToolUse, PostToolUse</code>
+                </div>
+                <div class="card rounded-2xl p-6">
+                    <div class="flex items-center gap-3 mb-3"><span class="text-2xl">💻</span><h3 class="font-bold text-lg">VS Code Integration</h3></div>
+                    <p class="text-gray-400 text-sm mb-3">Using Claude Code in your IDE</p>
+                    <code class="text-xs bg-dark-600 px-3 py-1.5 rounded-lg text-accent">Cmd+Esc shortcut</code>
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-16">
+            <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-4">DELIVERABLES</h2>
+            <div class="card rounded-2xl p-8">
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="flex gap-4">
+                        <span class="text-4xl">📁</span>
+                        <div>
+                            <h3 class="font-bold text-lg mb-1">.claude/ Folder Structure</h3>
+                            <ul class="text-gray-400 text-sm space-y-1">
+                                <li>• commands/ (at least 1)</li>
+                                <li>• skills/ (at least 1)</li>
+                                <li>• settings.json (Hook config)</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <span class="text-4xl">🎬</span>
+                        <div>
+                            <h3 class="font-bold text-lg mb-1">Demo Video or GIF</h3>
+                            <ul class="text-gray-400 text-sm space-y-1">
+                                <li>• CLI tool execution</li>
+                                <li>• Hook auto-execution</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-16">
+            <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-4">SCORING RUBRIC</h2>
+            <div class="card rounded-2xl overflow-hidden">
+                <table class="w-full">
+                    <thead><tr class="bg-dark-600/50 text-left"><th class="px-6 py-4 font-semibold">Category</th><th class="px-6 py-4 font-semibold text-right">Points</th></tr></thead>
+                    <tbody class="divide-y divide-white/5">
+                        <tr><td class="px-6 py-5"><div class="font-medium text-lg">Command Quality</div><div class="text-sm text-gray-500 mt-1">Reusability, practicality, documentation</div></td><td class="px-6 py-5 text-right"><span class="text-2xl font-bold text-accent">30</span></td></tr>
+                        <tr><td class="px-6 py-5"><div class="font-medium text-lg">Skill Quality</div><div class="text-sm text-gray-500 mt-1">Domain knowledge accuracy, structure</div></td><td class="px-6 py-5 text-right"><span class="text-2xl font-bold text-accent">25</span></td></tr>
+                        <tr><td class="px-6 py-5"><div class="font-medium text-lg">Hook Implementation</div><div class="text-sm text-gray-500 mt-1">Auto-linting working correctly</div></td><td class="px-6 py-5 text-right"><span class="text-2xl font-bold text-accent">25</span></td></tr>
+                        <tr><td class="px-6 py-5"><div class="font-medium text-lg">Demo & Documentation</div><div class="text-sm text-gray-500 mt-1">Demo quality, README</div></td><td class="px-6 py-5 text-right"><span class="text-2xl font-bold text-accent">10</span></td></tr>
+                        <tr class="bg-green-500/5"><td class="px-6 py-5"><div class="font-medium text-lg text-green-400">⏱️ Time Bonus</div></td><td class="px-6 py-5 text-right"><span class="text-2xl font-bold text-green-400">+10</span></td></tr>
+                    </tbody>
+                    <tfoot><tr class="bg-dark-600/30"><td class="px-6 py-4 font-bold text-lg">Total</td><td class="px-6 py-4 text-right"><span class="text-3xl font-bold bg-gradient-to-r from-accent to-purple-300 bg-clip-text text-transparent">100</span></td></tr></tfoot>
+                </table>
+            </div>
+        </section>
+
+        <section class="mb-16" id="submit">
+            <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-4">SUBMIT YOUR WORK</h2>
+            <div class="submit-card rounded-3xl p-8">
+                <div class="text-center py-12">
+                    <span class="text-6xl mb-4 block">🔒</span>
+                    <h3 class="text-2xl font-bold mb-2">Coming Soon</h3>
+                    <p class="text-gray-400">Week 2 is not yet open.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="border-t border-white/5 py-8">
+        <div class="max-w-5xl mx-auto px-6 text-center">
+            <a href="index.html" class="text-gray-500 hover:text-accent transition-colors">← Back to Home</a>
+        </div>
+    </footer>
+</body>
+</html>

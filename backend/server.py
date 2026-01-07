@@ -1,0 +1,905 @@
+#!/usr/bin/env python3
+"""
+Claude Code Study - API Server
+FastAPI server for submission handling and leaderboard
+"""
+
+import json
+import logging
+import os
+import re
+import subprocess
+import shutil
+import secrets
+from datetime import datetime, timedelta
+from pathlib import Path
+from typing import Optional
+from contextlib import asynccontextmanager
+
+import bcrypt
+import jwt
+import httpx
+from fastapi import FastAPI, HTTPException, BackgroundTasks, Depends, Header
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+from pydantic import BaseModel, field_validator
+
+# JWT Configuration
+JWT_SECRET = os.environ.get("JWT_SECRET")
+if not JWT_SECRET:
+    if os.environ.get("ENVIRONMENT", "development").lower() == "production":
+        raise RuntimeError("JWT_SECRET environment variable must be set in production")
+    JWT_SECRET = secrets.token_hex(32)
+    logging.warning("Using auto-generated JWT_SECRET. Set JWT_SECRET env var for production.")
+JWT_ALGORITHM = "HS256"
+JWT_EXPIRATION_HOURS = 24
+
+# Configuration
+BASE_DIR = Path(__file__).parent.parent
+SUBMISSIONS_DIR = BASE_DIR / "submissions"
+EVALUATIONS_DIR = BASE_DIR / "evaluations"
+DATA_DIR = BASE_DIR / "data"
+FRONTEND_DIR = BASE_DIR / "frontend"
+
+# 정적 파일 서빙 설정 (Cloudflare 배포 시 비활성화)
+SERVE_STATIC = os.environ.get("SERVE_STATIC", "true").lower() == "true"
+
+# Validation patterns
+PARTICIPANT_ID_PATTERN = re.compile(r'^[a-zA-Z0-9_-]{3,30}$')
+GITHUB_URL_PATTERN = re.compile(r'^https://github\.com/[a-zA-Z0-9_-]+/[a-zA-Z0-9_.-]+/?$')
+NAME_PATTERN = re.compile(r'^[a-zA-Z가-힣\s]{1,50}$')
+
+# Pydantic Models
+class SubmissionRequest(BaseModel):
+    week: int
+    github_url: str
+
+    @field_validator('week')
+    @classmethod
+    def validate_week(cls, v):
+        if not 1 <= v <= 5:
+            raise ValueError('Week must be between 1 and 5')
+        return v
+
+    @field_validator('github_url')
+    @classmethod
+    def validate_github_url(cls, v):
+        if not GITHUB_URL_PATTERN.match(v):
+            raise ValueError('Invalid GitHub URL format')
+        return v
+
+class ParticipantRegister(BaseModel):
+    participant_id: str
+    name: str
+    github_username: Optional[str] = None
+
+    @field_validator('participant_id')
+    @classmethod
+    def validate_participant_id(cls, v):
+        if not PARTICIPANT_ID_PATTERN.match(v):
+            raise ValueError('Participant ID must be 3-30 characters (letters, numbers, _, -)')
+        return v
+
+class StartChallenge(BaseModel):
+    participant_id: str
+    week: int
+
+    @field_validator('week')
+    @classmethod
+    def validate_week(cls, v):
+        if not 1 <= v <= 5:
+            raise ValueError('Week must be between 1 and 5')
+        return v
+
+class EndChallenge(BaseModel):
+    participant_id: str
+    week: int
+
+    @field_validator('week')
+    @classmethod
+    def validate_week(cls, v):
+        if not 1 <= v <= 5:
+            raise ValueError('Week must be between 1 and 5')
+        return v
+
+# Authentication Models
+class UserRegister(BaseModel):
+    user_id: str
+    first_name: str
+    last_name: str
+    password: str
+
+    @field_validator('user_id')
+    @classmethod
+    def validate_user_id(cls, v):
+        if not PARTICIPANT_ID_PATTERN.match(v):
+            raise ValueError('User ID must be 3-30 characters (letters, numbers, _, -)')
+        return v
+
+    @field_validator('first_name', 'last_name')
+    @classmethod
+    def validate_name(cls, v):
+        if not NAME_PATTERN.match(v):
+            raise ValueError('Name must contain only letters and spaces (1-50 characters)')
+        return v.strip()
+
+    @field_validator('password')
+    @classmethod
+    def validate_password(cls, v):
+        if len(v) < 4:
+            raise ValueError('Password must be at least 4 characters')
+        return v
+
+class UserLogin(BaseModel):
+    user_id: str
+    password: str
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: ensure directories exist
+    SUBMISSIONS_DIR.mkdir(parents=True, exist_ok=True)
+    EVALUATIONS_DIR.mkdir(parents=True, exist_ok=True)
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+
+    # Initialize participants.json if not exists
+    participants_file = DATA_DIR / "participants.json"
+    if not participants_file.exists():
+        with open(participants_file, 'w') as f:
+            json.dump({"participants": []}, f)
+
+    # Initialize users.json if not exists
+    users_file = DATA_DIR / "users.json"
+    if not users_file.exists():
+        with open(users_file, 'w') as f:
+            json.dump({"users": []}, f)
+
+    # Initialize challenges.json if not exists
+    challenges_file = DATA_DIR / "challenges.json"
+    if not challenges_file.exists():
+        with open(challenges_file, 'w') as f:
+            json.dump({
+                f"week{i}": {"status": "not_started", "start_time": None, "end_time": None}
+                for i in range(1, 6)
+            }, f, indent=2)
+
+    yield
+    # Shutdown: nothing to clean up
+
+
+app = FastAPI(
+    title="Claude Code Study API",
+    description="API for submission and leaderboard",
+    version="1.0.0",
+    lifespan=lifespan
+)
+
+# CORS 설정 (환경변수로 유연하게 관리)
+ALLOWED_ORIGINS = [
+    "http://localhost:8003",
+    "http://127.0.0.1:8003",
+    "http://localhost:8002",  # 하위 호환성
+    "http://127.0.0.1:8002",
+    "http://localhost:8001",
+    "http://127.0.0.1:8001",
+    "http://localhost:5500",  # VS Code Live Server
+    "http://127.0.0.1:5500",
+]
+
+# Cloudflare Pages 도메인 추가
+CLOUDFLARE_PAGES_URL = os.environ.get("CLOUDFLARE_PAGES_URL")
+if CLOUDFLARE_PAGES_URL:
+    ALLOWED_ORIGINS.append(CLOUDFLARE_PAGES_URL.rstrip("/"))
+
+# 추가 CORS origins (쉼표 구분)
+if os.environ.get("CORS_ORIGINS"):
+    ALLOWED_ORIGINS.extend([
+        origin.strip()
+        for origin in os.environ.get("CORS_ORIGINS", "").split(",")
+        if origin.strip()
+    ])
+
+# 개발용: 모든 origin 허용 (주의: 프로덕션에서 사용 금지)
+# 와일드카드 CORS와 credentials는 함께 사용할 수 없음
+ALLOW_CREDENTIALS = True
+if os.environ.get("ALLOW_ALL_ORIGINS", "").lower() == "true":
+    ALLOWED_ORIGINS = ["*"]
+    ALLOW_CREDENTIALS = False  # 와일드카드 시 credentials 비활성화
+    logging.warning("SECURITY: ALLOW_ALL_ORIGINS enabled. Credentials disabled for CORS.")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=ALLOWED_ORIGINS,
+    allow_credentials=ALLOW_CREDENTIALS,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+# ============== Challenges Helper Functions ==============
+
+def load_challenges() -> dict:
+    """Load challenges data from JSON file."""
+    challenges_file = DATA_DIR / "challenges.json"
+    try:
+        with open(challenges_file) as f:
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return {
+            f"week{i}": {"status": "not_started", "start_time": None, "end_time": None}
+            for i in range(1, 6)
+        }
+
+
+def save_challenges(challenges: dict):
+    """Save challenges data to JSON file."""
+    challenges_file = DATA_DIR / "challenges.json"
+    with open(challenges_file, 'w') as f:
+        json.dump(challenges, f, indent=2, ensure_ascii=False)
+
+
+# ============== Authentication ==============
+
+def hash_password(password: str) -> str:
+    """Hash a password using bcrypt."""
+    return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+
+
+def verify_password(password: str, hashed: str) -> bool:
+    """Verify a password against its hash."""
+    return bcrypt.checkpw(password.encode('utf-8'), hashed.encode('utf-8'))
+
+
+def create_jwt_token(user_data: dict) -> str:
+    """Create a JWT token for a user."""
+    payload = {
+        "user_id": user_data.get("user_id"),
+        "full_name": user_data["full_name"],
+        "first_name": user_data["first_name"],
+        "last_name": user_data["last_name"],
+        "role": user_data.get("role", "participant"),
+        "exp": datetime.utcnow() + timedelta(hours=JWT_EXPIRATION_HOURS)
+    }
+    return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
+
+
+def verify_jwt_token(token: str) -> Optional[dict]:
+    """Verify a JWT token and return the payload."""
+    try:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        return payload
+    except jwt.ExpiredSignatureError:
+        return None
+    except jwt.InvalidTokenError:
+        return None
+
+
+async def get_current_user(authorization: Optional[str] = Header(None)) -> Optional[dict]:
+    """Dependency to get current user from JWT token."""
+    if not authorization:
+        return None
+
+    if not authorization.startswith("Bearer "):
+        return None
+
+    token = authorization[7:]
+    return verify_jwt_token(token)
+
+
+async def require_admin(current_user: Optional[dict] = Depends(get_current_user)) -> dict:
+    """Dependency to require admin role."""
+    if not current_user:
+        raise HTTPException(401, "Not authenticated")
+    if current_user.get("role") != "admin":
+        raise HTTPException(403, "Admin access required")
+    return current_user
+
+
+async def get_profile_image_url(first_name: str, last_name: str = "") -> Optional[str]:
+    """Check if profile image exists on sundong.kim.
+
+    The actual image naming convention is: {firstname}{lastname}.{ext}
+    e.g., "seungpillee.png", "sundongkim.png"
+
+    Returns:
+        Profile image URL if found, None otherwise.
+        Never raises exceptions - registration should not fail due to profile image lookup.
+    """
+    # Build name variants to try
+    # Primary: firstname + lastname combined (e.g., "seungpillee")
+    full_combined = f"{first_name}{last_name}".lower().replace(" ", "")
+    first_only = first_name.lower().replace(" ", "")
+
+    name_variants = [
+        full_combined,                    # seungpillee
+        first_only,                       # seungpil
+        first_name,                       # Seungpil
+        first_name.lower(),               # seungpil
+        first_name.capitalize(),          # Seungpil
+    ]
+    # Remove duplicates while preserving order
+    name_variants = list(dict.fromkeys(name_variants))
+
+    try:
+        async with httpx.AsyncClient(
+            timeout=httpx.Timeout(5.0),
+            follow_redirects=True
+        ) as client:
+            for name in name_variants:
+                for ext in ['png', 'jpg', 'jpeg']:
+                    url = f"https://sundong.kim/assets/img/members/{name}.{ext}"
+                    try:
+                        response = await client.head(url)
+                        if response.status_code == 200:
+                            return url
+                    except httpx.HTTPError:
+                        continue
+    except Exception as e:
+        logging.warning(f"Profile image lookup failed for '{first_name} {last_name}': {type(e).__name__}: {e}")
+
+    return None
+
+
+@app.post("/api/auth/register")
+async def register_user(data: UserRegister):
+    """Register a new user."""
+    users_file = DATA_DIR / "users.json"
+
+    try:
+        with open(users_file) as f:
+            db = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        db = {"users": []}
+
+    full_name = f"{data.first_name} {data.last_name}"
+
+    # Check duplicate user_id
+    for u in db["users"]:
+        if u.get("user_id", "").lower() == data.user_id.lower():
+            raise HTTPException(400, "User ID already exists")
+
+    # Check duplicate full_name
+    for u in db["users"]:
+        if u["full_name"].lower() == full_name.lower():
+            raise HTTPException(400, "User already exists")
+
+    # Get profile image (uses firstname+lastname combined, e.g., "seungpillee.png")
+    profile_image = await get_profile_image_url(data.first_name, data.last_name)
+
+    # Determine role: user_id "iamseungpil" is admin, others are participants
+    role = "admin" if data.user_id.lower() == "iamseungpil" else "participant"
+
+    db["users"].append({
+        "user_id": data.user_id,
+        "full_name": full_name,
+        "first_name": data.first_name,
+        "last_name": data.last_name,
+        "password_hash": hash_password(data.password),
+        "profile_image": profile_image,
+        "role": role,
+        "registered_at": datetime.now().isoformat()
+    })
+
+    with open(users_file, 'w') as f:
+        json.dump(db, f, indent=2, ensure_ascii=False)
+
+    # Create token
+    token = create_jwt_token({
+        "user_id": data.user_id,
+        "full_name": full_name,
+        "first_name": data.first_name,
+        "last_name": data.last_name,
+        "role": role
+    })
+
+    return {
+        "status": "registered",
+        "user_id": data.user_id,
+        "full_name": full_name,
+        "profile_image": profile_image,
+        "token": token
+    }
+
+
+@app.post("/api/auth/login")
+async def login_user(data: UserLogin):
+    """Login a user by user_id."""
+    users_file = DATA_DIR / "users.json"
+
+    try:
+        with open(users_file) as f:
+            db = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        raise HTTPException(401, "Invalid credentials")
+
+    # Find user by user_id
+    user = None
+    for u in db["users"]:
+        if u.get("user_id", "").lower() == data.user_id.lower():
+            user = u
+            break
+
+    if not user:
+        raise HTTPException(401, "Invalid credentials")
+
+    if not verify_password(data.password, user["password_hash"]):
+        raise HTTPException(401, "Invalid credentials")
+
+    # Create token
+    token = create_jwt_token({
+        "user_id": user.get("user_id"),
+        "full_name": user["full_name"],
+        "first_name": user["first_name"],
+        "last_name": user["last_name"],
+        "role": user.get("role", "participant")
+    })
+
+    return {
+        "status": "logged_in",
+        "user_id": user.get("user_id"),
+        "full_name": user["full_name"],
+        "first_name": user["first_name"],
+        "last_name": user["last_name"],
+        "profile_image": user.get("profile_image"),
+        "role": user.get("role", "participant"),
+        "token": token
+    }
+
+
+@app.get("/api/auth/me")
+async def get_current_profile(current_user: Optional[dict] = Depends(get_current_user)):
+    """Get current user profile."""
+    if not current_user:
+        raise HTTPException(401, "Not authenticated")
+
+    users_file = DATA_DIR / "users.json"
+
+    try:
+        with open(users_file) as f:
+            db = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        raise HTTPException(401, "Not authenticated")
+
+    # Find user by user_id (primary identifier)
+    for u in db["users"]:
+        if u.get("user_id", "").lower() == current_user.get("user_id", "").lower():
+            return {
+                "user_id": u.get("user_id"),
+                "full_name": u["full_name"],
+                "first_name": u["first_name"],
+                "last_name": u["last_name"],
+                "profile_image": u.get("profile_image"),
+                "role": u.get("role", "participant"),
+                "registered_at": u.get("registered_at")
+            }
+
+    raise HTTPException(401, "Not authenticated")
+
+
+# ============== Participants ==============
+
+@app.post("/api/participants/register")
+async def register_participant(data: ParticipantRegister):
+    """Register a new participant."""
+    participants_file = DATA_DIR / "participants.json"
+    
+    with open(participants_file) as f:
+        db = json.load(f)
+    
+    # Check duplicate
+    for p in db["participants"]:
+        if p["id"] == data.participant_id:
+            raise HTTPException(400, "Participant ID already exists")
+    
+    db["participants"].append({
+        "id": data.participant_id,
+        "name": data.name,
+        "github": data.github_username,
+        "registered_at": datetime.now().isoformat(),
+        "scores": {}
+    })
+    
+    with open(participants_file, 'w') as f:
+        json.dump(db, f, indent=2, ensure_ascii=False)
+    
+    return {"status": "registered", "participant_id": data.participant_id}
+
+
+@app.get("/api/participants")
+async def list_participants():
+    """List all participants."""
+    participants_file = DATA_DIR / "participants.json"
+    
+    with open(participants_file) as f:
+        db = json.load(f)
+    
+    return db["participants"]
+
+
+# ============== Challenge Management (Admin) ==============
+
+@app.post("/api/admin/challenge/{week}/start")
+async def admin_start_challenge(week: int, admin: dict = Depends(require_admin)):
+    """Admin starts a challenge for all participants."""
+    if not 1 <= week <= 5:
+        raise HTTPException(400, "Week must be between 1 and 5")
+
+    challenges = load_challenges()
+    week_key = f"week{week}"
+
+    if challenges[week_key]["status"] != "not_started":
+        raise HTTPException(400, f"Challenge already {challenges[week_key]['status']}")
+
+    start_time = datetime.now().isoformat()
+    challenges[week_key] = {
+        "status": "started",
+        "start_time": start_time,
+        "end_time": None,
+        "started_by": admin.get("user_id")
+    }
+    save_challenges(challenges)
+
+    return {
+        "status": "started",
+        "week": week,
+        "start_time": start_time,
+        "started_by": admin.get("user_id")
+    }
+
+
+@app.post("/api/admin/challenge/{week}/end")
+async def admin_end_challenge(week: int, admin: dict = Depends(require_admin)):
+    """Admin ends a challenge."""
+    if not 1 <= week <= 5:
+        raise HTTPException(400, "Week must be between 1 and 5")
+
+    challenges = load_challenges()
+    week_key = f"week{week}"
+
+    if challenges[week_key]["status"] != "started":
+        raise HTTPException(400, "Challenge is not active")
+
+    end_time = datetime.now().isoformat()
+    challenges[week_key]["status"] = "ended"
+    challenges[week_key]["end_time"] = end_time
+    save_challenges(challenges)
+
+    return {
+        "status": "ended",
+        "week": week,
+        "end_time": end_time
+    }
+
+
+# ============== Challenge Status (Public) ==============
+
+@app.get("/api/challenges/status")
+async def get_all_challenges_status():
+    """Get status of all challenges."""
+    return load_challenges()
+
+
+@app.get("/api/challenge/{week}/status")
+async def get_challenge_status(week: int):
+    """Get status of a specific week's challenge."""
+    if not 1 <= week <= 5:
+        raise HTTPException(400, "Week must be between 1 and 5")
+
+    challenges = load_challenges()
+    week_key = f"week{week}"
+
+    return {
+        "week": week,
+        **challenges[week_key]
+    }
+
+
+# ============== Submissions ==============
+
+def clone_github_repo(github_url: str, target_dir: Path) -> bool:
+    """Clone a GitHub repository."""
+    try:
+        # Remove existing if any
+        if target_dir.exists():
+            shutil.rmtree(target_dir)
+        
+        target_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Clone
+        result = subprocess.run(
+            ["git", "clone", "--depth", "1", github_url, str(target_dir)],
+            capture_output=True,
+            text=True,
+            timeout=60
+        )
+        
+        return result.returncode == 0
+    except Exception as e:
+        print(f"Clone error: {e}")
+        return False
+
+
+def trigger_evaluation(week: int, participant_id: str):
+    """Trigger Claude Code evaluation in background."""
+    try:
+        subprocess.run(
+            ["python3", str(BASE_DIR / "backend" / "evaluator.py"), 
+             "evaluate", str(week), participant_id],
+            cwd=str(BASE_DIR),
+            timeout=300
+        )
+    except Exception as e:
+        print(f"Evaluation error: {e}")
+
+
+@app.post("/api/submissions/submit")
+async def submit_solution(
+    data: SubmissionRequest,
+    background_tasks: BackgroundTasks,
+    current_user: Optional[dict] = Depends(get_current_user)
+):
+    """Submit a solution via GitHub URL. Requires authentication."""
+    # Authentication check
+    if not current_user:
+        raise HTTPException(401, "Authentication required to submit solutions")
+
+    # Check challenge status
+    challenges = load_challenges()
+    week_key = f"week{data.week}"
+    challenge = challenges[week_key]
+
+    if challenge["status"] == "not_started":
+        raise HTTPException(400, "Challenge has not started yet. Wait for admin to start.")
+
+    if challenge["status"] == "ended":
+        raise HTTPException(400, "Challenge has ended. No more submissions allowed.")
+
+    # Use authenticated user's user_id as participant_id
+    participant_id = current_user.get("user_id")
+
+    # Calculate elapsed time from global start
+    submission_time = datetime.now()
+    global_start_time = datetime.fromisoformat(challenge["start_time"])
+    elapsed_seconds = (submission_time - global_start_time).total_seconds()
+    elapsed_minutes = elapsed_seconds / 60
+
+    submission_dir = SUBMISSIONS_DIR / f"week{data.week}" / participant_id
+    submission_dir.mkdir(parents=True, exist_ok=True)
+
+    # Create metadata with global time reference
+    metadata = {
+        "participant_id": participant_id,
+        "week": data.week,
+        "github_url": data.github_url,
+        "submitted_at": submission_time.isoformat(),
+        "global_start_time": challenge["start_time"],
+        "elapsed_seconds": round(elapsed_seconds, 1),
+        "elapsed_minutes": round(elapsed_minutes, 1),
+        "status": "submitted"
+    }
+
+    # Clone repository
+    code_dir = submission_dir / "code"
+    success = clone_github_repo(data.github_url, code_dir)
+
+    if not success:
+        raise HTTPException(400, "Failed to clone repository")
+
+    metadata["status"] = "cloned"
+
+    metadata_file = submission_dir / "metadata.json"
+    with open(metadata_file, 'w') as f:
+        json.dump(metadata, f, indent=2)
+
+    # Trigger evaluation in background
+    background_tasks.add_task(trigger_evaluation, data.week, participant_id)
+
+    return {
+        "status": "submitted",
+        "message": "Evaluation will start shortly",
+        "participant_id": participant_id,
+        "week": data.week,
+        "elapsed_minutes": round(elapsed_minutes, 1)
+    }
+
+
+@app.get("/api/submissions/{week}")
+async def list_submissions(week: int):
+    """List all submissions for a week."""
+    submissions_dir = SUBMISSIONS_DIR / f"week{week}"
+    
+    if not submissions_dir.exists():
+        return []
+    
+    submissions = []
+    for participant_dir in submissions_dir.iterdir():
+        if participant_dir.is_dir():
+            metadata_file = participant_dir / "metadata.json"
+            if metadata_file.exists():
+                with open(metadata_file) as f:
+                    submissions.append(json.load(f))
+    
+    return submissions
+
+
+# ============== Evaluations & Leaderboard ==============
+
+@app.get("/api/evaluations/{week}/{participant_id}")
+async def get_evaluation(week: int, participant_id: str):
+    """Get evaluation result for a participant."""
+    eval_file = EVALUATIONS_DIR / f"week{week}" / f"{participant_id}.json"
+    
+    if not eval_file.exists():
+        raise HTTPException(404, "Evaluation not found")
+    
+    with open(eval_file) as f:
+        return json.load(f)
+
+
+def _get_week_leaderboard_data(week: int) -> list:
+    """Helper function to get leaderboard data for a specific week."""
+    evaluations_dir = EVALUATIONS_DIR / f"week{week}"
+
+    if not evaluations_dir.exists():
+        return []
+
+    results = []
+    for eval_file in evaluations_dir.glob("*.json"):
+        with open(eval_file) as f:
+            data = json.load(f)
+            if data.get("status") == "completed":
+                results.append({
+                    "participant_id": data["participant"],
+                    "total": data["scores"]["total"],
+                    "rubric": data["scores"]["rubric"],
+                    "time_bonus": data["scores"]["time_bonus"],
+                    "evaluated_at": data.get("evaluated_at")
+                })
+
+    # Sort by total score descending
+    results.sort(key=lambda x: x["total"], reverse=True)
+
+    # Add rank
+    for i, r in enumerate(results):
+        r["rank"] = i + 1
+        if i == 0:
+            r["medal"] = "🥇"
+        elif i == 1:
+            r["medal"] = "🥈"
+        elif i == 2:
+            r["medal"] = "🥉"
+        else:
+            r["medal"] = ""
+
+    return results
+
+
+# NOTE: /api/leaderboard/season must be defined BEFORE /api/leaderboard/{week}
+# to prevent FastAPI from matching "season" as a week parameter
+@app.get("/api/leaderboard/season")
+async def get_season_leaderboard():
+    """Get overall season leaderboard (all weeks combined)."""
+    participants_file = DATA_DIR / "participants.json"
+    
+    with open(participants_file) as f:
+        db = json.load(f)
+    
+    # Calculate season points
+    season_scores = {}
+    
+    for week in range(1, 6):
+        week_leaderboard = _get_week_leaderboard_data(week)
+        
+        for entry in week_leaderboard:
+            pid = entry["participant_id"]
+            if pid not in season_scores:
+                season_scores[pid] = {
+                    "participant_id": pid,
+                    "total_points": 0,
+                    "weeks_completed": 0,
+                    "weekly_scores": {}
+                }
+            
+            # Weekly ranking points
+            rank = entry["rank"]
+            if rank == 1:
+                points = 10
+            elif rank == 2:
+                points = 7
+            elif rank == 3:
+                points = 5
+            else:
+                points = 3
+            
+            season_scores[pid]["total_points"] += points
+            season_scores[pid]["weeks_completed"] += 1
+            season_scores[pid]["weekly_scores"][f"week{week}"] = {
+                "rank": rank,
+                "points": points,
+                "score": entry["total"]
+            }
+    
+    # Sort by total points
+    results = list(season_scores.values())
+    results.sort(key=lambda x: x["total_points"], reverse=True)
+    
+    # Add season rank
+    for i, r in enumerate(results):
+        r["season_rank"] = i + 1
+        if i == 0:
+            r["title"] = "🥇 Champion"
+        elif i == 1:
+            r["title"] = "🥈 Runner-up"
+        elif i == 2:
+            r["title"] = "🥉 3rd Place"
+        else:
+            r["title"] = ""
+    
+    return results
+
+
+@app.get("/api/leaderboard/{week}")
+async def get_week_leaderboard(week: int):
+    """Get leaderboard for a specific week."""
+    return _get_week_leaderboard_data(week)
+
+
+# ============== Static Files (Local Development Only) ==============
+
+if SERVE_STATIC:
+    @app.get("/")
+    async def serve_index():
+        """Serve main page."""
+        return FileResponse(FRONTEND_DIR / "index.html")
+
+    @app.get("/leaderboard.html")
+    async def serve_leaderboard():
+        """Serve leaderboard page."""
+        return FileResponse(FRONTEND_DIR / "leaderboard.html")
+
+    @app.get("/admin.html")
+    async def serve_admin():
+        """Serve admin page."""
+        return FileResponse(FRONTEND_DIR / "admin.html")
+
+    @app.get("/week1.html")
+    async def serve_week1():
+        """Serve week 1 page."""
+        return FileResponse(FRONTEND_DIR / "week1.html")
+
+    @app.get("/week2.html")
+    async def serve_week2():
+        """Serve week 2 page."""
+        return FileResponse(FRONTEND_DIR / "week2.html")
+
+    @app.get("/week3.html")
+    async def serve_week3():
+        """Serve week 3 page."""
+        return FileResponse(FRONTEND_DIR / "week3.html")
+
+    @app.get("/week4.html")
+    async def serve_week4():
+        """Serve week 4 page."""
+        return FileResponse(FRONTEND_DIR / "week4.html")
+
+    @app.get("/week5.html")
+    async def serve_week5():
+        """Serve week 5 page."""
+        return FileResponse(FRONTEND_DIR / "week5.html")
+
+
+# ============== Health Check ==============
+
+@app.get("/api/health")
+async def health_check():
+    return {
+        "status": "healthy",
+        "timestamp": datetime.now().isoformat(),
+        "version": "1.0.0"
+    }
+
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8003)

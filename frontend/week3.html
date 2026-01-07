@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Week 3: Paper Survey - Claude Code Study</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { outfit: ['Outfit', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] },
+                    colors: {
+                        dark: { 900: '#0a0a0f', 800: '#12121a', 700: '#1a1a25', 600: '#252530' },
+                        accent: '#fbbf24'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * { font-family: 'Outfit', sans-serif; }
+        code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
+        html { scroll-behavior: smooth; }
+        .hero-gradient { background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(251, 191, 36, 0.15) 0%, transparent 50%), linear-gradient(180deg, #451a03 0%, #0a0a0f 100%); }
+        .nav-blur { background: rgba(10, 10, 15, 0.85); backdrop-filter: blur(20px); }
+        .card { background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%); border: 1px solid rgba(255,255,255,0.06); }
+        .step-number { width: 48px; height: 48px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.25rem; flex-shrink: 0; }
+        .submit-card { background: linear-gradient(135deg, rgba(251, 191, 36, 0.1) 0%, rgba(251, 191, 36, 0.02) 100%); border: 1px solid rgba(251, 191, 36, 0.2); }
+        .btn-primary { background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); color: #000; transition: all 0.3s ease; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 30px -10px rgba(251, 191, 36, 0.5); }
+    </style>
+    <script src="config.js"></script>
+</head>
+<body class="bg-dark-900 text-white min-h-screen">
+    <nav class="fixed top-0 w-full nav-blur border-b border-white/5 z-50">
+        <div class="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
+            <a href="index.html" class="flex items-center gap-3 text-gray-400 hover:text-white transition-colors">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                <span>Back</span>
+            </a>
+            <a href="leaderboard.html" class="text-accent hover:text-yellow-300 transition-colors text-sm font-medium">🏆 Leaderboard</a>
+        </div>
+    </nav>
+
+    <header class="hero-gradient pt-28 pb-16 px-6">
+        <div class="max-w-5xl mx-auto">
+            <div class="flex flex-wrap items-center gap-3 mb-6">
+                <span class="bg-accent text-dark-900 px-4 py-1.5 rounded-full text-sm font-bold">WEEK 3</span>
+                <span class="bg-gray-700 text-gray-300 px-3 py-1 rounded-full text-xs font-bold">Upcoming</span>
+            </div>
+            <h1 class="text-4xl md:text-5xl font-bold mb-4 tracking-tight">📚 Paper Survey (10+ papers)</h1>
+            <p class="text-xl text-gray-400 mb-8 max-w-2xl">Use MCP and Semantic Scholar API to survey 10+ papers on a specific topic.</p>
+            <div class="flex flex-wrap gap-3">
+                <div class="bg-dark-700/60 border border-white/10 rounded-xl px-5 py-3 flex items-center gap-3">
+                    <span class="text-2xl">⏱️</span>
+                    <div><div class="text-xs text-gray-500 uppercase tracking-wide">Time Limit</div><div class="font-bold text-lg">60 min</div></div>
+                </div>
+                <div class="bg-dark-700/60 border border-white/10 rounded-xl px-5 py-3 flex items-center gap-3">
+                    <span class="text-2xl">👥</span>
+                    <div><div class="text-xs text-gray-500 uppercase tracking-wide">Format</div><div class="font-bold text-lg">Pair</div></div>
+                </div>
+                <div class="bg-dark-700/60 border border-white/10 rounded-xl px-5 py-3 flex items-center gap-3">
+                    <span class="text-2xl">📊</span>
+                    <div><div class="text-xs text-gray-500 uppercase tracking-wide">Max Score</div><div class="font-bold text-lg">90 <span class="text-green-400">+10</span></div></div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-6 py-12">
+        <section class="mb-16">
+            <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-4">SITUATION</h2>
+            <div class="card rounded-2xl p-8">
+                <p class="text-lg text-gray-300 leading-relaxed">
+                    You need a <strong class="text-white">quick literature review</strong> for a new research topic.
+                    Connect to the Semantic Scholar API via <strong class="text-accent">MCP (Model Context Protocol)</strong>,
+                    and build a workflow to automatically search and summarize related papers.
+                </p>
+            </div>
+        </section>
+
+        <section class="mb-16">
+            <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-4">WHAT TO DO</h2>
+            <div class="space-y-4">
+                <div class="card rounded-2xl p-6 flex gap-5">
+                    <div class="step-number bg-accent/20 text-accent">1</div>
+                    <div>
+                        <h3 class="font-bold text-xl mb-2">Set Up MCP Server</h3>
+                        <p class="text-gray-400">Configure and connect to the Semantic Scholar MCP server.</p>
+                    </div>
+                </div>
+                <div class="card rounded-2xl p-6 flex gap-5">
+                    <div class="step-number bg-accent/20 text-accent">2</div>
+                    <div>
+                        <h3 class="font-bold text-xl mb-2">Design Search Queries</h3>
+                        <p class="text-gray-400">Develop effective search strategies for your research topic.</p>
+                    </div>
+                </div>
+                <div class="card rounded-2xl p-6 flex gap-5">
+                    <div class="step-number bg-accent/20 text-accent">3</div>
+                    <div>
+                        <h3 class="font-bold text-xl mb-2">Collect and Summarize Papers</h3>
+                        <p class="text-gray-400">Collect 10+ related papers and summarize each one.</p>
+                    </div>
+                </div>
+                <div class="card rounded-2xl p-6 flex gap-5">
+                    <div class="step-number bg-accent/20 text-accent">4</div>
+                    <div>
+                        <h3 class="font-bold text-xl mb-2">Write Survey Document</h3>
+                        <p class="text-gray-400">Create a systematic survey document based on the collected papers.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-16">
+            <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-4">WHAT YOU'LL LEARN</h2>
+            <div class="grid md:grid-cols-2 gap-4">
+                <div class="card rounded-2xl p-6">
+                    <div class="flex items-center gap-3 mb-3"><span class="text-2xl">🔌</span><h3 class="font-bold text-lg">MCP (Model Context Protocol)</h3></div>
+                    <p class="text-gray-400 text-sm mb-3">Protocol for connecting external APIs with Claude</p>
+                    <code class="text-xs bg-dark-600 px-3 py-1.5 rounded-lg text-accent">claude mcp add</code>
+                </div>
+                <div class="card rounded-2xl p-6">
+                    <div class="flex items-center gap-3 mb-3"><span class="text-2xl">🤖</span><h3 class="font-bold text-lg">Subagents</h3></div>
+                    <p class="text-gray-400 text-sm mb-3">Subagents for distributing work in parallel</p>
+                    <code class="text-xs bg-dark-600 px-3 py-1.5 rounded-lg text-accent">Use "Task tool"</code>
+                </div>
+                <div class="card rounded-2xl p-6">
+                    <div class="flex items-center gap-3 mb-3"><span class="text-2xl">🎛️</span><h3 class="font-bold text-lg">--model Selection</h3></div>
+                    <p class="text-gray-400 text-sm mb-3">Choose the right model for the task</p>
+                    <code class="text-xs bg-dark-600 px-3 py-1.5 rounded-lg text-accent">claude --model sonnet</code>
+                </div>
+                <div class="card rounded-2xl p-6">
+                    <div class="flex items-center gap-3 mb-3"><span class="text-2xl">📖</span><h3 class="font-bold text-lg">Semantic Scholar API</h3></div>
+                    <p class="text-gray-400 text-sm mb-3">Academic paper search and metadata retrieval</p>
+                    <code class="text-xs bg-dark-600 px-3 py-1.5 rounded-lg text-accent">Paper search, Citations</code>
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-16">
+            <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-4">DELIVERABLES</h2>
+            <div class="card rounded-2xl p-8">
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="flex gap-4">
+                        <span class="text-4xl">📄</span>
+                        <div>
+                            <h3 class="font-bold text-lg mb-1">survey.md</h3>
+                            <ul class="text-gray-400 text-sm space-y-1">
+                                <li>• Research topic introduction</li>
+                                <li>• Per-paper summaries (10+)</li>
+                                <li>• Classification system</li>
+                                <li>• Insights and conclusions</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <span class="text-4xl">📚</span>
+                        <div>
+                            <h3 class="font-bold text-lg mb-1">references.bib</h3>
+                            <ul class="text-gray-400 text-sm space-y-1">
+                                <li>• BibTeX format</li>
+                                <li>• 10+ papers</li>
+                                <li>• Accurate metadata</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-16">
+            <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-4">SCORING RUBRIC</h2>
+            <div class="card rounded-2xl overflow-hidden">
+                <table class="w-full">
+                    <thead><tr class="bg-dark-600/50 text-left"><th class="px-6 py-4 font-semibold">Category</th><th class="px-6 py-4 font-semibold text-right">Points</th></tr></thead>
+                    <tbody class="divide-y divide-white/5">
+                        <tr><td class="px-6 py-5"><div class="font-medium text-lg">Paper Coverage</div><div class="text-sm text-gray-500 mt-1">10+ papers collected, relevance</div></td><td class="px-6 py-5 text-right"><span class="text-2xl font-bold text-accent">30</span></td></tr>
+                        <tr><td class="px-6 py-5"><div class="font-medium text-lg">Summary Quality</div><div class="text-sm text-gray-500 mt-1">Accuracy of summaries, key points</div></td><td class="px-6 py-5 text-right"><span class="text-2xl font-bold text-accent">25</span></td></tr>
+                        <tr><td class="px-6 py-5"><div class="font-medium text-lg">MCP Usage</div><div class="text-sm text-gray-500 mt-1">MCP utilization, automation</div></td><td class="px-6 py-5 text-right"><span class="text-2xl font-bold text-accent">20</span></td></tr>
+                        <tr><td class="px-6 py-5"><div class="font-medium text-lg">Survey Structure</div><div class="text-sm text-gray-500 mt-1">Document structure, classification</div></td><td class="px-6 py-5 text-right"><span class="text-2xl font-bold text-accent">15</span></td></tr>
+                        <tr class="bg-green-500/5"><td class="px-6 py-5"><div class="font-medium text-lg text-green-400">⏱️ Time Bonus</div></td><td class="px-6 py-5 text-right"><span class="text-2xl font-bold text-green-400">+10</span></td></tr>
+                    </tbody>
+                    <tfoot><tr class="bg-dark-600/30"><td class="px-6 py-4 font-bold text-lg">Total</td><td class="px-6 py-4 text-right"><span class="text-3xl font-bold bg-gradient-to-r from-accent to-yellow-300 bg-clip-text text-transparent">100</span></td></tr></tfoot>
+                </table>
+            </div>
+        </section>
+
+        <section class="mb-16" id="submit">
+            <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-4">SUBMIT YOUR WORK</h2>
+            <div class="submit-card rounded-3xl p-8">
+                <div class="text-center py-12">
+                    <span class="text-6xl mb-4 block">🔒</span>
+                    <h3 class="text-2xl font-bold mb-2">Coming Soon</h3>
+                    <p class="text-gray-400">Week 3 is not yet open.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="border-t border-white/5 py-8">
+        <div class="max-w-5xl mx-auto px-6 text-center">
+            <a href="index.html" class="text-gray-500 hover:text-accent transition-colors">← Back to Home</a>
+        </div>
+    </footer>
+</body>
+</html>

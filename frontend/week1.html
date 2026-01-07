@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Week 1: Project Cleanup - Claude Code Study</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { outfit: ['Outfit', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] },
+                    colors: {
+                        dark: { 900: '#0a0a0f', 800: '#12121a', 700: '#1a1a25', 600: '#252530' },
+                        accent: '#4f8cff'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * { font-family: 'Outfit', sans-serif; }
+        code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
+        html { scroll-behavior: smooth; }
+        
+        .hero-gradient {
+            background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(79, 140, 255, 0.2) 0%, transparent 50%),
+                        linear-gradient(180deg, #0f172a 0%, #0a0a0f 100%);
+        }
+        
+        .nav-blur {
+            background: rgba(10, 10, 15, 0.85);
+            backdrop-filter: blur(20px);
+        }
+        
+        .card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+        
+        .step-number {
+            width: 48px;
+            height: 48px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+        
+        .file-tree {
+            background: #0d1117;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .file-tree-header {
+            background: rgba(255,255,255,0.03);
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 0.875rem;
+            color: #8b949e;
+        }
+        .file-tree pre {
+            padding: 16px;
+            font-size: 0.875rem;
+            line-height: 1.6;
+            color: #c9d1d9;
+        }
+        .file-comment { color: #6e7681; }
+        .file-important { color: #7ee787; }
+        .file-delete { color: #f85149; opacity: 0.6; }
+        
+        .submit-card {
+            background: linear-gradient(135deg, rgba(79, 140, 255, 0.1) 0%, rgba(79, 140, 255, 0.02) 100%);
+            border: 1px solid rgba(79, 140, 255, 0.2);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #4f8cff 0%, #3b7cf5 100%);
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px -10px rgba(79, 140, 255, 0.5);
+        }
+        
+        .btn-secondary {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s ease;
+        }
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        
+        .timer-display {
+            font-variant-numeric: tabular-nums;
+        }
+    </style>
+</head>
+<body class="bg-dark-900 text-white min-h-screen">
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full nav-blur border-b border-white/5 z-50">
+        <div class="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
+            <a href="index.html" class="flex items-center gap-3 text-gray-400 hover:text-white transition-colors">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                </svg>
+                <span>Back</span>
+            </a>
+            <a href="leaderboard.html" class="text-accent hover:text-blue-300 transition-colors text-sm font-medium">
+                🏆 Leaderboard
+            </a>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <header class="hero-gradient pt-28 pb-16 px-6">
+        <div class="max-w-5xl mx-auto">
+            <div class="flex flex-wrap items-center gap-3 mb-6">
+                <span class="bg-accent text-dark-900 px-4 py-1.5 rounded-full text-sm font-bold">WEEK 1</span>
+                <span class="bg-green-500/20 text-green-400 px-3 py-1 rounded-full text-xs font-bold border border-green-500/30">In Progress</span>
+            </div>
+            
+            <h1 class="text-4xl md:text-5xl font-bold mb-4 tracking-tight">
+                🧹 Project Folder Cleanup
+            </h1>
+            <p class="text-xl text-gray-400 mb-8 max-w-2xl">
+                Analyze a messy ML project, identify core files, and clean it up.
+            </p>
+            
+            <div class="flex flex-wrap gap-3">
+                <div class="bg-dark-700/60 border border-white/10 rounded-xl px-5 py-3 flex items-center gap-3">
+                    <span class="text-2xl">⏱️</span>
+                    <div>
+                        <div class="text-xs text-gray-500 uppercase tracking-wide">Time Limit</div>
+                        <div class="font-bold text-lg">45 min</div>
+                    </div>
+                </div>
+                <div class="bg-dark-700/60 border border-white/10 rounded-xl px-5 py-3 flex items-center gap-3">
+                    <span class="text-2xl">👤</span>
+                    <div>
+                        <div class="text-xs text-gray-500 uppercase tracking-wide">Format</div>
+                        <div class="font-bold text-lg">Solo</div>
+                    </div>
+                </div>
+                <div class="bg-dark-700/60 border border-white/10 rounded-xl px-5 py-3 flex items-center gap-3">
+                    <span class="text-2xl">📊</span>
+                    <div>
+                        <div class="text-xs text-gray-500 uppercase tracking-wide">Max Score</div>
+                        <div class="font-bold text-lg">90 <span class="text-green-400">+10</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-6 py-12">
+        <!-- Situation -->
+        <section class="mb-16">
+            <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-4">SITUATION</h2>
+            <div class="card rounded-2xl p-8">
+                <p class="text-lg text-gray-300 leading-relaxed">
+                    You've just joined a research lab and inherited an <strong class="text-white">ML project from a previous researcher</strong>.
+                    The project folder is a mess of duplicate files, old script versions, and unclear structure.
+                    You need to use <strong class="text-accent">Claude Code</strong> to analyze and clean up this project.
+                </p>
+            </div>
+        </section>
+
+        <!-- Given Files -->
+        <section class="mb-16">
+            <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-4">GIVEN FILES</h2>
+            <div class="file-tree">
+                <div class="file-tree-header">
+                    📁 messy-ml-project/
+                </div>
+                <pre><code>├── train.py
+├── train_v2.py
+├── train_final.py
+├── train_final_real.py     <span class="file-comment"># unclear which is the real one</span>
+├── model.py                <span class="file-important"># core file?</span>
+├── model_backup.py
+├── utils.py
+├── utils_old.py
+├── notebooks/
+│   ├── experiment1.ipynb
+│   ├── experiment1_copy.ipynb
+│   └── Untitled.ipynb
+├── __pycache__/            <span class="file-delete"># should be deleted</span>
+├── requirements.txt
+├── requirements_old.txt
+└── README.md               <span class="file-comment"># content: "TODO: write readme"</span></code></pre>
+            </div>
+        </section>
+
+        <!-- What to Do -->
+        <section class="mb-16">
+            <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-4">WHAT TO DO</h2>
+            <div class="space-y-4">
+                <div class="card rounded-2xl p-6 flex gap-5">
+                    <div class="step-number bg-accent/20 text-accent">1</div>
+                    <div>
+                        <h3 class="font-bold text-xl mb-2">Analyze the Project</h3>
+                        <p class="text-gray-400">Understand what this project does. Identify what model it trains, and what the inputs/outputs are.</p>
+                    </div>
+                </div>
+                <div class="card rounded-2xl p-6 flex gap-5">
+                    <div class="step-number bg-accent/20 text-accent">2</div>
+                    <div>
+                        <h3 class="font-bold text-xl mb-2">Identify Core Files</h3>
+                        <p class="text-gray-400">Figure out which files are actually used and their dependencies. Analyze which files import which.</p>
+                    </div>
+                </div>
+                <div class="card rounded-2xl p-6 flex gap-5">
+                    <div class="step-number bg-accent/20 text-accent">3</div>
+                    <div>
+                        <h3 class="font-bold text-xl mb-2">Propose Cleanup</h3>
+                        <p class="text-gray-400">Categorize files to keep vs delete, and propose a better folder structure.</p>
+                    </div>
+                </div>
+                <div class="card rounded-2xl p-6 flex gap-5">
+                    <div class="step-number bg-accent/20 text-accent">4</div>
+                    <div>
+                        <h3 class="font-bold text-xl mb-2">Write README</h3>
+                        <p class="text-gray-400">Document the project description, installation, usage, and folder structure.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- What You'll Learn -->
+        <section class="mb-16">
+            <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-4">WHAT YOU'LL LEARN</h2>
+            <div class="grid md:grid-cols-2 gap-4">
+                <div class="card rounded-2xl p-6">
+                    <div class="flex items-center gap-3 mb-3">
+                        <span class="text-2xl">⚡</span>
+                        <h3 class="font-bold text-lg">Plan Mode</h3>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-3">A mode for planning before execution. Essential for understanding structure.</p>
+                    <code class="text-xs bg-dark-600 px-3 py-1.5 rounded-lg text-accent">Shift+Tab × 2</code>
+                </div>
+                <div class="card rounded-2xl p-6">
+                    <div class="flex items-center gap-3 mb-3">
+                        <span class="text-2xl">🧠</span>
+                        <h3 class="font-bold text-lg">ultrathink</h3>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-3">Request deep thinking for complex analysis.</p>
+                    <code class="text-xs bg-dark-600 px-3 py-1.5 rounded-lg text-accent">"analyze with ultrathink"</code>
+                </div>
+                <div class="card rounded-2xl p-6">
+                    <div class="flex items-center gap-3 mb-3">
+                        <span class="text-2xl">🔧</span>
+                        <h3 class="font-bold text-lg">/init, /config</h3>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-3">Project initialization and configuration commands.</p>
+                    <code class="text-xs bg-dark-600 px-3 py-1.5 rounded-lg text-accent">/init → creates CLAUDE.md</code>
+                </div>
+                <div class="card rounded-2xl p-6">
+                    <div class="flex items-center gap-3 mb-3">
+                        <span class="text-2xl">🧹</span>
+                        <h3 class="font-bold text-lg">/clear, /compact</h3>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-3">Clean up context. Essential for token management before new tasks.</p>
+                    <code class="text-xs bg-dark-600 px-3 py-1.5 rounded-lg text-accent">/clear → reset conversation</code>
+                </div>
+            </div>
+        </section>
+
+        <!-- Deliverables -->
+        <section class="mb-16">
+            <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-4">DELIVERABLES</h2>
+            <div class="card rounded-2xl p-8">
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="flex gap-4">
+                        <span class="text-4xl">📄</span>
+                        <div>
+                            <h3 class="font-bold text-lg mb-1">analysis.md</h3>
+                            <ul class="text-gray-400 text-sm space-y-1">
+                                <li>• Project purpose explanation</li>
+                                <li>• Core file list + roles</li>
+                                <li>• Recommended files to delete</li>
+                                <li>• Dependency analysis</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <span class="text-4xl">📖</span>
+                        <div>
+                            <h3 class="font-bold text-lg mb-1">README.md</h3>
+                            <ul class="text-gray-400 text-sm space-y-1">
+                                <li>• Project description</li>
+                                <li>• Installation guide</li>
+                                <li>• Usage (with examples)</li>
+                                <li>• Folder structure</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Scoring -->
+        <section class="mb-16">
+            <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-4">SCORING RUBRIC</h2>
+            <div class="card rounded-2xl overflow-hidden">
+                <table class="w-full">
+                    <thead>
+                        <tr class="bg-dark-600/50 text-left">
+                            <th class="px-6 py-4 font-semibold">Category</th>
+                            <th class="px-6 py-4 font-semibold text-right">Points</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-white/5">
+                        <tr>
+                            <td class="px-6 py-5">
+                                <div class="font-medium text-lg">Analysis Quality</div>
+                                <div class="text-sm text-gray-500 mt-1">Project purpose understanding, core file identification accuracy</div>
+                            </td>
+                            <td class="px-6 py-5 text-right">
+                                <span class="text-2xl font-bold text-accent">40</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="px-6 py-5">
+                                <div class="font-medium text-lg">Cleanup Quality</div>
+                                <div class="text-sm text-gray-500 mt-1">Appropriateness of cleanup proposal, structure improvement</div>
+                            </td>
+                            <td class="px-6 py-5 text-right">
+                                <span class="text-2xl font-bold text-accent">30</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="px-6 py-5">
+                                <div class="font-medium text-lg">README Quality</div>
+                                <div class="text-sm text-gray-500 mt-1">Clarity, completeness, practicality</div>
+                            </td>
+                            <td class="px-6 py-5 text-right">
+                                <span class="text-2xl font-bold text-accent">20</span>
+                            </td>
+                        </tr>
+                        <tr class="bg-green-500/5">
+                            <td class="px-6 py-5">
+                                <div class="font-medium text-lg text-green-400">⏱️ Time Bonus</div>
+                                <div class="text-sm text-gray-500 mt-1">Extra points for fast completion</div>
+                            </td>
+                            <td class="px-6 py-5 text-right">
+                                <span class="text-2xl font-bold text-green-400">+10</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr class="bg-dark-600/30">
+                            <td class="px-6 py-4 font-bold text-lg">Total</td>
+                            <td class="px-6 py-4 text-right">
+                                <span class="text-3xl font-bold bg-gradient-to-r from-accent to-blue-300 bg-clip-text text-transparent">100</span>
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </section>
+
+        <!-- Submit -->
+        <section class="mb-16" id="submit">
+            <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-4">SUBMIT YOUR WORK</h2>
+            <div class="submit-card rounded-3xl p-8">
+                <!-- Login Warning -->
+                <div id="login-required-warning" class="mb-6 bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 text-amber-400 hidden">
+                    <span>⚠️ Please <a href="index.html" class="text-accent underline hover:text-accent/80">login</a> to start the timer and submit your solution.</span>
+                </div>
+
+                <!-- Instructions -->
+                <div class="mb-8 p-6 bg-dark-800/50 rounded-2xl border border-white/5">
+                    <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                        <span>📋</span> How to Submit
+                    </h3>
+                    <ol class="space-y-3 text-gray-300">
+                        <li class="flex gap-3">
+                            <span class="bg-accent/20 text-accent w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">1</span>
+                            <span>Click the <strong>Start Timer</strong> button to start the timer</span>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="bg-accent/20 text-accent w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">2</span>
+                            <span>Complete the task and push your deliverables to a <strong>GitHub repository</strong></span>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="bg-accent/20 text-accent w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">3</span>
+                            <span>Fill in the form below and click <strong>Submit</strong> to submit your work</span>
+                        </li>
+                    </ol>
+                </div>
+                
+                <!-- Timer Display -->
+                <div id="timerContainer" class="hidden mb-8 p-6 bg-accent/10 rounded-2xl border border-accent/30 text-center">
+                    <div class="text-sm text-accent mb-2">⏱️ Elapsed Time</div>
+                    <div id="timerDisplay" class="timer-display text-5xl font-bold text-white">00:00</div>
+                </div>
+                
+                <!-- Login Warning -->
+                <div id="login-warning" class="mb-6 p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl text-amber-400">
+                    <span>⚠️ Please <a href="index.html" class="text-accent underline hover:text-purple-300">login</a> to submit your solution.</span>
+                </div>
+
+                <!-- Form -->
+                <form id="submitForm" class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium mb-2 text-gray-300">GitHub Repository URL</label>
+                        <input type="url" id="githubUrl" required
+                               class="w-full bg-dark-800 border border-white/10 rounded-xl px-5 py-4 focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent/50 transition-all text-lg mono"
+                               placeholder="https://github.com/username/repo">
+                    </div>
+                    <div class="flex flex-col sm:flex-row gap-4 pt-4">
+                        <button type="button" id="startBtn" onclick="startChallenge()"
+                                class="btn-secondary flex-1 text-white font-bold py-4 px-6 rounded-xl text-lg flex items-center justify-center gap-2">
+                            <span>⏱️</span> Start Timer
+                        </button>
+                        <button type="submit" id="submitBtn"
+                                class="btn-primary flex-1 text-white font-bold py-4 px-6 rounded-xl text-lg flex items-center justify-center gap-2">
+                            <span>🚀</span> Submit
+                        </button>
+                    </div>
+                </form>
+                
+                <div id="statusMessage" class="mt-6 text-center hidden"></div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-white/5 py-8">
+        <div class="max-w-5xl mx-auto px-6 text-center">
+            <a href="index.html" class="text-gray-500 hover:text-accent transition-colors">
+                ← Back to Home
+            </a>
+        </div>
+    </footer>
+
+    <script src="config.js"></script>
+    <script>
+        // API Base URL (auto-configured from config.js)
+        const API_BASE = window.API_BASE || '';
+        const WEEK = 1;
+        let timerInterval = null;
+        let startTime = null;
+        let currentUser = null;
+
+        // Check login status on page load
+        async function checkLoginStatus() {
+            const token = localStorage.getItem('auth_token');
+            const loginWarning = document.getElementById('login-warning');
+            const startBtn = document.getElementById('startBtn');
+            const submitBtn = document.getElementById('submitBtn');
+
+            if (!token) {
+                // Not logged in
+                if (loginWarning) loginWarning.classList.remove('hidden');
+                startBtn.disabled = true;
+                startBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                submitBtn.disabled = true;
+                submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/api/auth/me`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    currentUser = await response.json();
+                    if (loginWarning) loginWarning.classList.add('hidden');
+                    startBtn.disabled = false;
+                    startBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    submitBtn.disabled = false;
+                    submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                } else {
+                    // Token expired or invalid
+                    localStorage.removeItem('auth_token');
+                    if (loginWarning) loginWarning.classList.remove('hidden');
+                    startBtn.disabled = true;
+                    startBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                    submitBtn.disabled = true;
+                    submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                }
+            } catch (e) {
+                console.error('Auth check failed:', e);
+                if (loginWarning) loginWarning.classList.remove('hidden');
+            }
+        }
+
+        // Run on page load
+        document.addEventListener('DOMContentLoaded', checkLoginStatus);
+
+        function updateTimer() {
+            if (!startTime) return;
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
+            const seconds = (elapsed % 60).toString().padStart(2, '0');
+            document.getElementById('timerDisplay').textContent = `${minutes}:${seconds}`;
+        }
+
+        async function startChallenge() {
+            // Check login
+            if (!currentUser) {
+                showStatus('⚠️ Please login first', 'text-amber-400');
+                return;
+            }
+
+            // Start local timer (challenge timing is managed by admin on server)
+            startTime = Date.now();
+            document.getElementById('timerContainer').classList.remove('hidden');
+            timerInterval = setInterval(updateTimer, 1000);
+            updateTimer();
+
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('startBtn').classList.add('opacity-50', 'cursor-not-allowed');
+            document.getElementById('startBtn').innerHTML = '✅ Timer Started';
+
+            showStatus('⏱️ Timer started. Good luck!', 'text-green-400');
+        }
+
+        document.getElementById('submitForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Check login
+            if (!currentUser) {
+                showStatus('⚠️ Please login first', 'text-amber-400');
+                return;
+            }
+
+            const githubUrl = document.getElementById('githubUrl').value;
+
+            if (!githubUrl) {
+                showStatus('⚠️ Please enter GitHub URL', 'text-amber-400');
+                return;
+            }
+
+            try {
+                // Submit with auth token (user_id is extracted from token on server)
+                const token = localStorage.getItem('auth_token');
+                const response = await fetch(`${API_BASE}/api/submissions/submit`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        week: WEEK,
+                        github_url: githubUrl
+                    })
+                });
+
+                if (timerInterval) clearInterval(timerInterval);
+
+                if (response.ok) {
+                    const data = await response.json();
+                    showStatus(`✅ Submission complete! Elapsed time: ${data.elapsed_minutes?.toFixed(1) || '-'} minutes. Evaluation will start shortly.`, 'text-green-400');
+                    document.getElementById('submitBtn').disabled = true;
+                    document.getElementById('submitBtn').classList.add('opacity-50', 'cursor-not-allowed');
+                    document.getElementById('submitBtn').innerHTML = '✅ Submitted';
+                } else {
+                    const error = await response.json();
+                    showStatus('❌ Submission failed: ' + (error.detail || 'Unknown error'), 'text-red-400');
+                }
+
+            } catch (error) {
+                showStatus('❌ Submission failed: ' + error.message, 'text-red-400');
+            }
+        });
+
+        function showStatus(message, colorClass) {
+            const el = document.getElementById('statusMessage');
+            el.textContent = message;
+            el.className = `mt-6 text-center text-lg font-medium ${colorClass}`;
+            el.classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
