@@ -33,7 +33,7 @@
 │                    로컬 서버 (your-computer)                      │
 │                                                                  │
 │   ┌─────────────────────────────────────────┐                   │
-│   │         FastAPI Server (:8000)           │                   │
+│   │         FastAPI Server (:8003)           │                   │
 │   │                                          │                   │
 │   │   - /api/auth/*                          │                   │
 │   │   - /api/participants/*                  │                   │
@@ -105,7 +105,7 @@ winget install cloudflare.cloudflared
 
 ### 2.2 빠른 터널 시작 (Quick Tunnel)
 ```bash
-cloudflared tunnel --url http://localhost:8000
+cloudflared tunnel --url http://localhost:8003
 ```
 
 출력 예시:
@@ -133,7 +133,7 @@ credentials-file: ~/.cloudflared/<TUNNEL_ID>.json
 
 ingress:
   - hostname: api.yourdomain.com
-    service: http://localhost:8000
+    service: http://localhost:8003
   - service: http_status:404
 EOF
 
@@ -189,10 +189,10 @@ cd backend
 python server.py
 
 # 터미널 2: Cloudflare Tunnel
-cloudflared tunnel --url http://localhost:8000
+cloudflared tunnel --url http://localhost:8003
 
 # 브라우저에서 접속
-# - 로컬: http://localhost:8000
+# - 로컬: http://localhost:8003
 # - 터널: https://random.trycloudflare.com
 ```
 

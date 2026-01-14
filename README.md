@@ -18,7 +18,7 @@ python server.py
 
 ### 3. 브라우저에서 접속
 ```
-http://localhost:8000
+http://localhost:8003
 ```
 
 ## 📁 구조
@@ -54,21 +54,21 @@ claude-code-study/
 
 ### 참가자 등록
 ```bash
-curl -X POST http://localhost:8000/api/participants/register \
+curl -X POST http://localhost:8003/api/participants/register \
   -H "Content-Type: application/json" \
   -d '{"participant_id": "user001", "name": "홍길동"}'
 ```
 
 ### 챌린지 시작
 ```bash
-curl -X POST http://localhost:8000/api/challenge/start \
+curl -X POST http://localhost:8003/api/challenge/start \
   -H "Content-Type: application/json" \
   -d '{"participant_id": "user001", "week": 1}'
 ```
 
 ### 솔루션 제출
 ```bash
-curl -X POST http://localhost:8000/api/submissions/submit \
+curl -X POST http://localhost:8003/api/submissions/submit \
   -H "Content-Type: application/json" \
   -d '{"participant_id": "user001", "week": 1, "github_url": "https://github.com/user/repo"}'
 ```
@@ -87,7 +87,7 @@ python backend/evaluator.py evaluate 1 user001
 
 ## 📊 리더보드
 
-`http://localhost:8000/leaderboard.html` 에서 확인
+`http://localhost:8003/leaderboard.html` 에서 확인
 
 - Season: 전체 시즌 순위
 - Week 1-5: 주간 순위
