@@ -20,23 +20,23 @@ def load_data(batch_size=64):
         transforms.ToTensor(),
         transforms.Normalize((0.1307,), (0.3081,))
     ])
-    
+
     train_dataset = datasets.MNIST(
         'data/raw', train=True, download=True, transform=transform
     )
     val_dataset = datasets.MNIST(
         'data/raw', train=False, download=True, transform=transform
     )
-    
+
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
-    
+
     return train_loader, val_loader
 
 
 def save_model(model, path):
     """Save model checkpoint."""
-    os.makedirs(os.path.dirname(path), exist_ok=True)
+    os.makedirs(os.path.dirname(path) if os.path.dirname(path) else '.', exist_ok=True)
     torch.save(model.state_dict(), path)
     logging.info(f"Model saved to {path}")
 
@@ -46,3 +46,8 @@ def load_model(model, path):
     model.load_state_dict(torch.load(path))
     logging.info(f"Model loaded from {path}")
     return model
+
+
+def count_parameters(model):
+    """Count trainable parameters."""
+    return sum(p.numel() for p in model.parameters() if p.requires_grad)

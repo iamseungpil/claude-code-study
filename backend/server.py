@@ -951,7 +951,13 @@ async def get_evaluation(week: int, participant_id: str):
 
 
 def _get_week_leaderboard_data(week: int) -> list:
-    """Helper function to get leaderboard data for a specific week."""
+    """Helper function to get leaderboard data for a specific week.
+
+    Scoring System:
+    - Rubric Score: Up to 80 points (evaluated by Claude)
+    - Time Rank Bonus: Up to 20 points (based on submission order)
+      - 1st: +20, 2nd: +17, 3rd: +14, 4th: +11, 5th: +8, 6th+: +5
+    """
     evaluations_dir = EVALUATIONS_DIR / f"week{week}"
 
     if not evaluations_dir.exists():
@@ -962,18 +968,20 @@ def _get_week_leaderboard_data(week: int) -> list:
         with open(eval_file) as f:
             data = json.load(f)
             if data.get("status") == "completed":
+                scores = data["scores"]
                 results.append({
                     "participant_id": data["participant"],
-                    "total": data["scores"]["total"],
-                    "rubric": data["scores"]["rubric"],
-                    "time_bonus": data["scores"]["time_bonus"],
+                    "total": scores["total"],
+                    "rubric": scores["rubric"],
+                    "time_rank": scores.get("time_rank", 0),
+                    "time_rank_bonus": scores.get("time_rank_bonus", scores.get("time_bonus", 0)),
                     "evaluated_at": data.get("evaluated_at")
                 })
 
     # Sort by total score descending
     results.sort(key=lambda x: x["total"], reverse=True)
 
-    # Add rank
+    # Add rank (overall rank by score, not submission time)
     for i, r in enumerate(results):
         r["rank"] = i + 1
         if i == 0:

@@ -1,0 +1,19 @@
+TODO List
+=========
+
+[ ] Clean up duplicate files
+[ ] Add proper documentation
+[ ] Write more tests
+[ ] Remove old code
+[ ] Fix config management
+[ ] Add CI/CD
+[ ] Review train_final_REAL.py - too long
+
+Done:
+[x] Add batch normalization option
+[x] Implement learning rate scheduler
+
+Notes:
+- train.py is the OLD script, use train_final_REAL.py
+- Don't delete model_backup.py yet
+- helper.py and common.py have duplicates - need to merge

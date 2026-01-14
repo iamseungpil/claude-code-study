@@ -1,0 +1,16 @@
+{
+    "training": {
+        "batch_size": 64,
+        "learning_rate": 0.001,
+        "epochs": 10,
+        "optimizer": "adam"
+    },
+    "model": {
+        "hidden_size": 128,
+        "dropout": 0.25
+    },
+    "data": {
+        "dir": "data/raw",
+        "num_workers": 4
+    }
+}

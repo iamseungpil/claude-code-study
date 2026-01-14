@@ -1,0 +1,17 @@
+Personal notes
+==============
+
+2024-01-10: Started project
+2024-01-15: Added CNN model
+2024-01-20: Training works now
+2024-02-01: Made backup before refactoring
+2024-02-15: Refactoring didn't go well, keeping old files
+
+File structure is a mess - need to clean up someday
+
+train_final_REAL.py is the one to use (not train_final.py!)
+
+Magic numbers in train_final_REAL.py:
+- 0.1307 = MNIST mean
+- 0.3081 = MNIST std
+- 42 = random seed (the answer to everything)

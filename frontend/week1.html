@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Week 1: Project Cleanup - Claude Code Study</title>
+    <title>Week 1: Legacy Code Separation - Claude Code Study</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -25,22 +25,22 @@
         * { font-family: 'Outfit', sans-serif; }
         code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
         html { scroll-behavior: smooth; }
-        
+
         .hero-gradient {
             background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(79, 140, 255, 0.2) 0%, transparent 50%),
                         linear-gradient(180deg, #0f172a 0%, #0a0a0f 100%);
         }
-        
+
         .nav-blur {
             background: rgba(10, 10, 15, 0.85);
             backdrop-filter: blur(20px);
         }
-        
+
         .card {
             background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
             border: 1px solid rgba(255,255,255,0.06);
         }
-        
+
         .step-number {
             width: 48px;
             height: 48px;
@@ -52,7 +52,7 @@
             font-size: 1.25rem;
             flex-shrink: 0;
         }
-        
+
         .file-tree {
             background: #0d1117;
             border: 1px solid rgba(255,255,255,0.1);
@@ -75,12 +75,12 @@
         .file-comment { color: #6e7681; }
         .file-important { color: #7ee787; }
         .file-delete { color: #f85149; opacity: 0.6; }
-        
+
         .submit-card {
             background: linear-gradient(135deg, rgba(79, 140, 255, 0.1) 0%, rgba(79, 140, 255, 0.02) 100%);
             border: 1px solid rgba(79, 140, 255, 0.2);
         }
-        
+
         .btn-primary {
             background: linear-gradient(135deg, #4f8cff 0%, #3b7cf5 100%);
             transition: all 0.3s ease;
@@ -89,7 +89,7 @@
             transform: translateY(-2px);
             box-shadow: 0 10px 30px -10px rgba(79, 140, 255, 0.5);
         }
-        
+
         .btn-secondary {
             background: rgba(255,255,255,0.05);
             border: 1px solid rgba(255,255,255,0.1);
@@ -98,7 +98,7 @@
         .btn-secondary:hover {
             background: rgba(255,255,255,0.1);
         }
-        
+
         .timer-display {
             font-variant-numeric: tabular-nums;
         }
@@ -115,7 +115,7 @@
                 <span>Back</span>
             </a>
             <a href="leaderboard.html" class="text-accent hover:text-blue-300 transition-colors text-sm font-medium">
-                🏆 Leaderboard
+                Leaderboard
             </a>
         </div>
     </nav>
@@ -127,14 +127,14 @@
                 <span class="bg-accent text-dark-900 px-4 py-1.5 rounded-full text-sm font-bold">WEEK 1</span>
                 <span class="bg-green-500/20 text-green-400 px-3 py-1 rounded-full text-xs font-bold border border-green-500/30">In Progress</span>
             </div>
-            
+
             <h1 class="text-4xl md:text-5xl font-bold mb-4 tracking-tight">
-                🧹 Project Folder Cleanup
+                Legacy Code Separation & Refactoring
             </h1>
             <p class="text-xl text-gray-400 mb-8 max-w-2xl">
-                Analyze a messy ML project, identify core files, and clean it up.
+                하나의 파일에 섞여있는 두 프로젝트를 분리하고 리팩토링하세요.
             </p>
-            
+
             <div class="flex flex-wrap gap-3">
                 <div class="bg-dark-700/60 border border-white/10 rounded-xl px-5 py-3 flex items-center gap-3">
                     <span class="text-2xl">⏱️</span>
@@ -154,7 +154,7 @@
                     <span class="text-2xl">📊</span>
                     <div>
                         <div class="text-xs text-gray-500 uppercase tracking-wide">Max Score</div>
-                        <div class="font-bold text-lg">90 <span class="text-green-400">+10</span></div>
+                        <div class="font-bold text-lg">80 <span class="text-green-400">+20</span></div>
                     </div>
                 </div>
             </div>
@@ -167,9 +167,9 @@
             <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-4">SITUATION</h2>
             <div class="card rounded-2xl p-8">
                 <p class="text-lg text-gray-300 leading-relaxed">
-                    You've just joined a research lab and inherited an <strong class="text-white">ML project from a previous researcher</strong>.
-                    The project folder is a mess of duplicate files, old script versions, and unclear structure.
-                    You need to use <strong class="text-accent">Claude Code</strong> to analyze and clean up this project.
+                    퇴사한 개발자가 남긴 <strong class="text-white">everything.py</strong> 파일을 인수인계 받았습니다.
+                    이 파일에는 <strong class="text-accent">두 개의 완전히 다른 프로젝트</strong>가 하나의 파일에 섞여 있습니다.
+                    <strong class="text-accent">Claude Code</strong>를 활용하여 이 코드를 분석하고, 분리하고, 리팩토링하세요.
                 </p>
             </div>
         </section>
@@ -179,24 +179,13 @@
             <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-4">GIVEN FILES</h2>
             <div class="file-tree">
                 <div class="file-tree-header">
-                    📁 messy-ml-project/
+                    challenges/week1/
                 </div>
-                <pre><code>├── train.py
-├── train_v2.py
-├── train_final.py
-├── train_final_real.py     <span class="file-comment"># unclear which is the real one</span>
-├── model.py                <span class="file-important"># core file?</span>
-├── model_backup.py
-├── utils.py
-├── utils_old.py
-├── notebooks/
-│   ├── experiment1.ipynb
-│   ├── experiment1_copy.ipynb
-│   └── Untitled.ipynb
-├── __pycache__/            <span class="file-delete"># should be deleted</span>
-├── requirements.txt
-├── requirements_old.txt
-└── README.md               <span class="file-comment"># content: "TODO: write readme"</span></code></pre>
+                <pre><code>├── everything.py          <span class="file-comment"># 200+ lines, 두 프로젝트가 섞여있음</span>
+└── README.md              <span class="file-comment"># 챌린지 설명</span></code></pre>
+            </div>
+            <div class="mt-4 p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl text-amber-400 text-sm">
+                <strong>Hint:</strong> <code class="bg-dark-800 px-2 py-1 rounded">python everything.py</code>를 실행하면 두 프로젝트가 무엇인지 감을 잡을 수 있습니다.
             </div>
         </section>
 
@@ -207,29 +196,29 @@
                 <div class="card rounded-2xl p-6 flex gap-5">
                     <div class="step-number bg-accent/20 text-accent">1</div>
                     <div>
-                        <h3 class="font-bold text-xl mb-2">Analyze the Project</h3>
-                        <p class="text-gray-400">Understand what this project does. Identify what model it trains, and what the inputs/outputs are.</p>
+                        <h3 class="font-bold text-xl mb-2">Analyze & Identify</h3>
+                        <p class="text-gray-400">코드를 분석하여 두 개의 서로 다른 도메인/프로젝트를 식별하세요.</p>
                     </div>
                 </div>
                 <div class="card rounded-2xl p-6 flex gap-5">
                     <div class="step-number bg-accent/20 text-accent">2</div>
                     <div>
-                        <h3 class="font-bold text-xl mb-2">Identify Core Files</h3>
-                        <p class="text-gray-400">Figure out which files are actually used and their dependencies. Analyze which files import which.</p>
+                        <h3 class="font-bold text-xl mb-2">Separate Projects</h3>
+                        <p class="text-gray-400">각 프로젝트를 별도의 폴더/모듈로 분리하세요. 적절한 파일 구조를 만드세요.</p>
                     </div>
                 </div>
                 <div class="card rounded-2xl p-6 flex gap-5">
                     <div class="step-number bg-accent/20 text-accent">3</div>
                     <div>
-                        <h3 class="font-bold text-xl mb-2">Propose Cleanup</h3>
-                        <p class="text-gray-400">Categorize files to keep vs delete, and propose a better folder structure.</p>
+                        <h3 class="font-bold text-xl mb-2">Refactor Code</h3>
+                        <p class="text-gray-400">코드 가독성을 개선하세요. 중첩 조건문, 매직 스트링 등을 리팩토링하세요.</p>
                     </div>
                 </div>
                 <div class="card rounded-2xl p-6 flex gap-5">
                     <div class="step-number bg-accent/20 text-accent">4</div>
                     <div>
-                        <h3 class="font-bold text-xl mb-2">Write README</h3>
-                        <p class="text-gray-400">Document the project description, installation, usage, and folder structure.</p>
+                        <h3 class="font-bold text-xl mb-2">Verify & Document</h3>
+                        <p class="text-gray-400">모든 테스트가 통과하는지 확인하고, 각 프로젝트의 README.md를 작성하세요.</p>
                     </div>
                 </div>
             </div>
@@ -244,7 +233,7 @@
                         <span class="text-2xl">⚡</span>
                         <h3 class="font-bold text-lg">Plan Mode</h3>
                     </div>
-                    <p class="text-gray-400 text-sm mb-3">A mode for planning before execution. Essential for understanding structure.</p>
+                    <p class="text-gray-400 text-sm mb-3">실행 전 계획 수립 모드. 구조 파악에 필수.</p>
                     <code class="text-xs bg-dark-600 px-3 py-1.5 rounded-lg text-accent">Shift+Tab × 2</code>
                 </div>
                 <div class="card rounded-2xl p-6">
@@ -252,7 +241,7 @@
                         <span class="text-2xl">🧠</span>
                         <h3 class="font-bold text-lg">ultrathink</h3>
                     </div>
-                    <p class="text-gray-400 text-sm mb-3">Request deep thinking for complex analysis.</p>
+                    <p class="text-gray-400 text-sm mb-3">복잡한 분석을 위한 깊은 사고 요청.</p>
                     <code class="text-xs bg-dark-600 px-3 py-1.5 rounded-lg text-accent">"analyze with ultrathink"</code>
                 </div>
                 <div class="card rounded-2xl p-6">
@@ -260,16 +249,16 @@
                         <span class="text-2xl">🔧</span>
                         <h3 class="font-bold text-lg">/init, /config</h3>
                     </div>
-                    <p class="text-gray-400 text-sm mb-3">Project initialization and configuration commands.</p>
-                    <code class="text-xs bg-dark-600 px-3 py-1.5 rounded-lg text-accent">/init → creates CLAUDE.md</code>
+                    <p class="text-gray-400 text-sm mb-3">프로젝트 초기화 및 설정 명령어.</p>
+                    <code class="text-xs bg-dark-600 px-3 py-1.5 rounded-lg text-accent">/init → CLAUDE.md 생성</code>
                 </div>
                 <div class="card rounded-2xl p-6">
                     <div class="flex items-center gap-3 mb-3">
                         <span class="text-2xl">🧹</span>
                         <h3 class="font-bold text-lg">/clear, /compact</h3>
                     </div>
-                    <p class="text-gray-400 text-sm mb-3">Clean up context. Essential for token management before new tasks.</p>
-                    <code class="text-xs bg-dark-600 px-3 py-1.5 rounded-lg text-accent">/clear → reset conversation</code>
+                    <p class="text-gray-400 text-sm mb-3">컨텍스트 정리. 새 작업 전 토큰 관리에 필수.</p>
+                    <code class="text-xs bg-dark-600 px-3 py-1.5 rounded-lg text-accent">/clear → 대화 초기화</code>
                 </div>
             </div>
         </section>
@@ -278,28 +267,44 @@
         <section id="deliverablesSection" class="hidden mb-16">
             <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-4">DELIVERABLES</h2>
             <div class="card rounded-2xl p-8">
+                <div class="mb-6">
+                    <h3 class="font-bold text-lg mb-3">Expected Structure (예시)</h3>
+                    <div class="file-tree">
+                        <pre><code>submission/
+├── gilded_rose/          <span class="file-important"># Project 1</span>
+│   ├── __init__.py
+│   ├── gilded_rose.py
+│   ├── item.py
+│   ├── test_gilded_rose.py
+│   └── README.md
+├── tennis/               <span class="file-important"># Project 2</span>
+│   ├── __init__.py
+│   ├── tennis_game.py
+│   ├── test_tennis.py
+│   └── README.md
+└── README.md             <span class="file-comment"># 전체 설명</span></code></pre>
+                    </div>
+                </div>
                 <div class="grid md:grid-cols-2 gap-6">
                     <div class="flex gap-4">
-                        <span class="text-4xl">📄</span>
+                        <span class="text-4xl">✅</span>
                         <div>
-                            <h3 class="font-bold text-lg mb-1">analysis.md</h3>
+                            <h3 class="font-bold text-lg mb-1">Tests Passing</h3>
                             <ul class="text-gray-400 text-sm space-y-1">
-                                <li>• Project purpose explanation</li>
-                                <li>• Core file list + roles</li>
-                                <li>• Recommended files to delete</li>
-                                <li>• Dependency analysis</li>
+                                <li>• 모든 22개 테스트 통과</li>
+                                <li>• Import 오류 없음</li>
+                                <li>• 독립 실행 가능</li>
                             </ul>
                         </div>
                     </div>
                     <div class="flex gap-4">
                         <span class="text-4xl">📖</span>
                         <div>
-                            <h3 class="font-bold text-lg mb-1">README.md</h3>
+                            <h3 class="font-bold text-lg mb-1">Documentation</h3>
                             <ul class="text-gray-400 text-sm space-y-1">
-                                <li>• Project description</li>
-                                <li>• Installation guide</li>
-                                <li>• Usage (with examples)</li>
-                                <li>• Folder structure</li>
+                                <li>• 각 프로젝트 설명</li>
+                                <li>• 실행 방법 안내</li>
+                                <li>• 테스트 실행 방법</li>
                             </ul>
                         </div>
                     </div>
@@ -321,38 +326,56 @@
                     <tbody class="divide-y divide-white/5">
                         <tr>
                             <td class="px-6 py-5">
-                                <div class="font-medium text-lg">Analysis Quality</div>
-                                <div class="text-sm text-gray-500 mt-1">Project purpose understanding, core file identification accuracy</div>
-                            </td>
-                            <td class="px-6 py-5 text-right">
-                                <span class="text-2xl font-bold text-accent">40</span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="px-6 py-5">
-                                <div class="font-medium text-lg">Cleanup Quality</div>
-                                <div class="text-sm text-gray-500 mt-1">Appropriateness of cleanup proposal, structure improvement</div>
-                            </td>
-                            <td class="px-6 py-5 text-right">
-                                <span class="text-2xl font-bold text-accent">30</span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="px-6 py-5">
-                                <div class="font-medium text-lg">README Quality</div>
-                                <div class="text-sm text-gray-500 mt-1">Clarity, completeness, practicality</div>
+                                <div class="font-medium text-lg">Project Separation</div>
+                                <div class="text-sm text-gray-500 mt-1">두 프로젝트를 별도 폴더로 완벽히 분리</div>
                             </td>
                             <td class="px-6 py-5 text-right">
                                 <span class="text-2xl font-bold text-accent">20</span>
                             </td>
                         </tr>
-                        <tr class="bg-green-500/5">
+                        <tr>
                             <td class="px-6 py-5">
-                                <div class="font-medium text-lg text-green-400">⏱️ Time Bonus</div>
-                                <div class="text-sm text-gray-500 mt-1">Extra points for fast completion</div>
+                                <div class="font-medium text-lg">File Structure</div>
+                                <div class="text-sm text-gray-500 mt-1">클래스별 파일 분리, 적절한 모듈 구조</div>
                             </td>
                             <td class="px-6 py-5 text-right">
-                                <span class="text-2xl font-bold text-green-400">+10</span>
+                                <span class="text-2xl font-bold text-accent">15</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="px-6 py-5">
+                                <div class="font-medium text-lg">Tests Passing</div>
+                                <div class="text-sm text-gray-500 mt-1">모든 22개 테스트 통과</div>
+                            </td>
+                            <td class="px-6 py-5 text-right">
+                                <span class="text-2xl font-bold text-accent">25</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="px-6 py-5">
+                                <div class="font-medium text-lg">Refactoring Quality</div>
+                                <div class="text-sm text-gray-500 mt-1">코드 가독성 향상, 중첩 조건문 제거</div>
+                            </td>
+                            <td class="px-6 py-5 text-right">
+                                <span class="text-2xl font-bold text-accent">15</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="px-6 py-5">
+                                <div class="font-medium text-lg">Documentation</div>
+                                <div class="text-sm text-gray-500 mt-1">README 작성, 실행 방법 명시</div>
+                            </td>
+                            <td class="px-6 py-5 text-right">
+                                <span class="text-2xl font-bold text-accent">5</span>
+                            </td>
+                        </tr>
+                        <tr class="bg-green-500/5">
+                            <td class="px-6 py-5">
+                                <div class="font-medium text-lg text-green-400">⏱️ Time Rank Bonus</div>
+                                <div class="text-sm text-gray-500 mt-1">제출 순서에 따른 등수 점수 (1등: 20점, 2등: 17점, ...)</div>
+                            </td>
+                            <td class="px-6 py-5 text-right">
+                                <span class="text-2xl font-bold text-green-400">+20</span>
                             </td>
                         </tr>
                     </tbody>
@@ -365,6 +388,37 @@
                         </tr>
                     </tfoot>
                 </table>
+            </div>
+
+            <!-- Time Rank Detail -->
+            <div class="mt-4 card rounded-2xl p-6">
+                <h3 class="font-bold text-lg mb-4">Time Rank Score Detail</h3>
+                <div class="grid grid-cols-3 md:grid-cols-6 gap-3 text-center">
+                    <div class="bg-amber-500/10 border border-amber-500/30 rounded-xl p-3">
+                        <div class="text-2xl mb-1">🥇</div>
+                        <div class="text-amber-400 font-bold">+20</div>
+                    </div>
+                    <div class="bg-gray-400/10 border border-gray-400/30 rounded-xl p-3">
+                        <div class="text-2xl mb-1">🥈</div>
+                        <div class="text-gray-300 font-bold">+17</div>
+                    </div>
+                    <div class="bg-orange-500/10 border border-orange-500/30 rounded-xl p-3">
+                        <div class="text-2xl mb-1">🥉</div>
+                        <div class="text-orange-400 font-bold">+14</div>
+                    </div>
+                    <div class="bg-dark-600/50 border border-white/10 rounded-xl p-3">
+                        <div class="text-lg mb-1">4th</div>
+                        <div class="text-gray-400 font-bold">+11</div>
+                    </div>
+                    <div class="bg-dark-600/50 border border-white/10 rounded-xl p-3">
+                        <div class="text-lg mb-1">5th</div>
+                        <div class="text-gray-400 font-bold">+8</div>
+                    </div>
+                    <div class="bg-dark-600/50 border border-white/10 rounded-xl p-3">
+                        <div class="text-lg mb-1">6th+</div>
+                        <div class="text-gray-400 font-bold">+5</div>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -392,13 +446,13 @@
                         </li>
                     </ol>
                 </div>
-                
+
                 <!-- Timer Display -->
                 <div id="timerContainer" class="hidden mb-8 p-6 bg-accent/10 rounded-2xl border border-accent/30 text-center">
                     <div class="text-sm text-accent mb-2">⏱️ Elapsed Time</div>
                     <div id="timerDisplay" class="timer-display text-5xl font-bold text-white">00:00</div>
                 </div>
-                
+
                 <!-- Login Warning -->
                 <div id="login-warning" class="mb-6 p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl text-amber-400">
                     <span>⚠️ Please <a href="index.html" class="text-accent underline hover:text-purple-300">login</a> to submit your solution.</span>
@@ -427,7 +481,7 @@
                         </button>
                     </div>
                 </form>
-                
+
                 <div id="statusMessage" class="mt-6 text-center hidden"></div>
             </div>
         </section>
