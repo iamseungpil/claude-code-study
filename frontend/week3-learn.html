@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Week 3: Learn - Claude Code Study</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { outfit: ['Outfit', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] },
+                    colors: {
+                        dark: { 900: '#0a0a0f', 800: '#12121a', 700: '#1a1a25', 600: '#252530' },
+                        accent: '#fbbf24'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * { font-family: 'Outfit', sans-serif; }
+        code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
+        html { scroll-behavior: smooth; }
+        .hero-gradient {
+            background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(251, 191, 36, 0.2) 0%, transparent 50%),
+                        linear-gradient(180deg, #0f172a 0%, #0a0a0f 100%);
+        }
+        .nav-blur {
+            background: rgba(10, 10, 15, 0.85);
+            backdrop-filter: blur(20px);
+        }
+        .card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+    </style>
+</head>
+<body class="bg-dark-900 text-white min-h-screen">
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full nav-blur border-b border-white/5 z-50">
+        <div class="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
+            <a href="index.html" class="flex items-center gap-3 text-gray-400 hover:text-white transition-colors">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                </svg>
+                <span>Back</span>
+            </a>
+            <a href="week3.html" class="text-accent hover:text-amber-300 transition-colors text-sm font-medium">
+                Go to Challenge
+            </a>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <header class="hero-gradient pt-28 pb-12 px-6">
+        <div class="max-w-5xl mx-auto">
+            <div class="flex flex-wrap items-center gap-3 mb-6">
+                <span class="bg-accent text-dark-900 px-4 py-1.5 rounded-full text-sm font-bold">WEEK 3</span>
+                <span class="bg-gray-500/20 text-gray-400 px-3 py-1 rounded-full text-xs font-bold border border-gray-500/30">LEARN</span>
+            </div>
+            <h1 class="text-4xl md:text-5xl font-bold mb-4 tracking-tight">
+                MCP & Paper Survey
+            </h1>
+            <p class="text-xl text-gray-400 mb-8 max-w-2xl">
+                Use Model Context Protocol and external tools to conduct research surveys.
+            </p>
+        </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-6 py-12">
+        <section class="mb-16">
+            <div class="card rounded-2xl p-12 text-center">
+                <div class="text-6xl mb-6">🚧</div>
+                <h2 class="text-3xl font-bold mb-4">Coming Soon</h2>
+                <p class="text-gray-400 text-lg mb-8 max-w-md mx-auto">
+                    Week 3 learning content is being prepared. Check back when the challenge begins!
+                </p>
+                <div class="flex flex-wrap justify-center gap-4">
+                    <a href="week1-learn.html" class="bg-accent/20 hover:bg-accent/30 border border-accent/30 px-6 py-3 rounded-xl transition-all font-medium text-accent">
+                        Review Week 1
+                    </a>
+                    <a href="index.html" class="bg-white/5 hover:bg-white/10 border border-white/10 px-6 py-3 rounded-xl transition-all font-medium">
+                        Back to Home
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Preview of Topics -->
+        <section class="mb-16">
+            <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-6">TOPICS PREVIEW</h2>
+            <div class="grid md:grid-cols-2 gap-4">
+                <div class="card rounded-2xl p-6 opacity-60">
+                    <div class="flex items-center gap-3 mb-3">
+                        <span class="text-2xl">🔌</span>
+                        <h3 class="font-bold text-lg">MCP (Model Context Protocol)</h3>
+                    </div>
+                    <p class="text-gray-400 text-sm">Connect Claude to external tools and data sources.</p>
+                </div>
+                <div class="card rounded-2xl p-6 opacity-60">
+                    <div class="flex items-center gap-3 mb-3">
+                        <span class="text-2xl">🤖</span>
+                        <h3 class="font-bold text-lg">Subagents</h3>
+                    </div>
+                    <p class="text-gray-400 text-sm">Spawn specialized agents for parallel tasks.</p>
+                </div>
+                <div class="card rounded-2xl p-6 opacity-60">
+                    <div class="flex items-center gap-3 mb-3">
+                        <span class="text-2xl">🧠</span>
+                        <h3 class="font-bold text-lg">--model Flag</h3>
+                    </div>
+                    <p class="text-gray-400 text-sm">Choose different Claude models for specific tasks.</p>
+                </div>
+                <div class="card rounded-2xl p-6 opacity-60">
+                    <div class="flex items-center gap-3 mb-3">
+                        <span class="text-2xl">📚</span>
+                        <h3 class="font-bold text-lg">Research Workflows</h3>
+                    </div>
+                    <p class="text-gray-400 text-sm">Build automated literature review pipelines.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-white/5 py-8">
+        <div class="max-w-5xl mx-auto px-6 text-center">
+            <a href="index.html" class="text-gray-500 hover:text-accent transition-colors">
+                Back to Home
+            </a>
+        </div>
+    </footer>
+</body>
+</html>

@@ -194,7 +194,7 @@
                         <div>
                             <label class="block text-sm text-gray-400 mb-2">Week</label>
                             <select id="submit-week" class="w-full bg-dark-800 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-accent-blue/50 transition-colors">
-                                <option value="1">Week 1 - Project Cleanup</option>
+                                <option value="1">Week 1 - UIGen Feature Sprint</option>
                                 <option value="2">Week 2 - CLI Tool</option>
                                 <option value="3">Week 3 - Paper Survey</option>
                                 <option value="4">Week 4 - Bot/App MVP</option>
@@ -350,40 +350,47 @@
             
             <div class="space-y-6">
                 <!-- Week 1 -->
-                <a href="week1.html" class="week-card block rounded-3xl p-8 hover:glow-blue group">
+                <div class="week-card block rounded-3xl p-8 hover:glow-blue group">
                     <span class="week-number bg-accent-blue text-dark-900">WEEK 1</span>
                     <div class="flex flex-col md:flex-row md:items-center gap-6">
                         <div class="flex-1">
                             <div class="flex items-center gap-3 mb-3">
                                 <span class="badge-active text-white text-xs font-bold px-2 py-1 rounded-full">In Progress</span>
-                                <span class="text-gray-500 text-sm">👤 Solo · ⏱️ 45 min</span>
+                                <span class="text-gray-500 text-sm">👤 Solo · ⏱️ 70 min</span>
                             </div>
                             <h3 class="text-2xl md:text-3xl font-bold mb-3 group-hover:text-accent-blue transition-colors">
-                                Legacy Code Separation & Refactoring
+                                UIGen Feature Sprint
                             </h3>
                             <p class="text-gray-400 text-lg mb-4">
-                                하나의 파일에 섞여있는 두 프로젝트를 분리하고 리팩토링하세요.
+                                Build 3 features in an AI Component Generator using Memory-Driven Development.
                             </p>
                             <div class="flex flex-wrap gap-2">
                                 <span class="feature-tag">/init</span>
                                 <span class="feature-tag">Plan Mode</span>
-                                <span class="feature-tag">ultrathink</span>
+                                <span class="feature-tag">CLAUDE.md</span>
+                                <span class="feature-tag"># memory</span>
                                 <span class="feature-tag">/clear</span>
                                 <span class="feature-tag">/compact</span>
-                                <span class="feature-tag">/context</span>
                             </div>
                         </div>
-                        <div class="flex items-center gap-2 text-accent-blue font-medium">
-                            <span>Start Challenge</span>
-                            <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
-                            </svg>
+                        <div class="flex flex-col gap-3">
+                            <a href="week1-learn.html" class="flex items-center gap-2 bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 px-5 py-3 rounded-xl transition-all font-medium text-purple-400">
+                                <span>📚</span>
+                                <span>Learn First</span>
+                            </a>
+                            <a href="week1.html" class="flex items-center gap-2 bg-accent-blue/20 hover:bg-accent-blue/30 border border-accent-blue/30 px-5 py-3 rounded-xl transition-all font-medium text-accent-blue">
+                                <span>⚡</span>
+                                <span>Start Challenge</span>
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                                </svg>
+                            </a>
                         </div>
                     </div>
-                </a>
+                </div>
 
                 <!-- Week 2 -->
-                <a href="week2.html" class="week-card block rounded-3xl p-8 hover:glow-purple group opacity-60 hover:opacity-100">
+                <div class="week-card block rounded-3xl p-8 hover:glow-purple group opacity-60 hover:opacity-100">
                     <span class="week-number bg-accent-purple text-dark-900">WEEK 2</span>
                     <div class="flex flex-col md:flex-row md:items-center gap-6">
                         <div class="flex-1">
@@ -392,7 +399,7 @@
                                 <span class="text-gray-500 text-sm">👤 Solo · ⏱️ 50 min</span>
                             </div>
                             <h3 class="text-2xl md:text-3xl font-bold mb-3 group-hover:text-accent-purple transition-colors">
-                                🛠️ CLI Tool + Auto Linting
+                                CLI Tool + Auto Linting
                             </h3>
                             <p class="text-gray-400 text-lg mb-4">
                                 Build a research CLI tool and set up automatic linting with Hooks.
@@ -404,14 +411,21 @@
                                 <span class="feature-tag">VS Code</span>
                             </div>
                         </div>
-                        <div class="flex items-center gap-2 text-gray-500 font-medium">
-                            <span>Coming Soon</span>
+                        <div class="flex flex-col gap-3">
+                            <a href="week2-learn.html" class="flex items-center gap-2 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/20 px-5 py-3 rounded-xl transition-all font-medium text-gray-500">
+                                <span>📚</span>
+                                <span>Learn</span>
+                            </a>
+                            <a href="week2.html" class="flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 px-5 py-3 rounded-xl transition-all font-medium text-gray-500">
+                                <span>⚡</span>
+                                <span>Coming Soon</span>
+                            </a>
                         </div>
                     </div>
-                </a>
+                </div>
 
                 <!-- Week 3 -->
-                <a href="week3.html" class="week-card block rounded-3xl p-8 hover:glow-amber group opacity-60 hover:opacity-100">
+                <div class="week-card block rounded-3xl p-8 hover:glow-amber group opacity-60 hover:opacity-100">
                     <span class="week-number bg-accent-amber text-dark-900">WEEK 3</span>
                     <div class="flex flex-col md:flex-row md:items-center gap-6">
                         <div class="flex-1">
@@ -420,7 +434,7 @@
                                 <span class="text-gray-500 text-sm">👥 Pair · ⏱️ 60 min</span>
                             </div>
                             <h3 class="text-2xl md:text-3xl font-bold mb-3 group-hover:text-accent-amber transition-colors">
-                                📚 Paper Survey (10+ papers)
+                                Paper Survey (10+ papers)
                             </h3>
                             <p class="text-gray-400 text-lg mb-4">
                                 Use MCP and Semantic Scholar to survey 10+ papers.
@@ -431,14 +445,21 @@
                                 <span class="feature-tag">--model</span>
                             </div>
                         </div>
-                        <div class="flex items-center gap-2 text-gray-500 font-medium">
-                            <span>Coming Soon</span>
+                        <div class="flex flex-col gap-3">
+                            <a href="week3-learn.html" class="flex items-center gap-2 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 px-5 py-3 rounded-xl transition-all font-medium text-gray-500">
+                                <span>📚</span>
+                                <span>Learn</span>
+                            </a>
+                            <a href="week3.html" class="flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 px-5 py-3 rounded-xl transition-all font-medium text-gray-500">
+                                <span>⚡</span>
+                                <span>Coming Soon</span>
+                            </a>
                         </div>
                     </div>
-                </a>
+                </div>
 
                 <!-- Week 4 -->
-                <a href="week4.html" class="week-card block rounded-3xl p-8 hover:glow-emerald group opacity-60 hover:opacity-100">
+                <div class="week-card block rounded-3xl p-8 hover:glow-emerald group opacity-60 hover:opacity-100">
                     <span class="week-number bg-accent-emerald text-dark-900">WEEK 4</span>
                     <div class="flex flex-col md:flex-row md:items-center gap-6">
                         <div class="flex-1">
@@ -447,7 +468,7 @@
                                 <span class="text-gray-500 text-sm">👥👥 Team · ⏱️ 60 min</span>
                             </div>
                             <h3 class="text-2xl md:text-3xl font-bold mb-3 group-hover:text-accent-emerald transition-colors">
-                                🤖 Bot or App MVP
+                                Bot or App MVP
                             </h3>
                             <p class="text-gray-400 text-lg mb-4">
                                 Build a Discord bot or web dashboard MVP as a team.
@@ -459,23 +480,30 @@
                                 <span class="feature-tag">Permissions</span>
                             </div>
                         </div>
-                        <div class="flex items-center gap-2 text-gray-500 font-medium">
-                            <span>Coming Soon</span>
+                        <div class="flex flex-col gap-3">
+                            <a href="week4-learn.html" class="flex items-center gap-2 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 px-5 py-3 rounded-xl transition-all font-medium text-gray-500">
+                                <span>📚</span>
+                                <span>Learn</span>
+                            </a>
+                            <a href="week4.html" class="flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 px-5 py-3 rounded-xl transition-all font-medium text-gray-500">
+                                <span>⚡</span>
+                                <span>Coming Soon</span>
+                            </a>
                         </div>
                     </div>
-                </a>
+                </div>
 
                 <!-- Week 5 -->
-                <a href="week5.html" class="week-card block rounded-3xl p-8 hover:glow-rose group opacity-60 hover:opacity-100">
+                <div class="week-card block rounded-3xl p-8 hover:glow-rose group opacity-60 hover:opacity-100">
                     <span class="week-number bg-gradient-to-r from-accent-rose to-accent-amber text-dark-900">FINAL</span>
                     <div class="flex flex-col md:flex-row md:items-center gap-6">
                         <div class="flex-1">
                             <div class="flex items-center gap-3 mb-3">
-                                <span class="text-amber-600 text-xs font-bold px-2 py-1 rounded-full bg-amber-900/30 border border-amber-700/30">🏆 Final</span>
+                                <span class="text-amber-600 text-xs font-bold px-2 py-1 rounded-full bg-amber-900/30 border border-amber-700/30">Final</span>
                                 <span class="text-gray-500 text-sm">👥👥 Team · ⏱️ 75 min</span>
                             </div>
                             <h3 class="text-2xl md:text-3xl font-bold mb-3 group-hover:text-accent-rose transition-colors">
-                                🎬 Final Project + Live Demo
+                                Final Project + Live Demo
                             </h3>
                             <p class="text-gray-400 text-lg mb-4">
                                 Present your final project integrating all features learned over 5 weeks.
@@ -487,11 +515,18 @@
                                 <span class="feature-tag">Demo</span>
                             </div>
                         </div>
-                        <div class="flex items-center gap-2 text-gray-500 font-medium">
-                            <span>Coming Soon</span>
+                        <div class="flex flex-col gap-3">
+                            <a href="week5-learn.html" class="flex items-center gap-2 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 px-5 py-3 rounded-xl transition-all font-medium text-gray-500">
+                                <span>📚</span>
+                                <span>Learn</span>
+                            </a>
+                            <a href="week5.html" class="flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 px-5 py-3 rounded-xl transition-all font-medium text-gray-500">
+                                <span>⚡</span>
+                                <span>Coming Soon</span>
+                            </a>
                         </div>
                     </div>
-                </a>
+                </div>
             </div>
         </section>
 

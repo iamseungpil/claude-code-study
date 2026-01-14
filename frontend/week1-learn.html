@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Week 1: Learn - Claude Code Study</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { outfit: ['Outfit', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] },
+                    colors: {
+                        dark: { 900: '#0a0a0f', 800: '#12121a', 700: '#1a1a25', 600: '#252530' },
+                        accent: '#4f8cff'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * { font-family: 'Outfit', sans-serif; }
+        code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
+        html { scroll-behavior: smooth; }
+
+        .hero-gradient {
+            background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(79, 140, 255, 0.2) 0%, transparent 50%),
+                        linear-gradient(180deg, #0f172a 0%, #0a0a0f 100%);
+        }
+
+        .nav-blur {
+            background: rgba(10, 10, 15, 0.85);
+            backdrop-filter: blur(20px);
+        }
+
+        .card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .lesson-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
+            border: 1px solid rgba(255,255,255,0.06);
+            transition: all 0.3s ease;
+        }
+        .lesson-card:hover {
+            border-color: rgba(79, 140, 255, 0.3);
+        }
+        .lesson-card.open {
+            border-color: rgba(79, 140, 255, 0.5);
+        }
+
+        .lesson-header {
+            cursor: pointer;
+        }
+
+        .lesson-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease;
+        }
+        .lesson-content.open {
+            max-height: 2000px;
+        }
+
+        .chevron {
+            transition: transform 0.3s ease;
+        }
+        .chevron.open {
+            transform: rotate(180deg);
+        }
+
+        .code-block {
+            background: #0d1117;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .code-block-header {
+            background: rgba(255,255,255,0.03);
+            padding: 10px 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 0.75rem;
+            color: #8b949e;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .code-block pre {
+            padding: 16px;
+            font-size: 0.875rem;
+            line-height: 1.6;
+            color: #c9d1d9;
+            overflow-x: auto;
+        }
+        .code-comment { color: #6e7681; }
+        .code-keyword { color: #ff7b72; }
+        .code-string { color: #a5d6ff; }
+        .code-function { color: #d2a8ff; }
+
+        .tip-box {
+            background: rgba(79, 140, 255, 0.1);
+            border: 1px solid rgba(79, 140, 255, 0.3);
+            border-radius: 12px;
+            padding: 16px;
+        }
+
+        .warning-box {
+            background: rgba(251, 191, 36, 0.1);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            border-radius: 12px;
+            padding: 16px;
+        }
+
+        .quiz-option {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .quiz-option:hover {
+            border-color: rgba(79, 140, 255, 0.5);
+            background: rgba(79, 140, 255, 0.05);
+        }
+        .quiz-option.selected {
+            border-color: rgba(79, 140, 255, 0.8);
+            background: rgba(79, 140, 255, 0.1);
+        }
+        .quiz-option.correct {
+            border-color: rgba(52, 211, 153, 0.8);
+            background: rgba(52, 211, 153, 0.1);
+        }
+        .quiz-option.incorrect {
+            border-color: rgba(248, 113, 113, 0.8);
+            background: rgba(248, 113, 113, 0.1);
+        }
+
+        .progress-bar {
+            background: rgba(255,255,255,0.1);
+            border-radius: 9999px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            background: linear-gradient(90deg, #4f8cff 0%, #3b7cf5 100%);
+            height: 100%;
+            border-radius: 9999px;
+            transition: width 0.5s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4f8cff 0%, #3b7cf5 100%);
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px -10px rgba(79, 140, 255, 0.5);
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s ease;
+        }
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.1);
+        }
+    </style>
+</head>
+<body class="bg-dark-900 text-white min-h-screen">
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full nav-blur border-b border-white/5 z-50">
+        <div class="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
+            <a href="index.html" class="flex items-center gap-3 text-gray-400 hover:text-white transition-colors">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                </svg>
+                <span>Back</span>
+            </a>
+            <div class="flex items-center gap-4">
+                <a href="week1.html" class="text-accent hover:text-blue-300 transition-colors text-sm font-medium">
+                    Go to Challenge
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <header class="hero-gradient pt-28 pb-12 px-6">
+        <div class="max-w-5xl mx-auto">
+            <div class="flex flex-wrap items-center gap-3 mb-6">
+                <span class="bg-accent text-dark-900 px-4 py-1.5 rounded-full text-sm font-bold">WEEK 1</span>
+                <span class="bg-purple-500/20 text-purple-400 px-3 py-1 rounded-full text-xs font-bold border border-purple-500/30">LEARN</span>
+            </div>
+
+            <h1 class="text-4xl md:text-5xl font-bold mb-4 tracking-tight">
+                Claude Code Fundamentals
+            </h1>
+            <p class="text-xl text-gray-400 mb-8 max-w-2xl">
+                Master the essential commands and workflows for effective AI-assisted development.
+            </p>
+
+            <!-- Progress Tracker -->
+            <div class="card rounded-2xl p-6 max-w-md">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-sm font-medium text-gray-400">Learning Progress</span>
+                    <span id="progressText" class="text-sm font-bold text-accent">0/4 Lessons</span>
+                </div>
+                <div class="progress-bar h-2">
+                    <div id="progressFill" class="progress-fill" style="width: 0%"></div>
+                </div>
+                <div class="mt-3 flex items-center justify-between text-xs text-gray-500">
+                    <span>Quiz Score: <span id="quizScoreDisplay" class="text-accent font-bold">0</span>/10</span>
+                    <span id="completionStatus" class="hidden text-green-400">Ready for Challenge!</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-6 py-12">
+        <!-- Lessons Section -->
+        <section class="mb-16">
+            <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-6">LESSONS</h2>
+
+            <div class="space-y-4">
+                <!-- Lesson 1: Adding Context -->
+                <div id="lesson1" class="lesson-card rounded-2xl overflow-hidden">
+                    <div class="lesson-header p-6 flex items-center justify-between" onclick="toggleLesson(1)">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-accent/20 flex items-center justify-center text-2xl">1</div>
+                            <div>
+                                <h3 class="font-bold text-xl">Adding Context</h3>
+                                <p class="text-gray-400 text-sm">/init, CLAUDE.md, # memory, @ references</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span id="lesson1-status" class="text-xs px-3 py-1 rounded-full bg-gray-700 text-gray-400">Not Started</span>
+                            <svg class="chevron w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="lesson-content">
+                        <div class="px-6 pb-6 space-y-6">
+                            <!-- /init Command -->
+                            <div>
+                                <h4 class="font-bold text-lg mb-3 text-accent">/init - Project Initialization</h4>
+                                <p class="text-gray-300 mb-4">
+                                    The <code class="bg-dark-600 px-2 py-1 rounded text-sm">/init</code> command analyzes your project structure and generates a <code class="bg-dark-600 px-2 py-1 rounded text-sm">CLAUDE.md</code> file containing project context.
+                                </p>
+                                <div class="code-block mb-4">
+                                    <div class="code-block-header">Terminal</div>
+                                    <pre><code><span class="code-comment"># Run this at the start of any new project</span>
+/init
+
+<span class="code-comment"># Claude will analyze:</span>
+<span class="code-comment"># - File structure</span>
+<span class="code-comment"># - Dependencies (package.json, requirements.txt, etc.)</span>
+<span class="code-comment"># - Existing documentation</span>
+<span class="code-comment"># - Code patterns and conventions</span></code></pre>
+                                </div>
+                                <div class="tip-box">
+                                    <div class="flex items-start gap-3">
+                                        <span class="text-xl">💡</span>
+                                        <div>
+                                            <div class="font-medium text-accent mb-1">Pro Tip</div>
+                                            <p class="text-sm text-gray-300">Always run <code class="bg-dark-800 px-2 py-1 rounded">/init</code> when starting work on a new codebase. It helps Claude understand the project context.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- CLAUDE.md -->
+                            <div>
+                                <h4 class="font-bold text-lg mb-3 text-accent">CLAUDE.md - Project Memory</h4>
+                                <p class="text-gray-300 mb-4">
+                                    The <code class="bg-dark-600 px-2 py-1 rounded text-sm">CLAUDE.md</code> file stores project-specific context that persists across sessions. It has three levels:
+                                </p>
+                                <div class="grid md:grid-cols-3 gap-4 mb-4">
+                                    <div class="card rounded-xl p-4">
+                                        <div class="font-bold text-sm mb-2">Project Level</div>
+                                        <code class="text-xs text-gray-400">./CLAUDE.md</code>
+                                        <p class="text-xs text-gray-500 mt-2">Specific to current project</p>
+                                    </div>
+                                    <div class="card rounded-xl p-4">
+                                        <div class="font-bold text-sm mb-2">Local Level</div>
+                                        <code class="text-xs text-gray-400">~/.claude/CLAUDE.md</code>
+                                        <p class="text-xs text-gray-500 mt-2">Shared across local projects</p>
+                                    </div>
+                                    <div class="card rounded-xl p-4">
+                                        <div class="font-bold text-sm mb-2">Global Level</div>
+                                        <code class="text-xs text-gray-400">Enterprise settings</code>
+                                        <p class="text-xs text-gray-500 mt-2">Organization-wide context</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- # Memory Mode -->
+                            <div>
+                                <h4 class="font-bold text-lg mb-3 text-accent"># - Add to Memory</h4>
+                                <p class="text-gray-300 mb-4">
+                                    Use the <code class="bg-dark-600 px-2 py-1 rounded text-sm">#</code> prefix to add information directly to CLAUDE.md. This is useful for recording learnings or project conventions.
+                                </p>
+                                <div class="code-block mb-4">
+                                    <div class="code-block-header">Example Usage</div>
+                                    <pre><code><span class="code-comment"># When you discover important patterns:</span>
+# Always use TypeScript strict mode in this project
+
+<span class="code-comment"># Record learned lessons:</span>
+# FileSystemContext requires FileSystemProvider wrapper
+
+<span class="code-comment"># Document conventions:</span>
+# API routes follow /api/v1/resource pattern</code></pre>
+                                </div>
+                            </div>
+
+                            <!-- @ File Reference -->
+                            <div>
+                                <h4 class="font-bold text-lg mb-3 text-accent">@ - File References</h4>
+                                <p class="text-gray-300 mb-4">
+                                    Use <code class="bg-dark-600 px-2 py-1 rounded text-sm">@</code> to reference specific files in your prompts. This adds the file content to context.
+                                </p>
+                                <div class="code-block">
+                                    <div class="code-block-header">Example Usage</div>
+                                    <pre><code><span class="code-comment"># Reference a specific file</span>
+@src/components/Button.tsx add a loading state
+
+<span class="code-comment"># Reference multiple files</span>
+@package.json @tsconfig.json explain the build setup
+
+<span class="code-comment"># Reference with context</span>
+Based on @types/user.ts create a user form component</code></pre>
+                                </div>
+                            </div>
+
+                            <button onclick="completeLesson(1)" class="btn-secondary px-6 py-3 rounded-xl text-sm font-medium">
+                                Mark as Complete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lesson 2: Plan Mode -->
+                <div id="lesson2" class="lesson-card rounded-2xl overflow-hidden">
+                    <div class="lesson-header p-6 flex items-center justify-between" onclick="toggleLesson(2)">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center text-2xl">2</div>
+                            <div>
+                                <h3 class="font-bold text-xl">Plan Mode</h3>
+                                <p class="text-gray-400 text-sm">Think before you act with structured planning</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span id="lesson2-status" class="text-xs px-3 py-1 rounded-full bg-gray-700 text-gray-400">Not Started</span>
+                            <svg class="chevron w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="lesson-content">
+                        <div class="px-6 pb-6 space-y-6">
+                            <div>
+                                <h4 class="font-bold text-lg mb-3 text-purple-400">What is Plan Mode?</h4>
+                                <p class="text-gray-300 mb-4">
+                                    Plan Mode lets Claude analyze and plan without executing code changes. It's essential for complex tasks where you want to understand the approach before implementation.
+                                </p>
+                                <div class="code-block mb-4">
+                                    <div class="code-block-header">Activation</div>
+                                    <pre><code><span class="code-comment"># Press Shift+Tab twice to toggle Plan Mode</span>
+<span class="code-keyword">Shift</span> + <span class="code-keyword">Tab</span> + <span class="code-keyword">Tab</span>
+
+<span class="code-comment"># Or use the command</span>
+/plan</code></pre>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h4 class="font-bold text-lg mb-3 text-purple-400">When to Use Plan Mode</h4>
+                                <div class="grid md:grid-cols-2 gap-4">
+                                    <div class="card rounded-xl p-4 border-l-4 border-green-500">
+                                        <div class="font-bold text-green-400 mb-2">Use Plan Mode</div>
+                                        <ul class="text-sm text-gray-400 space-y-1">
+                                            <li>- Analyzing unfamiliar codebases</li>
+                                            <li>- Planning complex refactors</li>
+                                            <li>- Exploring multiple approaches</li>
+                                            <li>- Understanding dependencies</li>
+                                        </ul>
+                                    </div>
+                                    <div class="card rounded-xl p-4 border-l-4 border-red-500">
+                                        <div class="font-bold text-red-400 mb-2">Skip Plan Mode</div>
+                                        <ul class="text-sm text-gray-400 space-y-1">
+                                            <li>- Simple, one-line fixes</li>
+                                            <li>- Familiar, routine tasks</li>
+                                            <li>- Urgent bug fixes</li>
+                                            <li>- Quick code generation</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h4 class="font-bold text-lg mb-3 text-purple-400">Plan Mode Workflow</h4>
+                                <div class="code-block">
+                                    <div class="code-block-header">Example Session</div>
+                                    <pre><code><span class="code-comment"># 1. Enter Plan Mode</span>
+[Plan Mode ON]
+
+<span class="code-comment"># 2. Ask Claude to analyze</span>
+Analyze how authentication works in this project
+
+<span class="code-comment"># 3. Claude explores without changing files</span>
+<span class="code-comment"># - Reads relevant files</span>
+<span class="code-comment"># - Identifies patterns</span>
+<span class="code-comment"># - Creates a plan</span>
+
+<span class="code-comment"># 4. Review the plan</span>
+<span class="code-comment"># 5. Exit Plan Mode and execute</span>
+[Plan Mode OFF]
+Implement the plan</code></pre>
+                                </div>
+                            </div>
+
+                            <div class="warning-box">
+                                <div class="flex items-start gap-3">
+                                    <span class="text-xl">⚠️</span>
+                                    <div>
+                                        <div class="font-medium text-amber-400 mb-1">Important</div>
+                                        <p class="text-sm text-gray-300">Plan Mode only affects file modifications. Claude can still read files, search, and explore in Plan Mode.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button onclick="completeLesson(2)" class="btn-secondary px-6 py-3 rounded-xl text-sm font-medium">
+                                Mark as Complete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lesson 3: Thinking Modes -->
+                <div id="lesson3" class="lesson-card rounded-2xl overflow-hidden">
+                    <div class="lesson-header p-6 flex items-center justify-between" onclick="toggleLesson(3)">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-amber-500/20 flex items-center justify-center text-2xl">3</div>
+                            <div>
+                                <h3 class="font-bold text-xl">Thinking Modes</h3>
+                                <p class="text-gray-400 text-sm">"think more", "ultrathink" for deep analysis</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span id="lesson3-status" class="text-xs px-3 py-1 rounded-full bg-gray-700 text-gray-400">Not Started</span>
+                            <svg class="chevron w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="lesson-content">
+                        <div class="px-6 pb-6 space-y-6">
+                            <div>
+                                <h4 class="font-bold text-lg mb-3 text-amber-400">Extended Thinking</h4>
+                                <p class="text-gray-300 mb-4">
+                                    Claude can use extended thinking for complex problems. Use keywords in your prompt to trigger deeper analysis.
+                                </p>
+                                <div class="grid md:grid-cols-2 gap-4 mb-4">
+                                    <div class="card rounded-xl p-4">
+                                        <div class="font-bold text-accent mb-2">"think more"</div>
+                                        <p class="text-sm text-gray-400 mb-2">Extended reasoning mode. Good for moderately complex problems.</p>
+                                        <code class="text-xs bg-dark-600 px-2 py-1 rounded">think more about this architecture</code>
+                                    </div>
+                                    <div class="card rounded-xl p-4">
+                                        <div class="font-bold text-amber-400 mb-2">"ultrathink"</div>
+                                        <p class="text-sm text-gray-400 mb-2">Maximum reasoning capacity. Use for highly complex analysis.</p>
+                                        <code class="text-xs bg-dark-600 px-2 py-1 rounded">ultrathink about this bug</code>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h4 class="font-bold text-lg mb-3 text-amber-400">When to Use Extended Thinking</h4>
+                                <div class="code-block mb-4">
+                                    <div class="code-block-header">Good Use Cases</div>
+                                    <pre><code><span class="code-comment"># Debugging complex issues</span>
+ultrathink about why this race condition occurs
+
+<span class="code-comment"># Architecture decisions</span>
+think more about the trade-offs between these approaches
+
+<span class="code-comment"># Security analysis</span>
+ultrathink about potential vulnerabilities in this code
+
+<span class="code-comment"># Performance optimization</span>
+think more about how to optimize this database query</code></pre>
+                                </div>
+                            </div>
+
+                            <div class="tip-box">
+                                <div class="flex items-start gap-3">
+                                    <span class="text-xl">💡</span>
+                                    <div>
+                                        <div class="font-medium text-accent mb-1">Usage Tip</div>
+                                        <p class="text-sm text-gray-300">Extended thinking uses more tokens. Use it for genuinely complex problems, not simple tasks where quick answers suffice.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button onclick="completeLesson(3)" class="btn-secondary px-6 py-3 rounded-xl text-sm font-medium">
+                                Mark as Complete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lesson 4: Context Management -->
+                <div id="lesson4" class="lesson-card rounded-2xl overflow-hidden">
+                    <div class="lesson-header p-6 flex items-center justify-between" onclick="toggleLesson(4)">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center text-2xl">4</div>
+                            <div>
+                                <h3 class="font-bold text-xl">Context Management</h3>
+                                <p class="text-gray-400 text-sm">/clear, /compact for efficient token usage</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span id="lesson4-status" class="text-xs px-3 py-1 rounded-full bg-gray-700 text-gray-400">Not Started</span>
+                            <svg class="chevron w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="lesson-content">
+                        <div class="px-6 pb-6 space-y-6">
+                            <div>
+                                <h4 class="font-bold text-lg mb-3 text-emerald-400">Why Context Management Matters</h4>
+                                <p class="text-gray-300 mb-4">
+                                    Claude has a context window limit. As you work, the conversation accumulates tokens. Managing context helps maintain performance and relevance.
+                                </p>
+                            </div>
+
+                            <div>
+                                <h4 class="font-bold text-lg mb-3 text-emerald-400">/clear - Reset Conversation</h4>
+                                <p class="text-gray-300 mb-4">
+                                    Completely resets the conversation. Use when switching to a completely different task.
+                                </p>
+                                <div class="code-block mb-4">
+                                    <div class="code-block-header">Usage</div>
+                                    <pre><code><span class="code-comment"># Clear entire conversation</span>
+/clear
+
+<span class="code-comment"># When to use:</span>
+<span class="code-comment"># - Switching to unrelated work</span>
+<span class="code-comment"># - After completing a major task</span>
+<span class="code-comment"># - When context becomes cluttered</span></code></pre>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h4 class="font-bold text-lg mb-3 text-emerald-400">/compact - Compress Context</h4>
+                                <p class="text-gray-300 mb-4">
+                                    Summarizes and compresses the conversation while retaining key information. Use to continue work with less token usage.
+                                </p>
+                                <div class="code-block mb-4">
+                                    <div class="code-block-header">Usage</div>
+                                    <pre><code><span class="code-comment"># Compress conversation</span>
+/compact
+
+<span class="code-comment"># When to use:</span>
+<span class="code-comment"># - Long sessions approaching token limit</span>
+<span class="code-comment"># - Before adding large file references</span>
+<span class="code-comment"># - To maintain context across breaks</span></code></pre>
+                                </div>
+                            </div>
+
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div class="card rounded-xl p-4 border-l-4 border-emerald-500">
+                                    <div class="font-bold text-emerald-400 mb-2">/clear</div>
+                                    <ul class="text-sm text-gray-400 space-y-1">
+                                        <li>- Complete reset</li>
+                                        <li>- Loses all context</li>
+                                        <li>- Fresh start</li>
+                                    </ul>
+                                </div>
+                                <div class="card rounded-xl p-4 border-l-4 border-accent">
+                                    <div class="font-bold text-accent mb-2">/compact</div>
+                                    <ul class="text-sm text-gray-400 space-y-1">
+                                        <li>- Preserves key info</li>
+                                        <li>- Reduces token usage</li>
+                                        <li>- Continues session</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <button onclick="completeLesson(4)" class="btn-secondary px-6 py-3 rounded-xl text-sm font-medium">
+                                Mark as Complete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quiz Section -->
+        <section class="mb-16">
+            <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-6">KNOWLEDGE CHECK</h2>
+            <div class="card rounded-2xl p-8">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="font-bold text-2xl">Quiz: Week 1 Fundamentals</h3>
+                    <span id="quizProgress" class="text-sm text-gray-400">Question 1/10</span>
+                </div>
+
+                <div id="quizContainer">
+                    <!-- Quiz questions will be rendered here -->
+                </div>
+
+                <div id="quizResults" class="hidden text-center py-8">
+                    <div class="text-6xl mb-4" id="resultEmoji">🎉</div>
+                    <h4 class="text-2xl font-bold mb-2">Quiz Complete!</h4>
+                    <p class="text-gray-400 mb-6">You scored <span id="finalScore" class="text-accent font-bold">0</span>/10</p>
+                    <div class="flex gap-4 justify-center">
+                        <button onclick="retakeQuiz()" class="btn-secondary px-6 py-3 rounded-xl text-sm font-medium">
+                            Retake Quiz
+                        </button>
+                        <a href="week1.html" class="btn-primary px-6 py-3 rounded-xl text-sm font-medium inline-flex items-center gap-2">
+                            Go to Challenge
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Go to Challenge CTA -->
+        <section class="mb-16">
+            <div class="card rounded-3xl p-8 border-accent/30 bg-gradient-to-br from-accent/5 to-transparent">
+                <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div>
+                        <h3 class="text-2xl font-bold mb-2">Ready for the Challenge?</h3>
+                        <p class="text-gray-400">Apply what you've learned by building features in a real project.</p>
+                    </div>
+                    <a href="week1.html" class="btn-primary px-8 py-4 rounded-xl font-bold text-lg flex items-center gap-3 whitespace-nowrap">
+                        Start Challenge
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-white/5 py-8">
+        <div class="max-w-5xl mx-auto px-6 text-center">
+            <a href="index.html" class="text-gray-500 hover:text-accent transition-colors">
+                Back to Home
+            </a>
+        </div>
+    </footer>
+
+    <script>
+        // Quiz Data
+        const quizQuestions = [
+            {
+                question: "What command generates a CLAUDE.md file by analyzing your project?",
+                options: ["/config", "/init", "/setup", "/start"],
+                correct: 1
+            },
+            {
+                question: "What prefix do you use to add information to Claude's memory (CLAUDE.md)?",
+                options: ["@", "#", "!", "$"],
+                correct: 1
+            },
+            {
+                question: "How do you reference a specific file in your prompt to add it to context?",
+                options: ["#filename", "@filename", "!filename", "/filename"],
+                correct: 1
+            },
+            {
+                question: "What keyboard shortcut activates Plan Mode?",
+                options: ["Ctrl+P", "Shift+Tab twice", "Alt+P", "Cmd+Shift+P"],
+                correct: 1
+            },
+            {
+                question: "What can Claude do in Plan Mode?",
+                options: ["Only write files", "Only read files and analyze", "Nothing", "Run commands only"],
+                correct: 1
+            },
+            {
+                question: "Which keyword triggers maximum reasoning capacity in Claude?",
+                options: ["think hard", "deep analysis", "ultrathink", "maximum think"],
+                correct: 2
+            },
+            {
+                question: "What command completely resets the conversation?",
+                options: ["/reset", "/clear", "/new", "/restart"],
+                correct: 1
+            },
+            {
+                question: "What command compresses the conversation while retaining key information?",
+                options: ["/compress", "/minimize", "/compact", "/shrink"],
+                correct: 2
+            },
+            {
+                question: "Which CLAUDE.md location is specific to the current project only?",
+                options: ["~/.claude/CLAUDE.md", "./CLAUDE.md", "/etc/claude/CLAUDE.md", "Enterprise settings"],
+                correct: 1
+            },
+            {
+                question: "When should you use /compact instead of /clear?",
+                options: [
+                    "When switching to unrelated work",
+                    "When you want to continue with reduced tokens",
+                    "When starting fresh",
+                    "When debugging errors"
+                ],
+                correct: 1
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let answeredQuestions = new Array(quizQuestions.length).fill(null);
+        let completedLessons = new Set();
+
+        // Load saved state from sessionStorage
+        function loadState() {
+            const saved = sessionStorage.getItem('week1_learn_state');
+            if (saved) {
+                const state = JSON.parse(saved);
+                completedLessons = new Set(state.completedLessons || []);
+                score = state.quizScore || 0;
+                answeredQuestions = state.answeredQuestions || new Array(quizQuestions.length).fill(null);
+                currentQuestion = state.currentQuestion || 0;
+            }
+            updateProgress();
+            updateLessonStatuses();
+            renderQuiz();
+        }
+
+        // Save state to sessionStorage
+        function saveState() {
+            const state = {
+                completedLessons: Array.from(completedLessons),
+                quizScore: score,
+                answeredQuestions: answeredQuestions,
+                currentQuestion: currentQuestion
+            };
+            sessionStorage.setItem('week1_learn_state', JSON.stringify(state));
+        }
+
+        // Lesson Functions
+        function toggleLesson(num) {
+            const lesson = document.getElementById(`lesson${num}`);
+            const content = lesson.querySelector('.lesson-content');
+            const chevron = lesson.querySelector('.chevron');
+
+            // Close all other lessons
+            document.querySelectorAll('.lesson-card').forEach(card => {
+                if (card.id !== `lesson${num}`) {
+                    card.classList.remove('open');
+                    card.querySelector('.lesson-content').classList.remove('open');
+                    card.querySelector('.chevron').classList.remove('open');
+                }
+            });
+
+            lesson.classList.toggle('open');
+            content.classList.toggle('open');
+            chevron.classList.toggle('open');
+        }
+
+        function completeLesson(num) {
+            completedLessons.add(num);
+            saveState();
+            updateLessonStatuses();
+            updateProgress();
+
+            // Auto-open next lesson
+            if (num < 4) {
+                setTimeout(() => toggleLesson(num + 1), 300);
+            }
+        }
+
+        function updateLessonStatuses() {
+            for (let i = 1; i <= 4; i++) {
+                const status = document.getElementById(`lesson${i}-status`);
+                if (completedLessons.has(i)) {
+                    status.textContent = 'Completed';
+                    status.className = 'text-xs px-3 py-1 rounded-full bg-green-500/20 text-green-400';
+                }
+            }
+        }
+
+        function updateProgress() {
+            const lessonProgress = completedLessons.size;
+            const progressPercent = (lessonProgress / 4) * 100;
+
+            document.getElementById('progressText').textContent = `${lessonProgress}/4 Lessons`;
+            document.getElementById('progressFill').style.width = `${progressPercent}%`;
+            document.getElementById('quizScoreDisplay').textContent = score;
+
+            if (lessonProgress === 4 && score >= 7) {
+                document.getElementById('completionStatus').classList.remove('hidden');
+            }
+        }
+
+        // Quiz Functions
+        function renderQuiz() {
+            const container = document.getElementById('quizContainer');
+            const results = document.getElementById('quizResults');
+
+            // Check if quiz is complete
+            if (answeredQuestions.every(a => a !== null)) {
+                container.classList.add('hidden');
+                results.classList.remove('hidden');
+                document.getElementById('finalScore').textContent = score;
+                document.getElementById('resultEmoji').textContent = score >= 7 ? '🎉' : score >= 5 ? '👍' : '📚';
+                return;
+            }
+
+            container.classList.remove('hidden');
+            results.classList.add('hidden');
+
+            const q = quizQuestions[currentQuestion];
+            document.getElementById('quizProgress').textContent = `Question ${currentQuestion + 1}/10`;
+
+            container.innerHTML = `
+                <div class="mb-6">
+                    <p class="text-lg font-medium mb-6">${q.question}</p>
+                    <div class="space-y-3">
+                        ${q.options.map((opt, i) => `
+                            <div class="quiz-option card rounded-xl p-4 ${answeredQuestions[currentQuestion] === i ? (i === q.correct ? 'correct' : 'incorrect') : ''}"
+                                 onclick="selectAnswer(${i})" ${answeredQuestions[currentQuestion] !== null ? 'style="pointer-events: none;"' : ''}>
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-lg bg-dark-600 flex items-center justify-center text-sm font-bold">
+                                        ${String.fromCharCode(65 + i)}
+                                    </div>
+                                    <span>${opt}</span>
+                                    ${answeredQuestions[currentQuestion] === i ? (i === q.correct ? '<span class="ml-auto text-green-400">✓</span>' : '<span class="ml-auto text-red-400">✗</span>') : ''}
+                                    ${answeredQuestions[currentQuestion] !== null && i === q.correct && answeredQuestions[currentQuestion] !== i ? '<span class="ml-auto text-green-400">✓ Correct</span>' : ''}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                <div class="flex justify-between items-center">
+                    <button onclick="prevQuestion()" class="btn-secondary px-4 py-2 rounded-xl text-sm" ${currentQuestion === 0 ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>
+                        Previous
+                    </button>
+                    <div class="flex gap-1">
+                        ${quizQuestions.map((_, i) => `
+                            <div class="w-2 h-2 rounded-full ${i === currentQuestion ? 'bg-accent' : answeredQuestions[i] !== null ? (answeredQuestions[i] === quizQuestions[i].correct ? 'bg-green-500' : 'bg-red-500') : 'bg-gray-600'}"></div>
+                        `).join('')}
+                    </div>
+                    <button onclick="nextQuestion()" class="btn-primary px-4 py-2 rounded-xl text-sm" ${answeredQuestions[currentQuestion] === null ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>
+                        ${currentQuestion === quizQuestions.length - 1 ? 'Finish' : 'Next'}
+                    </button>
+                </div>
+            `;
+        }
+
+        function selectAnswer(index) {
+            if (answeredQuestions[currentQuestion] !== null) return;
+
+            answeredQuestions[currentQuestion] = index;
+            if (index === quizQuestions[currentQuestion].correct) {
+                score++;
+            }
+            saveState();
+            updateProgress();
+            renderQuiz();
+        }
+
+        function nextQuestion() {
+            if (answeredQuestions[currentQuestion] === null) return;
+            if (currentQuestion < quizQuestions.length - 1) {
+                currentQuestion++;
+                saveState();
+                renderQuiz();
+            } else {
+                renderQuiz(); // Will show results
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                saveState();
+                renderQuiz();
+            }
+        }
+
+        function retakeQuiz() {
+            currentQuestion = 0;
+            score = 0;
+            answeredQuestions = new Array(quizQuestions.length).fill(null);
+            saveState();
+            updateProgress();
+            renderQuiz();
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadState();
+            // Auto-open first incomplete lesson
+            for (let i = 1; i <= 4; i++) {
+                if (!completedLessons.has(i)) {
+                    toggleLesson(i);
+                    break;
+                }
+            }
+        });
+    </script>
+</body>
+</html>
