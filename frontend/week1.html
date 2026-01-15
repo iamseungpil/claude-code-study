@@ -270,27 +270,6 @@ npm run dev</code></pre>
             </div>
         </section>
 
-        <!-- Given Files -->
-        <section class="mb-16">
-            <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-4">KEY FILES</h2>
-            <div class="file-tree">
-                <div class="file-tree-header">
-                    uigen/src/
-                </div>
-                <pre><code>├── components/
-│   ├── <span class="file-target">HeaderActions.tsx</span>        <span class="file-comment"># Add buttons here (Stage 1, 2)</span>
-│   └── ui/
-│       ├── <span class="file-important">dialog.tsx</span>              <span class="file-comment"># Dialog component (Stage 1)</span>
-│       └── <span class="file-important">command.tsx</span>             <span class="file-comment"># Command palette (Stage 3)</span>
-├── lib/
-│   ├── <span class="file-important">file-system.ts</span>              <span class="file-comment"># VirtualFileSystem class</span>
-│   └── contexts/
-│       └── <span class="file-target">file-system-context.tsx</span> <span class="file-comment"># reset(), getAllFiles()</span>
-└── app/
-    └── page.tsx                    <span class="file-comment"># Main page component</span></code></pre>
-            </div>
-        </section>
-
         <!-- Stages (hidden until timer starts) -->
         <section id="stagesSection" class="hidden mb-16">
             <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-4">FEATURE STAGES</h2>
@@ -311,21 +290,21 @@ npm run dev</code></pre>
 
                     <div class="grid md:grid-cols-2 gap-6">
                         <div>
-                            <h4 class="font-bold text-sm text-gray-400 uppercase tracking-wide mb-3">Implementation</h4>
+                            <h4 class="font-bold text-sm text-gray-400 uppercase tracking-wide mb-3">Requirements</h4>
                             <ul class="space-y-2 text-gray-300 text-sm">
-                                <li class="flex gap-2"><span class="text-green-400">&#10003;</span> Add "Clear All" button to HeaderActions.tsx</li>
-                                <li class="flex gap-2"><span class="text-green-400">&#10003;</span> Implement confirmation dialog (prevent accidents)</li>
-                                <li class="flex gap-2"><span class="text-green-400">&#10003;</span> Use FileSystemContext's <code class="bg-dark-600 px-1.5 py-0.5 rounded">reset()</code> function</li>
+                                <li class="flex gap-2"><span class="text-green-400">&#10003;</span> Add "Clear All" button with Trash2 icon to header</li>
+                                <li class="flex gap-2"><span class="text-green-400">&#10003;</span> Show confirmation dialog: "Are you sure?"</li>
+                                <li class="flex gap-2"><span class="text-green-400">&#10003;</span> "Delete All" button calls <code class="bg-dark-600 px-1.5 py-0.5 rounded">reset()</code></li>
+                                <li class="flex gap-2"><span class="text-green-400">&#10003;</span> "Cancel" button closes dialog without action</li>
                             </ul>
                         </div>
                         <div>
-                            <h4 class="font-bold text-sm text-gray-400 uppercase tracking-wide mb-3">Hints</h4>
-                            <div class="code-block">
-                                <pre><code><span class="code-comment">// Reference existing AuthDialog.tsx for pattern</span>
-<span class="code-comment">// Import from @/components/ui/dialog</span>
-
-<span class="code-comment">// FileSystemContext already has reset():</span>
-const { reset } = useFileSystem();</code></pre>
+                            <h4 class="font-bold text-sm text-gray-400 uppercase tracking-wide mb-3">Expected Behavior</h4>
+                            <div class="bg-dark-600/50 rounded-xl p-4 text-sm text-gray-300 space-y-2">
+                                <p><strong class="text-white">1.</strong> User clicks "Clear All" button</p>
+                                <p><strong class="text-white">2.</strong> Warning dialog appears (red theme)</p>
+                                <p><strong class="text-white">3.</strong> "Delete All" → All files removed, tree reset</p>
+                                <p><strong class="text-white">4.</strong> "Cancel" → Dialog closes, no changes</p>
                             </div>
                         </div>
                     </div>
@@ -347,23 +326,21 @@ const { reset } = useFileSystem();</code></pre>
 
                     <div class="grid md:grid-cols-2 gap-6">
                         <div>
-                            <h4 class="font-bold text-sm text-gray-400 uppercase tracking-wide mb-3">Implementation</h4>
+                            <h4 class="font-bold text-sm text-gray-400 uppercase tracking-wide mb-3">Requirements</h4>
                             <ul class="space-y-2 text-gray-300 text-sm">
-                                <li class="flex gap-2"><span class="text-blue-400">&#10003;</span> Add "Download ZIP" button to HeaderActions.tsx</li>
-                                <li class="flex gap-2"><span class="text-blue-400">&#10003;</span> Use <code class="bg-dark-600 px-1.5 py-0.5 rounded">getAllFiles()</code> to get all files</li>
-                                <li class="flex gap-2"><span class="text-blue-400">&#10003;</span> Generate ZIP using JSZip or native Blob API</li>
-                                <li class="flex gap-2"><span class="text-blue-400">&#10003;</span> Trigger browser download</li>
+                                <li class="flex gap-2"><span class="text-blue-400">&#10003;</span> Add "Download ZIP" button with Download icon</li>
+                                <li class="flex gap-2"><span class="text-blue-400">&#10003;</span> Get all files via <code class="bg-dark-600 px-1.5 py-0.5 rounded">getAllFiles()</code></li>
+                                <li class="flex gap-2"><span class="text-blue-400">&#10003;</span> Create ZIP (JSZip or Blob API)</li>
+                                <li class="flex gap-2"><span class="text-blue-400">&#10003;</span> Filename: <code class="bg-dark-600 px-1.5 py-0.5 rounded">uigen-export.zip</code></li>
                             </ul>
                         </div>
                         <div>
-                            <h4 class="font-bold text-sm text-gray-400 uppercase tracking-wide mb-3">Hints</h4>
-                            <div class="code-block">
-                                <pre><code><span class="code-comment">// Option 1: Install JSZip</span>
-npm install jszip
-
-<span class="code-comment">// Option 2: Use native Blob API</span>
-<span class="code-comment">// getAllFiles() returns Map&lt;string, string&gt;</span>
-<span class="code-comment">// Remove leading slash: path.slice(1)</span></code></pre>
+                            <h4 class="font-bold text-sm text-gray-400 uppercase tracking-wide mb-3">Expected Behavior</h4>
+                            <div class="bg-dark-600/50 rounded-xl p-4 text-sm text-gray-300 space-y-2">
+                                <p><strong class="text-white">1.</strong> User clicks "Download ZIP" button</p>
+                                <p><strong class="text-white">2.</strong> <code class="text-xs">getAllFiles()</code> returns Map&lt;path, content&gt;</p>
+                                <p><strong class="text-white">3.</strong> ZIP file created with all files</p>
+                                <p><strong class="text-white">4.</strong> Browser auto-downloads the ZIP</p>
                             </div>
                         </div>
                     </div>
@@ -385,27 +362,21 @@ npm install jszip
 
                     <div class="grid md:grid-cols-2 gap-6">
                         <div>
-                            <h4 class="font-bold text-sm text-gray-400 uppercase tracking-wide mb-3">Implementation</h4>
+                            <h4 class="font-bold text-sm text-gray-400 uppercase tracking-wide mb-3">Requirements</h4>
                             <ul class="space-y-2 text-gray-300 text-sm">
-                                <li class="flex gap-2"><span class="text-amber-400">&#10003;</span> Add global keyboard event listener (Cmd/Ctrl+K)</li>
-                                <li class="flex gap-2"><span class="text-amber-400">&#10003;</span> Use existing Command component from ui/command.tsx</li>
-                                <li class="flex gap-2"><span class="text-amber-400">&#10003;</span> Implement at least 2 commands: Clear All, Download ZIP</li>
+                                <li class="flex gap-2"><span class="text-amber-400">&#10003;</span> <kbd class="bg-dark-600 px-1.5 py-0.5 rounded text-xs">Cmd/Ctrl+K</kbd> opens Command Palette</li>
+                                <li class="flex gap-2"><span class="text-amber-400">&#10003;</span> Use existing <code class="bg-dark-600 px-1.5 py-0.5 rounded">Command</code> component</li>
+                                <li class="flex gap-2"><span class="text-amber-400">&#10003;</span> Include: "Clear All Files" command</li>
+                                <li class="flex gap-2"><span class="text-amber-400">&#10003;</span> Include: "Download as ZIP" command</li>
                             </ul>
                         </div>
                         <div>
-                            <h4 class="font-bold text-sm text-gray-400 uppercase tracking-wide mb-3">Hints</h4>
-                            <div class="code-block">
-                                <pre><code><span class="code-comment">// useEffect for global listener</span>
-useEffect(() =&gt; {
-  const handler = (e) =&gt; {
-    if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-      e.preventDefault();
-      setOpen(true);
-    }
-  };
-  window.addEventListener('keydown', handler);
-  return () =&gt; window.removeEventListener('keydown', handler);
-}, []);</code></pre>
+                            <h4 class="font-bold text-sm text-gray-400 uppercase tracking-wide mb-3">Expected Behavior</h4>
+                            <div class="bg-dark-600/50 rounded-xl p-4 text-sm text-gray-300 space-y-2">
+                                <p><strong class="text-white">1.</strong> Press <kbd class="bg-dark-800 px-1 rounded text-xs">Cmd+K</kbd> (Mac) or <kbd class="bg-dark-800 px-1 rounded text-xs">Ctrl+K</kbd> (Win)</p>
+                                <p><strong class="text-white">2.</strong> Command Palette modal opens</p>
+                                <p><strong class="text-white">3.</strong> Search filters available commands</p>
+                                <p><strong class="text-white">4.</strong> Select command → executes & closes</p>
                             </div>
                         </div>
                     </div>

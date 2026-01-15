@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Week 2: CLI Tool + Hooks - Claude Code Study</title>
+    <title>Week 2: Hooks Mastery - Claude Code Study</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -15,7 +15,7 @@
                     fontFamily: { outfit: ['Outfit', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] },
                     colors: {
                         dark: { 900: '#0a0a0f', 800: '#12121a', 700: '#1a1a25', 600: '#252530' },
-                        accent: '#a78bfa'
+                        accent: '#4f8cff'
                     }
                 }
             }
@@ -25,188 +25,801 @@
         * { font-family: 'Outfit', sans-serif; }
         code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
         html { scroll-behavior: smooth; }
-        .hero-gradient { background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(167, 139, 250, 0.2) 0%, transparent 50%), linear-gradient(180deg, #1e1b4b 0%, #0a0a0f 100%); }
-        .nav-blur { background: rgba(10, 10, 15, 0.85); backdrop-filter: blur(20px); }
-        .card { background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%); border: 1px solid rgba(255,255,255,0.06); }
-        .step-number { width: 48px; height: 48px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.25rem; flex-shrink: 0; }
-        .submit-card { background: linear-gradient(135deg, rgba(167, 139, 250, 0.1) 0%, rgba(167, 139, 250, 0.02) 100%); border: 1px solid rgba(167, 139, 250, 0.2); }
-        .btn-primary { background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%); transition: all 0.3s ease; }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 30px -10px rgba(167, 139, 250, 0.5); }
-        .btn-secondary { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); transition: all 0.3s ease; }
-        .btn-secondary:hover { background: rgba(255,255,255,0.1); }
-        .timer-display { font-variant-numeric: tabular-nums; }
+
+        .hero-gradient {
+            background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(168, 85, 247, 0.2) 0%, transparent 50%),
+                        linear-gradient(180deg, #0f172a 0%, #0a0a0f 100%);
+        }
+
+        .nav-blur {
+            background: rgba(10, 10, 15, 0.85);
+            backdrop-filter: blur(20px);
+        }
+
+        .card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .stage-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
+            border: 1px solid rgba(255,255,255,0.06);
+            transition: all 0.3s ease;
+        }
+        .stage-card:hover {
+            border-color: rgba(255,255,255,0.15);
+        }
+
+        .stage-number {
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .code-block {
+            background: #0d1117;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .code-block-header {
+            background: rgba(255,255,255,0.03);
+            padding: 10px 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 0.75rem;
+            color: #8b949e;
+            text-transform: uppercase;
+        }
+        .code-block pre {
+            padding: 16px;
+            font-size: 0.875rem;
+            line-height: 1.6;
+            color: #c9d1d9;
+            overflow-x: auto;
+        }
+        .code-comment { color: #6e7681; }
+        .code-keyword { color: #ff7b72; }
+        .code-string { color: #a5d6ff; }
+
+        .submit-card {
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.1) 0%, rgba(168, 85, 247, 0.02) 100%);
+            border: 1px solid rgba(168, 85, 247, 0.2);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%);
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px -10px rgba(168, 85, 247, 0.5);
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s ease;
+        }
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .timer-display {
+            font-variant-numeric: tabular-nums;
+        }
+
+        .tip-box {
+            background: rgba(168, 85, 247, 0.1);
+            border: 1px solid rgba(168, 85, 247, 0.3);
+        }
+
+        .warning-box {
+            background: rgba(251, 191, 36, 0.1);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+        }
+
+        .important-box {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
     </style>
-    <script src="config.js"></script>
 </head>
 <body class="bg-dark-900 text-white min-h-screen">
+    <!-- Navigation -->
     <nav class="fixed top-0 w-full nav-blur border-b border-white/5 z-50">
         <div class="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
             <a href="index.html" class="flex items-center gap-3 text-gray-400 hover:text-white transition-colors">
-                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                </svg>
                 <span>Back</span>
             </a>
-            <a href="leaderboard.html" class="text-accent hover:text-purple-300 transition-colors text-sm font-medium">🏆 Leaderboard</a>
+            <div class="flex items-center gap-4">
+                <a href="week2-learn.html" class="text-purple-400 hover:text-purple-300 transition-colors text-sm font-medium">
+                    Review Lessons
+                </a>
+                <a href="leaderboard.html" class="text-purple-400 hover:text-purple-300 transition-colors text-sm font-medium">
+                    Leaderboard
+                </a>
+            </div>
         </div>
     </nav>
 
+    <!-- Hero -->
     <header class="hero-gradient pt-28 pb-16 px-6">
         <div class="max-w-5xl mx-auto">
             <div class="flex flex-wrap items-center gap-3 mb-6">
-                <span class="bg-accent text-dark-900 px-4 py-1.5 rounded-full text-sm font-bold">WEEK 2</span>
-                <span class="bg-gray-700 text-gray-300 px-3 py-1 rounded-full text-xs font-bold">Upcoming</span>
+                <span class="bg-purple-500 text-white px-4 py-1.5 rounded-full text-sm font-bold">WEEK 2</span>
+                <span class="bg-green-500/20 text-green-400 px-3 py-1 rounded-full text-xs font-bold border border-green-500/30">In Progress</span>
             </div>
-            <h1 class="text-4xl md:text-5xl font-bold mb-4 tracking-tight">🛠️ CLI Tool + Auto Linting</h1>
-            <p class="text-xl text-gray-400 mb-8 max-w-2xl">Build a research CLI tool and set up automatic linting with Hooks.</p>
+
+            <h1 class="text-4xl md:text-5xl font-bold mb-4 tracking-tight">
+                Hooks Mastery
+            </h1>
+            <p class="text-xl text-gray-400 mb-8 max-w-2xl">
+                Build security and automation hooks to control Claude Code's behavior.
+            </p>
+
             <div class="flex flex-wrap gap-3">
                 <div class="bg-dark-700/60 border border-white/10 rounded-xl px-5 py-3 flex items-center gap-3">
-                    <span class="text-2xl">⏱️</span>
-                    <div><div class="text-xs text-gray-500 uppercase tracking-wide">Time Limit</div><div class="font-bold text-lg">50 min</div></div>
+                    <span class="text-2xl">&#9201;</span>
+                    <div>
+                        <div class="text-xs text-gray-500 uppercase tracking-wide">Time Limit</div>
+                        <div class="font-bold text-lg">60 min</div>
+                    </div>
                 </div>
                 <div class="bg-dark-700/60 border border-white/10 rounded-xl px-5 py-3 flex items-center gap-3">
-                    <span class="text-2xl">👤</span>
-                    <div><div class="text-xs text-gray-500 uppercase tracking-wide">Format</div><div class="font-bold text-lg">Solo</div></div>
+                    <span class="text-2xl">&#127919;</span>
+                    <div>
+                        <div class="text-xs text-gray-500 uppercase tracking-wide">Format</div>
+                        <div class="font-bold text-lg">3-Stage Sprint</div>
+                    </div>
                 </div>
                 <div class="bg-dark-700/60 border border-white/10 rounded-xl px-5 py-3 flex items-center gap-3">
-                    <span class="text-2xl">📊</span>
-                    <div><div class="text-xs text-gray-500 uppercase tracking-wide">Max Score</div><div class="font-bold text-lg">90 <span class="text-green-400">+10</span></div></div>
+                    <span class="text-2xl">&#128200;</span>
+                    <div>
+                        <div class="text-xs text-gray-500 uppercase tracking-wide">Max Score</div>
+                        <div class="font-bold text-lg">100 <span class="text-green-400">+20</span></div>
+                    </div>
                 </div>
             </div>
         </div>
     </header>
 
     <main class="max-w-5xl mx-auto px-6 py-12">
+        <!-- Situation -->
         <section class="mb-16">
-            <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-4">SITUATION</h2>
+            <h2 class="text-sm font-bold text-purple-400 uppercase tracking-widest mb-4">SITUATION</h2>
             <div class="card rounded-2xl p-8">
-                <p class="text-lg text-gray-300 leading-relaxed">
-                    You need a <strong class="text-white">CLI tool</strong> to automate frequently used tasks in your research lab.
-                    Also, to maintain code quality, you need to set up <strong class="text-accent">Hooks</strong> for automatic linting before commits.
+                <p class="text-lg text-gray-300 leading-relaxed mb-6">
+                    Your security team has requested a <strong class="text-white">Hook system</strong> for Claude Code.
+                    They need to <strong class="text-purple-400">block sensitive file access</strong> and <strong class="text-purple-400">automate code quality checks</strong>.
+                    The project has incomplete hooks that you need to fix and extend.
                 </p>
-            </div>
-        </section>
-
-        <section class="mb-16">
-            <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-4">WHAT TO DO</h2>
-            <div class="space-y-4">
-                <div class="card rounded-2xl p-6 flex gap-5">
-                    <div class="step-number bg-accent/20 text-accent">1</div>
-                    <div>
-                        <h3 class="font-bold text-xl mb-2">Design CLI Tool</h3>
-                        <p class="text-gray-400">Design useful commands like experiment result organization, paper BibTeX conversion, etc.</p>
-                    </div>
-                </div>
-                <div class="card rounded-2xl p-6 flex gap-5">
-                    <div class="step-number bg-accent/20 text-accent">2</div>
-                    <div>
-                        <h3 class="font-bold text-xl mb-2">Implement Custom Commands</h3>
-                        <p class="text-gray-400">Create reusable commands in the .claude/commands/ folder.</p>
-                    </div>
-                </div>
-                <div class="card rounded-2xl p-6 flex gap-5">
-                    <div class="step-number bg-accent/20 text-accent">3</div>
-                    <div>
-                        <h3 class="font-bold text-xl mb-2">Write Skills</h3>
-                        <p class="text-gray-400">Write skills with domain knowledge in the .claude/skills/ folder.</p>
-                    </div>
-                </div>
-                <div class="card rounded-2xl p-6 flex gap-5">
-                    <div class="step-number bg-accent/20 text-accent">4</div>
-                    <div>
-                        <h3 class="font-bold text-xl mb-2">Set Up Pre-commit Hook</h3>
-                        <p class="text-gray-400">Configure hooks in .claude/settings.json for automatic linting.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section class="mb-16">
-            <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-4">WHAT YOU'LL LEARN</h2>
-            <div class="grid md:grid-cols-2 gap-4">
-                <div class="card rounded-2xl p-6">
-                    <div class="flex items-center gap-3 mb-3"><span class="text-2xl">📜</span><h3 class="font-bold text-lg">Custom Commands</h3></div>
-                    <p class="text-gray-400 text-sm mb-3">Reusable commands invoked with /project: prefix</p>
-                    <code class="text-xs bg-dark-600 px-3 py-1.5 rounded-lg text-accent">.claude/commands/*.md</code>
-                </div>
-                <div class="card rounded-2xl p-6">
-                    <div class="flex items-center gap-3 mb-3"><span class="text-2xl">🎯</span><h3 class="font-bold text-lg">Skills</h3></div>
-                    <p class="text-gray-400 text-sm mb-3">Domain expertise and best practices</p>
-                    <code class="text-xs bg-dark-600 px-3 py-1.5 rounded-lg text-accent">.claude/skills/*/SKILL.md</code>
-                </div>
-                <div class="card rounded-2xl p-6">
-                    <div class="flex items-center gap-3 mb-3"><span class="text-2xl">🪝</span><h3 class="font-bold text-lg">Hooks</h3></div>
-                    <p class="text-gray-400 text-sm mb-3">Actions that auto-execute on specific events</p>
-                    <code class="text-xs bg-dark-600 px-3 py-1.5 rounded-lg text-accent">PreToolUse, PostToolUse</code>
-                </div>
-                <div class="card rounded-2xl p-6">
-                    <div class="flex items-center gap-3 mb-3"><span class="text-2xl">💻</span><h3 class="font-bold text-lg">VS Code Integration</h3></div>
-                    <p class="text-gray-400 text-sm mb-3">Using Claude Code in your IDE</p>
-                    <code class="text-xs bg-dark-600 px-3 py-1.5 rounded-lg text-accent">Cmd+Esc shortcut</code>
-                </div>
-            </div>
-        </section>
-
-        <section class="mb-16">
-            <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-4">DELIVERABLES</h2>
-            <div class="card rounded-2xl p-8">
-                <div class="grid md:grid-cols-2 gap-6">
-                    <div class="flex gap-4">
-                        <span class="text-4xl">📁</span>
+                <div class="important-box rounded-xl p-4">
+                    <div class="flex items-start gap-3">
+                        <span class="text-2xl">&#128274;</span>
                         <div>
-                            <h3 class="font-bold text-lg mb-1">.claude/ Folder Structure</h3>
-                            <ul class="text-gray-400 text-sm space-y-1">
-                                <li>• commands/ (at least 1)</li>
-                                <li>• skills/ (at least 1)</li>
-                                <li>• settings.json (Hook config)</li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="flex gap-4">
-                        <span class="text-4xl">🎬</span>
-                        <div>
-                            <h3 class="font-bold text-lg mb-1">Demo Video or GIF</h3>
-                            <ul class="text-gray-400 text-sm space-y-1">
-                                <li>• CLI tool execution</li>
-                                <li>• Hook auto-execution</li>
-                            </ul>
+                            <div class="font-bold text-red-400 mb-1">Security Focus</div>
+                            <p class="text-sm text-gray-300">
+                                Hooks intercept Claude's tool usage. Use <code class="bg-dark-800 px-2 py-1 rounded">exit code 2</code> to block dangerous operations.
+                                Document your learnings in CLAUDE.md using the <code class="bg-dark-800 px-2 py-1 rounded">#</code> command!
+                            </p>
                         </div>
                     </div>
                 </div>
             </div>
         </section>
 
+        <!-- Project Setup -->
         <section class="mb-16">
-            <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-4">SCORING RUBRIC</h2>
+            <h2 class="text-sm font-bold text-purple-400 uppercase tracking-widest mb-4">PROJECT SETUP</h2>
+            <div class="card rounded-2xl p-6">
+                <div class="code-block mb-4">
+                    <div class="code-block-header">Terminal</div>
+                    <pre><code><span class="code-comment"># 1. Extract the project</span>
+unzip challenges/week2/hooks-challenge.zip -d my-hooks
+
+<span class="code-comment"># 2. Navigate to project</span>
+cd my-hooks
+
+<span class="code-comment"># 3. Install dependencies</span>
+npm install
+
+<span class="code-comment"># 4. Copy settings (IMPORTANT!)</span>
+cp .claude/settings.example.json .claude/settings.json</code></pre>
+                </div>
+                <div class="tip-box rounded-xl p-4">
+                    <div class="flex items-start gap-3">
+                        <span class="text-xl">&#128161;</span>
+                        <div>
+                            <div class="font-medium text-purple-400 mb-1">First Step</div>
+                            <p class="text-sm text-gray-300">Run <code class="bg-dark-800 px-2 py-1 rounded">/init</code> to analyze the project. Check <code class="bg-dark-800 px-2 py-1 rounded">hooks/</code> directory for existing hooks.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Stages (hidden until timer starts) -->
+        <section id="stagesSection" class="hidden mb-16">
+            <h2 class="text-sm font-bold text-purple-400 uppercase tracking-widest mb-4">FEATURE STAGES</h2>
+            <div class="space-y-6">
+                <!-- Stage 1 -->
+                <div class="stage-card rounded-2xl p-6">
+                    <div class="flex gap-5 mb-6">
+                        <div class="stage-number bg-green-500/20 text-green-400">1</div>
+                        <div>
+                            <div class="flex items-center gap-3 mb-2">
+                                <h3 class="font-bold text-2xl">Security Hook</h3>
+                                <span class="bg-green-500/20 text-green-400 px-3 py-1 rounded-full text-xs font-bold">Required</span>
+                                <span class="text-gray-500 text-sm">~15 min</span>
+                            </div>
+                            <p class="text-gray-400">Complete the read_hook.js to block .env file access.</p>
+                        </div>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="font-bold text-sm text-gray-400 uppercase tracking-wide mb-3">Requirements</h4>
+                            <ul class="space-y-2 text-gray-300 text-sm">
+                                <li class="flex gap-2"><span class="text-green-400">&#10003;</span> Find TODO in <code class="bg-dark-600 px-1.5 py-0.5 rounded">hooks/read_hook.js</code></li>
+                                <li class="flex gap-2"><span class="text-green-400">&#10003;</span> Block Read tool when path contains <code class="bg-dark-600 px-1.5 py-0.5 rounded">.env</code></li>
+                                <li class="flex gap-2"><span class="text-green-400">&#10003;</span> Return exit code 2 to block, 0 to allow</li>
+                                <li class="flex gap-2"><span class="text-green-400">&#10003;</span> Print message: "Blocked: Cannot read .env"</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-sm text-gray-400 uppercase tracking-wide mb-3">Expected Behavior</h4>
+                            <div class="bg-dark-600/50 rounded-xl p-4 text-sm text-gray-300 space-y-2">
+                                <p><strong class="text-white">1.</strong> Claude tries to read any file</p>
+                                <p><strong class="text-white">2.</strong> Hook checks if path contains ".env"</p>
+                                <p><strong class="text-white">3.</strong> If .env: exit(2) + error message</p>
+                                <p><strong class="text-white">4.</strong> Otherwise: exit(0) to allow</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stage 2 -->
+                <div class="stage-card rounded-2xl p-6">
+                    <div class="flex gap-5 mb-6">
+                        <div class="stage-number bg-blue-500/20 text-blue-400">2</div>
+                        <div>
+                            <div class="flex items-center gap-3 mb-2">
+                                <h3 class="font-bold text-2xl">Query Duplicate Detection</h3>
+                                <span class="bg-blue-500/20 text-blue-400 px-3 py-1 rounded-full text-xs font-bold">Required</span>
+                                <span class="text-gray-500 text-sm">~25 min</span>
+                            </div>
+                            <p class="text-gray-400">Activate the disabled query_hook.js to prevent duplicate queries.</p>
+                        </div>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="font-bold text-sm text-gray-400 uppercase tracking-wide mb-3">Requirements</h4>
+                            <ul class="space-y-2 text-gray-300 text-sm">
+                                <li class="flex gap-2"><span class="text-blue-400">&#10003;</span> Find disabled code in <code class="bg-dark-600 px-1.5 py-0.5 rounded">hooks/query_hook.js</code></li>
+                                <li class="flex gap-2"><span class="text-blue-400">&#10003;</span> Remove the early <code class="bg-dark-600 px-1.5 py-0.5 rounded">process.exit(0)</code></li>
+                                <li class="flex gap-2"><span class="text-blue-400">&#10003;</span> Understand Claude Agent SDK usage</li>
+                                <li class="flex gap-2"><span class="text-blue-400">&#10003;</span> Verify hook is registered in settings.json</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-sm text-gray-400 uppercase tracking-wide mb-3">Expected Behavior</h4>
+                            <div class="bg-dark-600/50 rounded-xl p-4 text-sm text-gray-300 space-y-2">
+                                <p><strong class="text-white">1.</strong> Claude writes to src/queries/</p>
+                                <p><strong class="text-white">2.</strong> Hook analyzes for duplicate queries</p>
+                                <p><strong class="text-white">3.</strong> Uses Claude SDK to check existing code</p>
+                                <p><strong class="text-white">4.</strong> Blocks if duplicate found (exit 2)</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stage 3 -->
+                <div class="stage-card rounded-2xl p-6 border-amber-500/20">
+                    <div class="flex gap-5 mb-6">
+                        <div class="stage-number bg-amber-500/20 text-amber-400">3</div>
+                        <div>
+                            <div class="flex items-center gap-3 mb-2">
+                                <h3 class="font-bold text-2xl">Custom PostToolUse Hook</h3>
+                                <span class="bg-amber-500/20 text-amber-400 px-3 py-1 rounded-full text-xs font-bold">Bonus</span>
+                                <span class="text-gray-500 text-sm">~20 min</span>
+                            </div>
+                            <p class="text-gray-400">Create your own PostToolUse hook for automation.</p>
+                        </div>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="font-bold text-sm text-gray-400 uppercase tracking-wide mb-3">Requirements</h4>
+                            <ul class="space-y-2 text-gray-300 text-sm">
+                                <li class="flex gap-2"><span class="text-amber-400">&#10003;</span> Create new hook file (e.g., <code class="bg-dark-600 px-1.5 py-0.5 rounded">log_hook.js</code>)</li>
+                                <li class="flex gap-2"><span class="text-amber-400">&#10003;</span> Trigger after Write/Edit operations</li>
+                                <li class="flex gap-2"><span class="text-amber-400">&#10003;</span> Choose one: log changes / add comments / stats</li>
+                                <li class="flex gap-2"><span class="text-amber-400">&#10003;</span> Register in settings.json PostToolUse</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-sm text-gray-400 uppercase tracking-wide mb-3">Hook Ideas</h4>
+                            <div class="bg-dark-600/50 rounded-xl p-4 text-sm text-gray-300 space-y-2">
+                                <p><strong class="text-amber-400">A.</strong> Log all file changes to changes.log</p>
+                                <p><strong class="text-amber-400">B.</strong> Add timestamp comment to modified files</p>
+                                <p><strong class="text-amber-400">C.</strong> Print file statistics after each edit</p>
+                                <p><strong class="text-amber-400">D.</strong> Notify when specific files are changed</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CLAUDE.md Expectations (hidden until timer starts) -->
+        <section id="claudemdSection" class="hidden mb-16">
+            <h2 class="text-sm font-bold text-purple-400 uppercase tracking-widest mb-4">CLAUDE.MD EXPECTATIONS</h2>
+            <div class="card rounded-2xl p-6">
+                <p class="text-gray-300 mb-4">
+                    Your CLAUDE.md should document Hook system learnings. Good examples:
+                </p>
+                <div class="code-block">
+                    <div class="code-block-header">Example CLAUDE.md Entries</div>
+                    <pre><code><span class="code-comment">## Hook System Learnings</span>
+
+<span class="code-comment">### Exit Codes</span>
+- exit(0) = Allow the tool to proceed
+- exit(2) = Block the tool with error message
+- stdout messages shown to Claude on block
+
+<span class="code-comment">### Hook Input (stdin)</span>
+- JSON with tool_input containing tool parameters
+- tool_input.file_path for Read tool
+- tool_input.content for Write tool
+
+<span class="code-comment">### Settings.json Structure</span>
+- PreToolUse: runs BEFORE tool execution
+- PostToolUse: runs AFTER tool execution
+- matcher: regex pattern for tool names
+
+<span class="code-comment">### Debugging Tips</span>
+- Use: jq . > debug.json to inspect stdin
+- Check: node hooks/my_hook.js &lt; test.json</code></pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- Scoring (hidden until timer starts) -->
+        <section id="scoringSection" class="hidden mb-16">
+            <h2 class="text-sm font-bold text-purple-400 uppercase tracking-widest mb-4">SCORING RUBRIC</h2>
             <div class="card rounded-2xl overflow-hidden">
                 <table class="w-full">
-                    <thead><tr class="bg-dark-600/50 text-left"><th class="px-6 py-4 font-semibold">Category</th><th class="px-6 py-4 font-semibold text-right">Points</th></tr></thead>
+                    <thead>
+                        <tr class="bg-dark-600/50 text-left">
+                            <th class="px-6 py-4 font-semibold">Category</th>
+                            <th class="px-6 py-4 font-semibold text-right">Points</th>
+                        </tr>
+                    </thead>
                     <tbody class="divide-y divide-white/5">
-                        <tr><td class="px-6 py-5"><div class="font-medium text-lg">Command Quality</div><div class="text-sm text-gray-500 mt-1">Reusability, practicality, documentation</div></td><td class="px-6 py-5 text-right"><span class="text-2xl font-bold text-accent">30</span></td></tr>
-                        <tr><td class="px-6 py-5"><div class="font-medium text-lg">Skill Quality</div><div class="text-sm text-gray-500 mt-1">Domain knowledge accuracy, structure</div></td><td class="px-6 py-5 text-right"><span class="text-2xl font-bold text-accent">25</span></td></tr>
-                        <tr><td class="px-6 py-5"><div class="font-medium text-lg">Hook Implementation</div><div class="text-sm text-gray-500 mt-1">Auto-linting working correctly</div></td><td class="px-6 py-5 text-right"><span class="text-2xl font-bold text-accent">25</span></td></tr>
-                        <tr><td class="px-6 py-5"><div class="font-medium text-lg">Demo & Documentation</div><div class="text-sm text-gray-500 mt-1">Demo quality, README</div></td><td class="px-6 py-5 text-right"><span class="text-2xl font-bold text-accent">10</span></td></tr>
-                        <tr class="bg-green-500/5"><td class="px-6 py-5"><div class="font-medium text-lg text-green-400">⏱️ Time Bonus</div></td><td class="px-6 py-5 text-right"><span class="text-2xl font-bold text-green-400">+10</span></td></tr>
+                        <tr>
+                            <td class="px-6 py-5">
+                                <div class="font-medium text-lg text-green-400">Stage 1: Security Hook</div>
+                                <div class="text-sm text-gray-500 mt-1">.env blocking (15) + Error message (5) + Memory (5)</div>
+                            </td>
+                            <td class="px-6 py-5 text-right">
+                                <span class="text-2xl font-bold text-green-400">25</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="px-6 py-5">
+                                <div class="font-medium text-lg text-blue-400">Stage 2: Query Hook Activation</div>
+                                <div class="text-sm text-gray-500 mt-1">Activation (10) + Working (15) + Settings (5) + Memory (5)</div>
+                            </td>
+                            <td class="px-6 py-5 text-right">
+                                <span class="text-2xl font-bold text-blue-400">35</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="px-6 py-5">
+                                <div class="font-medium text-lg text-amber-400">Stage 3: Custom Hook (Bonus)</div>
+                                <div class="text-sm text-gray-500 mt-1">Hook creation (10) + Working (10) + Memory (5)</div>
+                            </td>
+                            <td class="px-6 py-5 text-right">
+                                <span class="text-2xl font-bold text-amber-400">25</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="px-6 py-5">
+                                <div class="font-medium text-lg text-purple-400">CLAUDE.md Quality</div>
+                                <div class="text-sm text-gray-500 mt-1">Hook concepts, exit codes, debugging tips documented</div>
+                            </td>
+                            <td class="px-6 py-5 text-right">
+                                <span class="text-2xl font-bold text-purple-400">15</span>
+                            </td>
+                        </tr>
+                        <tr class="bg-green-500/5">
+                            <td class="px-6 py-5">
+                                <div class="font-medium text-lg text-green-400">Time Rank Bonus</div>
+                                <div class="text-sm text-gray-500 mt-1">1st: +20, 2nd: +17, 3rd: +14, 4th: +11, 5th: +8, 6th+: +5</div>
+                            </td>
+                            <td class="px-6 py-5 text-right">
+                                <span class="text-2xl font-bold text-green-400">+20</span>
+                            </td>
+                        </tr>
                     </tbody>
-                    <tfoot><tr class="bg-dark-600/30"><td class="px-6 py-4 font-bold text-lg">Total</td><td class="px-6 py-4 text-right"><span class="text-3xl font-bold bg-gradient-to-r from-accent to-purple-300 bg-clip-text text-transparent">100</span></td></tr></tfoot>
+                    <tfoot>
+                        <tr class="bg-dark-600/30">
+                            <td class="px-6 py-4 font-bold text-lg">Total</td>
+                            <td class="px-6 py-4 text-right">
+                                <span class="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-300 bg-clip-text text-transparent">100</span>
+                                <span class="text-green-400 text-lg ml-1">+20</span>
+                            </td>
+                        </tr>
+                    </tfoot>
                 </table>
+            </div>
+
+            <div class="mt-4 card rounded-2xl p-6">
+                <h3 class="font-bold text-lg mb-4">Passing Criteria</h3>
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div class="bg-dark-600/50 rounded-xl p-4 border-l-4 border-gray-500">
+                        <div class="font-bold text-gray-400 mb-1">Minimum Pass</div>
+                        <p class="text-sm text-gray-500">Stage 1 + Stage 2 completed (60 points)</p>
+                    </div>
+                    <div class="bg-dark-600/50 rounded-xl p-4 border-l-4 border-green-500">
+                        <div class="font-bold text-green-400 mb-1">Excellence</div>
+                        <p class="text-sm text-gray-500">All 3 Stages + Quality CLAUDE.md (85+ points)</p>
+                    </div>
+                </div>
             </div>
         </section>
 
-        <section class="mb-16" id="submit">
-            <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-4">SUBMIT YOUR WORK</h2>
-            <div class="submit-card rounded-3xl p-8">
-                <div class="text-center py-12">
-                    <span class="text-6xl mb-4 block">🔒</span>
-                    <h3 class="text-2xl font-bold mb-2">Coming Soon</h3>
-                    <p class="text-gray-400">Week 2 is not yet open.</p>
+        <!-- What You'll Learn -->
+        <section class="mb-16">
+            <h2 class="text-sm font-bold text-purple-400 uppercase tracking-widest mb-4">WHAT YOU'LL PRACTICE</h2>
+            <div class="grid md:grid-cols-2 gap-4">
+                <div class="card rounded-2xl p-6">
+                    <div class="flex items-center gap-3 mb-3">
+                        <span class="text-2xl">&#128274;</span>
+                        <h3 class="font-bold text-lg">PreToolUse Hooks</h3>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-3">Intercept and control tool execution before it happens.</p>
+                    <code class="text-xs bg-dark-600 px-3 py-1.5 rounded-lg text-purple-400">exit(2) to block</code>
                 </div>
+                <div class="card rounded-2xl p-6">
+                    <div class="flex items-center gap-3 mb-3">
+                        <span class="text-2xl">&#9889;</span>
+                        <h3 class="font-bold text-lg">PostToolUse Hooks</h3>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-3">Automate actions after tool execution completes.</p>
+                    <code class="text-xs bg-dark-600 px-3 py-1.5 rounded-lg text-purple-400">tool_response data</code>
+                </div>
+                <div class="card rounded-2xl p-6">
+                    <div class="flex items-center gap-3 mb-3">
+                        <span class="text-2xl">&#129504;</span>
+                        <h3 class="font-bold text-lg">Claude Agent SDK</h3>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-3">Call Claude programmatically from hooks.</p>
+                    <code class="text-xs bg-dark-600 px-3 py-1.5 rounded-lg text-purple-400">@anthropic-ai/claude-agent-sdk</code>
+                </div>
+                <div class="card rounded-2xl p-6">
+                    <div class="flex items-center gap-3 mb-3">
+                        <span class="text-2xl">&#128736;</span>
+                        <h3 class="font-bold text-lg">settings.json</h3>
+                    </div>
+                    <p class="text-gray-400 text-sm mb-3">Configure hook matchers and commands.</p>
+                    <code class="text-xs bg-dark-600 px-3 py-1.5 rounded-lg text-purple-400">Write|Edit|MultiEdit</code>
+                </div>
+            </div>
+        </section>
+
+        <!-- Submit -->
+        <section class="mb-16" id="submit">
+            <h2 class="text-sm font-bold text-purple-400 uppercase tracking-widest mb-4">SUBMIT YOUR WORK</h2>
+            <div class="submit-card rounded-3xl p-8">
+                <!-- Instructions -->
+                <div id="instructionsContainer" class="hidden mb-8 p-6 bg-dark-800/50 rounded-2xl border border-white/5">
+                    <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                        <span>&#128203;</span> How to Submit
+                    </h3>
+                    <ol class="space-y-3 text-gray-300">
+                        <li class="flex gap-3">
+                            <span class="bg-purple-500/20 text-purple-400 w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">1</span>
+                            <span>Push your code to a <strong>GitHub repository</strong></span>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="bg-purple-500/20 text-purple-400 w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">2</span>
+                            <span>Make sure <strong>CLAUDE.md</strong> and <strong>hooks/</strong> are included</span>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="bg-purple-500/20 text-purple-400 w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">3</span>
+                            <span>Enter your repository URL below and click <strong>Submit</strong></span>
+                        </li>
+                    </ol>
+                </div>
+
+                <!-- Timer Display -->
+                <div id="timerContainer" class="hidden mb-8 p-6 bg-purple-500/10 rounded-2xl border border-purple-500/30 text-center">
+                    <div class="text-sm text-purple-400 mb-2">Elapsed Time</div>
+                    <div id="timerDisplay" class="timer-display text-5xl font-bold text-white">00:00</div>
+                </div>
+
+                <!-- Login Warning -->
+                <div id="login-warning" class="mb-6 p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl text-amber-400">
+                    <span>Please <a href="index.html" class="text-purple-400 underline hover:text-purple-300">login</a> to submit your solution.</span>
+                </div>
+
+                <!-- Form -->
+                <form id="submitForm" class="space-y-6">
+                    <div id="githubUrlContainer" class="hidden">
+                        <label class="block text-sm font-medium mb-2 text-gray-300">GitHub Repository URL</label>
+                        <input type="url" id="githubUrl" required
+                               class="w-full bg-dark-800 border border-white/10 rounded-xl px-5 py-4 focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500/50 transition-all text-lg mono"
+                               placeholder="https://github.com/username/hooks-week2">
+                    </div>
+                    <div class="flex flex-col sm:flex-row gap-4 pt-4">
+                        <!-- Timer not started hint -->
+                        <div id="timerNotStartedHint" class="flex-1 p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl text-amber-400 text-center">
+                            <span>Start Timer to reveal challenge details and submit form</span>
+                        </div>
+                        <button type="button" id="startBtn" onclick="startChallenge()"
+                                class="btn-secondary flex-1 text-white font-bold py-4 px-6 rounded-xl text-lg flex items-center justify-center gap-2">
+                            <span>&#9201;</span> Start Timer
+                        </button>
+                        <button type="submit" id="submitBtn"
+                                class="hidden btn-primary flex-1 text-white font-bold py-4 px-6 rounded-xl text-lg flex items-center justify-center gap-2">
+                            <span>&#128640;</span> Submit
+                        </button>
+                    </div>
+                </form>
+
+                <div id="statusMessage" class="mt-6 text-center hidden"></div>
             </div>
         </section>
     </main>
 
+    <!-- Footer -->
     <footer class="border-t border-white/5 py-8">
         <div class="max-w-5xl mx-auto px-6 text-center">
-            <a href="index.html" class="text-gray-500 hover:text-accent transition-colors">← Back to Home</a>
+            <a href="index.html" class="text-gray-500 hover:text-purple-400 transition-colors">
+                Back to Home
+            </a>
         </div>
     </footer>
+
+    <script src="config.js"></script>
+    <script>
+        // API Base URL (auto-configured from config.js)
+        const API_BASE = window.API_BASE || '';
+        const WEEK = 2;
+        let timerInterval = null;
+        let startTime = null;
+        let currentUser = null;
+        let personalStartTime = null;
+
+        // Check login status on page load
+        async function checkLoginStatus() {
+            const token = localStorage.getItem('auth_token');
+            const loginWarning = document.getElementById('login-warning');
+            const startBtn = document.getElementById('startBtn');
+            const submitBtn = document.getElementById('submitBtn');
+
+            if (!token) {
+                if (loginWarning) loginWarning.classList.remove('hidden');
+                startBtn.disabled = true;
+                startBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                submitBtn.disabled = true;
+                submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                const hint = document.getElementById('timerNotStartedHint');
+                if (hint) hint.classList.add('hidden');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/api/auth/me`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    currentUser = await response.json();
+                    if (loginWarning) loginWarning.classList.add('hidden');
+                    startBtn.disabled = false;
+                    startBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    submitBtn.disabled = false;
+                    submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                } else {
+                    localStorage.removeItem('auth_token');
+                    if (loginWarning) loginWarning.classList.remove('hidden');
+                    startBtn.disabled = true;
+                    startBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                    submitBtn.disabled = true;
+                    submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                    const hint = document.getElementById('timerNotStartedHint');
+                    if (hint) hint.classList.add('hidden');
+                }
+            } catch (e) {
+                console.error('Auth check failed:', e);
+                if (loginWarning) loginWarning.classList.remove('hidden');
+            }
+        }
+
+        // Load personal timer status from server
+        async function loadPersonalStatus() {
+            const token = localStorage.getItem('auth_token');
+            if (!token || !currentUser) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/api/challenge/${WEEK}/my-status`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+
+                    if (data.challenge_status !== 'started') {
+                        showStatus('Challenge not started yet. Wait for admin.', 'text-gray-400');
+                        document.getElementById('startBtn').disabled = true;
+                        document.getElementById('startBtn').classList.add('opacity-50', 'cursor-not-allowed');
+                        return;
+                    }
+
+                    if (data.personal_status === 'in_progress' || data.personal_status === 'submitted') {
+                        personalStartTime = data.personal_start_time;
+
+                        document.getElementById('timerContainer').classList.remove('hidden');
+                        document.getElementById('startBtn').disabled = true;
+                        document.getElementById('startBtn').classList.add('opacity-50', 'cursor-not-allowed');
+                        document.getElementById('startBtn').innerHTML = 'Timer Started';
+
+                        timerInterval = setInterval(updateTimer, 1000);
+                        updateTimer();
+
+                        showChallengeForm();
+
+                        if (data.personal_status === 'submitted') {
+                            document.getElementById('submitBtn').disabled = true;
+                            document.getElementById('submitBtn').classList.add('opacity-50', 'cursor-not-allowed');
+                            document.getElementById('submitBtn').innerHTML = 'Submitted';
+                            showStatus('Already submitted for this week', 'text-green-400');
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error('Failed to load personal status:', e);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await checkLoginStatus();
+            await loadPersonalStatus();
+        });
+
+        function updateTimer() {
+            if (!personalStartTime) return;
+            const startDate = new Date(personalStartTime);
+            const elapsed = Math.floor((Date.now() - startDate.getTime()) / 1000);
+            const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
+            const seconds = (elapsed % 60).toString().padStart(2, '0');
+            document.getElementById('timerDisplay').textContent = `${minutes}:${seconds}`;
+        }
+
+        function showChallengeForm() {
+            // Show hidden sections
+            const stages = document.getElementById('stagesSection');
+            const claudemd = document.getElementById('claudemdSection');
+            const scoring = document.getElementById('scoringSection');
+            if (stages) stages.classList.remove('hidden');
+            if (claudemd) claudemd.classList.remove('hidden');
+            if (scoring) scoring.classList.remove('hidden');
+
+            // Show submission form elements
+            const instructions = document.getElementById('instructionsContainer');
+            const githubUrl = document.getElementById('githubUrlContainer');
+            const submitBtn = document.getElementById('submitBtn');
+            if (instructions) instructions.classList.remove('hidden');
+            if (githubUrl) githubUrl.classList.remove('hidden');
+            if (submitBtn) submitBtn.classList.remove('hidden');
+
+            const hint = document.getElementById('timerNotStartedHint');
+            if (hint) hint.classList.add('hidden');
+        }
+
+        async function startChallenge() {
+            if (!currentUser) {
+                showStatus('Please login first', 'text-amber-400');
+                return;
+            }
+
+            const token = localStorage.getItem('auth_token');
+
+            try {
+                const response = await fetch(`${API_BASE}/api/challenge/${WEEK}/start-personal`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    personalStartTime = data.started_at;
+
+                    document.getElementById('timerContainer').classList.remove('hidden');
+                    timerInterval = setInterval(updateTimer, 1000);
+                    updateTimer();
+
+                    document.getElementById('startBtn').disabled = true;
+                    document.getElementById('startBtn').classList.add('opacity-50', 'cursor-not-allowed');
+                    document.getElementById('startBtn').innerHTML = 'Timer Started';
+
+                    showChallengeForm();
+
+                    showStatus('Timer started! Good luck!', 'text-green-400');
+                } else {
+                    const error = await response.json();
+                    showStatus(error.detail || 'Failed to start timer', 'text-red-400');
+                }
+            } catch (e) {
+                showStatus('Connection error', 'text-red-400');
+            }
+        }
+
+        document.getElementById('submitForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            if (!currentUser) {
+                showStatus('Please login first', 'text-amber-400');
+                return;
+            }
+
+            const githubUrl = document.getElementById('githubUrl').value;
+
+            if (!githubUrl) {
+                showStatus('Please enter GitHub URL', 'text-amber-400');
+                return;
+            }
+
+            try {
+                const token = localStorage.getItem('auth_token');
+                const response = await fetch(`${API_BASE}/api/submissions/submit`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        week: WEEK,
+                        github_url: githubUrl
+                    })
+                });
+
+                if (timerInterval) clearInterval(timerInterval);
+
+                if (response.ok) {
+                    const data = await response.json();
+                    showStatus(`Submission complete! Elapsed time: ${data.elapsed_minutes?.toFixed(1) || '-'} minutes. Evaluation will start shortly.`, 'text-green-400');
+                    document.getElementById('submitBtn').disabled = true;
+                    document.getElementById('submitBtn').classList.add('opacity-50', 'cursor-not-allowed');
+                    document.getElementById('submitBtn').innerHTML = 'Submitted';
+                } else {
+                    const error = await response.json();
+                    showStatus('Submission failed: ' + (error.detail || 'Unknown error'), 'text-red-400');
+                }
+
+            } catch (error) {
+                showStatus('Submission failed: ' + error.message, 'text-red-400');
+            }
+        });
+
+        function showStatus(message, colorClass) {
+            const el = document.getElementById('statusMessage');
+            el.textContent = message;
+            el.className = `mt-6 text-center text-lg font-medium ${colorClass}`;
+            el.classList.remove('hidden');
+        }
+    </script>
 </body>
 </html>
