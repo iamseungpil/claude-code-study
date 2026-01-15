@@ -72,10 +72,10 @@
                 <span class="bg-gray-500/20 text-gray-400 px-3 py-1 rounded-full text-xs font-bold border border-gray-500/30">LEARN</span>
             </div>
             <h1 class="text-4xl md:text-5xl font-bold mb-4 tracking-tight">
-                SDK & GitHub Integration
+                Skills & Plugins
             </h1>
             <p class="text-xl text-gray-400 mb-8 max-w-2xl">
-                Build custom automation with the Claude Code SDK and integrate with GitHub workflows.
+                Claude Code의 확장 기능을 개발하고, 스킬과 플러그인을 활용하여 워크플로우를 자동화하세요.
             </p>
         </div>
     </header>
@@ -84,264 +84,518 @@
         <!-- Lesson Navigation -->
         <div class="flex flex-wrap gap-3 mb-8">
             <button class="lesson-btn active px-4 py-2 rounded-xl border border-white/10 text-sm font-medium transition-all hover:bg-white/5" data-lesson="1">
-                1. Claude Code SDK
+                1. Skills 기초
             </button>
             <button class="lesson-btn px-4 py-2 rounded-xl border border-white/10 text-sm font-medium transition-all hover:bg-white/5" data-lesson="2">
-                2. GitHub Integration
+                2. Plugins 시스템
             </button>
             <button class="lesson-btn px-4 py-2 rounded-xl border border-white/10 text-sm font-medium transition-all hover:bg-white/5" data-lesson="3">
-                3. Headless Mode
+                3. Skill Discovery
             </button>
             <button class="lesson-btn px-4 py-2 rounded-xl border border-white/10 text-sm font-medium transition-all hover:bg-white/5" data-lesson="4">
-                4. Custom Commands
+                4. 실전 자동화
             </button>
         </div>
 
-        <!-- Lesson 1: Claude Code SDK -->
+        <!-- Lesson 1: Skills 기초 -->
         <section id="lesson1" class="lesson-content active mb-12">
             <div class="card rounded-2xl p-8">
                 <div class="flex items-center gap-4 mb-6">
                     <span class="bg-accent/20 text-accent w-12 h-12 rounded-xl flex items-center justify-center text-xl font-bold">1</span>
-                    <h2 class="text-2xl font-bold">Claude Code SDK</h2>
+                    <h2 class="text-2xl font-bold">Skills 기초</h2>
                 </div>
 
                 <div class="space-y-6 text-gray-300">
                     <div class="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4">
-                        <p class="text-emerald-200 font-medium">The Claude Agent SDK</p>
-                        <p class="text-sm mt-1">The <code class="inline-code">@anthropic-ai/claude-agent-sdk</code> package lets you run Claude Code programmatically. Build custom tools, automation pipelines, and integrate Claude into your applications.</p>
+                        <p class="text-emerald-200 font-medium">Skills란?</p>
+                        <p class="text-sm mt-1">Skills는 Claude에게 특정 작업 방법을 가르치는 지침입니다. 작업 맥락에 맞으면 Claude가 자동으로 호출하거나, <code class="inline-code">/skill-name</code>으로 직접 호출할 수 있습니다.</p>
                     </div>
 
-                    <h3 class="text-xl font-semibold text-white">Installation</h3>
-                    <pre><code class="text-green-400"># Install the SDK
-npm install @anthropic-ai/claude-agent-sdk
+                    <h3 class="text-xl font-semibold text-white">SKILL.md 구조</h3>
+                    <p>스킬은 <code class="inline-code">SKILL.md</code> 파일로 정의됩니다. YAML frontmatter로 메타데이터를 지정합니다:</p>
 
-# Or with pnpm/yarn
-pnpm add @anthropic-ai/claude-agent-sdk
-yarn add @anthropic-ai/claude-agent-sdk</code></pre>
+                    <pre><code class="text-green-400"># .claude/skills/my-skill/SKILL.md
+---
+name: my-skill
+description: 이 스킬이 하는 일 (Claude가 검색에 사용)
+allowed-tools: [Bash, Read, Write]  # 선택
+model: sonnet                        # 선택
+user-invocable: true                 # /skill-name으로 호출 가능
+---
 
-                    <h3 class="text-xl font-semibold text-white mt-8">Basic Usage</h3>
-                    <p>The SDK provides a <code class="inline-code">query()</code> function to run Claude Code programmatically:</p>
+# 스킬 지침 내용
+Claude에게 이 작업을 어떻게 수행할지 설명합니다.
 
-                    <pre><code class="text-green-400">import { query } from "@anthropic-ai/claude-agent-sdk";
+## 동작 방식
+1. 첫 번째 단계...
+2. 두 번째 단계...
+3. 결과 출력...</code></pre>
 
-async function main() {
-  const result = await query({
-    prompt: "What files are in the src directory?",
-    options: {
-      maxTurns: 5,           // Limit agent iterations
-      allowedTools: ["Read", "Glob", "Grep"],  // Restrict tools
-    }
-  });
+                    <h3 class="text-xl font-semibold text-white mt-8">스킬 위치 및 우선순위</h3>
+                    <p>스킬은 여러 위치에 저장할 수 있으며, 우선순위가 있습니다:</p>
+                    <div class="bg-dark-700 rounded-xl p-4 mt-4">
+                        <ol class="space-y-2 text-sm">
+                            <li><span class="text-accent font-bold">1.</span> 프로젝트 스킬: <code class="inline-code">.claude/skills/&lt;name&gt;/SKILL.md</code> (최우선)</li>
+                            <li><span class="text-accent font-bold">2.</span> 사용자 스킬: <code class="inline-code">~/.claude/skills/&lt;name&gt;/SKILL.md</code></li>
+                            <li><span class="text-accent font-bold">3.</span> 글로벌 스킬: 설치된 플러그인의 스킬</li>
+                        </ol>
+                    </div>
 
-  console.log(result.response);
-}
+                    <h3 class="text-xl font-semibold text-white mt-8">실습: 첫 번째 스킬 만들기</h3>
+                    <p>커밋 메시지를 자동으로 생성하는 스킬을 만들어 봅시다:</p>
 
-main();</code></pre>
+                    <pre><code class="text-green-400"># 디렉토리 생성
+mkdir -p .claude/skills/commit-helper
 
-                    <h3 class="text-xl font-semibold text-white mt-8">SDK in Hooks</h3>
-                    <p>The SDK is particularly powerful when used in hooks. Here's an example that prevents duplicate query functions:</p>
+# SKILL.md 작성
+cat > .claude/skills/commit-helper/SKILL.md << 'EOF'
+---
+name: commit-helper
+description: 깔끔한 커밋 메시지를 생성하고 커밋합니다
+user-invocable: true
+allowed-tools: [Bash]
+---
 
-                    <pre><code class="text-green-400">// hooks/query_hook.js
-import { query } from "@anthropic-ai/claude-agent-sdk";
+# Commit Helper Skill
 
-async function main() {
-  // Read the tool input from stdin
-  const chunks = [];
-  for await (const chunk of process.stdin) {
-    chunks.push(chunk);
-  }
-  const toolInput = JSON.parse(Buffer.concat(chunks).toString());
+## 사용법
+/commit-helper 또는 "커밋해줘"라고 말하면 이 스킬이 활성화됩니다.
 
-  // Get the new code being written
-  const newCode = toolInput.tool_input?.content || "";
+## 동작
+1. git status로 변경사항 확인
+2. 변경 내용을 분석하여 의미있는 커밋 메시지 생성
+3. Conventional Commits 형식 사용 (feat:, fix:, docs: 등)
+4. git commit 실행
+EOF</code></pre>
 
-  // Ask Claude to review for duplicates
-  const review = await query({
-    prompt: `Review this code for duplicate functions:
-
-${newCode}
-
-If duplicates exist, respond with "DUPLICATE: [reason]".
-If no duplicates, respond with "OK".`,
-    options: {
-      maxTurns: 1,
-      allowedTools: ["Read", "Grep"]
-    }
-  });
-
-  if (review.response.includes("DUPLICATE:")) {
-    console.error(review.response);
-    process.exit(2);  // Block the tool call
-  }
-
-  process.exit(0);  // Allow the tool call
-}
-
-main();</code></pre>
-
-                    <h3 class="text-xl font-semibold text-white mt-8">SDK Options</h3>
+                    <h3 class="text-xl font-semibold text-white mt-8">고급 스킬 설정</h3>
                     <div class="overflow-x-auto">
                         <table class="w-full mt-4 text-sm">
                             <thead>
                                 <tr class="border-b border-white/10">
-                                    <th class="text-left py-3 px-4 text-accent">Option</th>
-                                    <th class="text-left py-3 px-4">Description</th>
-                                    <th class="text-left py-3 px-4">Default</th>
+                                    <th class="text-left py-3 px-4 text-accent">필드</th>
+                                    <th class="text-left py-3 px-4">설명</th>
+                                    <th class="text-left py-3 px-4">예시</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr class="border-b border-white/5">
-                                    <td class="py-3 px-4 font-mono text-sm">maxTurns</td>
-                                    <td class="py-3 px-4">Maximum agent iterations</td>
-                                    <td class="py-3 px-4">10</td>
+                                    <td class="py-3 px-4 font-mono text-sm">name</td>
+                                    <td class="py-3 px-4">스킬 고유 이름 (필수)</td>
+                                    <td class="py-3 px-4">code-review</td>
                                 </tr>
                                 <tr class="border-b border-white/5">
-                                    <td class="py-3 px-4 font-mono text-sm">allowedTools</td>
-                                    <td class="py-3 px-4">Tools the agent can use</td>
-                                    <td class="py-3 px-4">All tools</td>
+                                    <td class="py-3 px-4 font-mono text-sm">description</td>
+                                    <td class="py-3 px-4">Claude 검색용 설명 (필수)</td>
+                                    <td class="py-3 px-4">코드 품질을 검토합니다</td>
+                                </tr>
+                                <tr class="border-b border-white/5">
+                                    <td class="py-3 px-4 font-mono text-sm">allowed-tools</td>
+                                    <td class="py-3 px-4">사용 가능한 도구 제한</td>
+                                    <td class="py-3 px-4">[Bash, Read]</td>
                                 </tr>
                                 <tr class="border-b border-white/5">
                                     <td class="py-3 px-4 font-mono text-sm">model</td>
-                                    <td class="py-3 px-4">Claude model to use</td>
-                                    <td class="py-3 px-4">sonnet</td>
+                                    <td class="py-3 px-4">사용할 모델</td>
+                                    <td class="py-3 px-4">sonnet, opus</td>
                                 </tr>
                                 <tr class="border-b border-white/5">
-                                    <td class="py-3 px-4 font-mono text-sm">cwd</td>
-                                    <td class="py-3 px-4">Working directory</td>
-                                    <td class="py-3 px-4">Current dir</td>
+                                    <td class="py-3 px-4 font-mono text-sm">user-invocable</td>
+                                    <td class="py-3 px-4">/명령어 호출 가능</td>
+                                    <td class="py-3 px-4">true</td>
+                                </tr>
+                                <tr class="border-b border-white/5">
+                                    <td class="py-3 px-4 font-mono text-sm">agent</td>
+                                    <td class="py-3 px-4">서브에이전트로 실행</td>
+                                    <td class="py-3 px-4">true</td>
+                                </tr>
+                                <tr class="border-b border-white/5">
+                                    <td class="py-3 px-4 font-mono text-sm">context</td>
+                                    <td class="py-3 px-4">추가 컨텍스트 파일</td>
+                                    <td class="py-3 px-4">["docs/*.md"]</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
 
-                    <h3 class="text-xl font-semibold text-white mt-8">Use Cases</h3>
+                    <h3 class="text-xl font-semibold text-white mt-8">스킬 사용하기</h3>
                     <div class="grid md:grid-cols-2 gap-4 mt-4">
                         <div class="bg-dark-700 rounded-xl p-4">
-                            <h4 class="font-semibold text-accent mb-2">Automated Code Review</h4>
-                            <p class="text-sm">Run Claude to review PRs, check for bugs, and suggest improvements automatically.</p>
+                            <h4 class="font-semibold text-accent mb-2">수동 호출</h4>
+                            <p class="text-sm">user-invocable: true 설정 시</p>
+                            <pre class="mt-2"><code class="text-xs text-green-400">> /commit-helper
+> /code-review src/</code></pre>
                         </div>
                         <div class="bg-dark-700 rounded-xl p-4">
-                            <h4 class="font-semibold text-accent mb-2">Custom CLI Tools</h4>
-                            <p class="text-sm">Build domain-specific tools that leverage Claude's capabilities.</p>
+                            <h4 class="font-semibold text-accent mb-2">자동 발견</h4>
+                            <p class="text-sm">description과 맥락이 일치하면</p>
+                            <pre class="mt-2"><code class="text-xs text-green-400">> 커밋해줘
+> 코드 리뷰해줘</code></pre>
                         </div>
-                        <div class="bg-dark-700 rounded-xl p-4">
-                            <h4 class="font-semibold text-accent mb-2">Pre-commit Hooks</h4>
-                            <p class="text-sm">Validate code quality, check for security issues, enforce patterns.</p>
-                        </div>
-                        <div class="bg-dark-700 rounded-xl p-4">
-                            <h4 class="font-semibold text-accent mb-2">CI/CD Integration</h4>
-                            <p class="text-sm">Integrate Claude into your build pipelines for automated tasks.</p>
-                        </div>
+                    </div>
+
+                    <div class="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 mt-6">
+                        <p class="text-emerald-200 font-medium">Pro Tip</p>
+                        <p class="text-sm mt-1">스킬 파일이 500줄을 초과하면 세부 내용을 별도 파일로 분리하고 SKILL.md에서 참조하세요. Progressive disclosure 패턴을 활용합니다.</p>
                     </div>
                 </div>
 
                 <div class="mt-8 pt-6 border-t border-white/10">
                     <button onclick="showLesson(2)" class="bg-accent hover:bg-emerald-400 text-dark-900 px-6 py-3 rounded-xl font-semibold transition-all">
-                        Next: GitHub Integration
+                        Next: Plugins 시스템
                     </button>
                 </div>
             </div>
         </section>
 
-        <!-- Lesson 2: GitHub Integration -->
+        <!-- Lesson 2: Plugins 시스템 -->
         <section id="lesson2" class="lesson-content mb-12">
             <div class="card rounded-2xl p-8">
                 <div class="flex items-center gap-4 mb-6">
                     <span class="bg-accent/20 text-accent w-12 h-12 rounded-xl flex items-center justify-center text-xl font-bold">2</span>
-                    <h2 class="text-2xl font-bold">GitHub Integration</h2>
+                    <h2 class="text-2xl font-bold">Plugins 시스템</h2>
                 </div>
 
                 <div class="space-y-6 text-gray-300">
-                    <h3 class="text-xl font-semibold text-white">Built-in Git Commands</h3>
-                    <p>Claude Code has powerful GitHub integration. Use slash commands for common operations:</p>
+                    <div class="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4">
+                        <p class="text-emerald-200 font-medium">Plugin vs Skill</p>
+                        <p class="text-sm mt-1">Plugin은 여러 기능(commands, skills, hooks, MCP 서버)을 하나로 묶어 버전 관리하고 공유할 수 있는 확장 패키지입니다. Skill이 단일 기능이라면, Plugin은 기능 모음집입니다.</p>
+                    </div>
 
+                    <h3 class="text-xl font-semibold text-white">Plugin 구조</h3>
+                    <pre><code class="text-green-400">my-plugin/
+├── .claude-plugin/
+│   └── plugin.json      # 매니페스트 (필수)
+├── commands/            # 사용자 명령어
+│   └── deploy.md
+├── skills/              # Claude 스킬
+│   └── code-review/
+│       └── SKILL.md
+├── agents/              # 커스텀 에이전트
+├── hooks/               # 이벤트 훅
+└── mcp-servers/         # MCP 서버</code></pre>
+
+                    <h3 class="text-xl font-semibold text-white mt-8">plugin.json 작성</h3>
+                    <p>플러그인의 모든 구성 요소를 정의하는 매니페스트 파일입니다:</p>
+
+                    <pre><code class="text-green-400">{
+  "name": "deployment-tools",
+  "version": "1.0.0",
+  "description": "배포 자동화 도구 모음",
+  "author": "your-name",
+  "commands": ["commands/deploy.md"],
+  "skills": ["skills/code-review"],
+  "hooks": {
+    "post-tool-use": ["hooks/notify.sh"]
+  },
+  "mcp-servers": {
+    "my-server": {
+      "command": "node",
+      "args": ["mcp-servers/server.js"]
+    }
+  }
+}</code></pre>
+
+                    <h3 class="text-xl font-semibold text-white mt-8">Plugin 설치 방법</h3>
                     <div class="space-y-4 mt-4">
                         <div class="bg-dark-700 rounded-xl p-4">
-                            <div class="flex items-center gap-3 mb-2">
-                                <code class="inline-code">/commit</code>
-                            </div>
-                            <p class="text-sm">Stage changes, generate a descriptive commit message, and commit. Claude analyzes your changes and writes meaningful messages.</p>
-                            <pre class="mt-3"><code class="text-xs text-gray-400">> /commit
-Claude: I'll analyze the changes and create a commit.
-
-[Stages modified files]
-[Generates commit message based on diff]
-[Creates commit]
-
-Committed: "Add user authentication with JWT tokens"</code></pre>
+                            <h4 class="font-semibold text-accent mb-2">로컬 설치</h4>
+                            <pre><code class="text-xs text-green-400"># 로컬 디렉토리에서 설치
+claude plugins add ./my-plugin</code></pre>
                         </div>
 
                         <div class="bg-dark-700 rounded-xl p-4">
-                            <div class="flex items-center gap-3 mb-2">
-                                <code class="inline-code">/pr</code>
-                            </div>
-                            <p class="text-sm">Create a pull request with auto-generated title and description based on your commits.</p>
-                            <pre class="mt-3"><code class="text-xs text-gray-400">> /pr
-Claude: Creating PR for branch 'feature/auth'...
-
-[Analyzes commits in branch]
-[Generates PR title and description]
-[Creates PR on GitHub]
-
-PR #42 created: "Implement user authentication"</code></pre>
+                            <h4 class="font-semibold text-accent mb-2">GitHub에서 설치</h4>
+                            <pre><code class="text-xs text-green-400"># GitHub 저장소에서 직접 설치
+claude plugins add github:username/plugin-name</code></pre>
                         </div>
 
                         <div class="bg-dark-700 rounded-xl p-4">
-                            <div class="flex items-center gap-3 mb-2">
-                                <code class="inline-code">/review</code>
-                            </div>
-                            <p class="text-sm">Review a PR, analyze changes, identify issues, and suggest improvements.</p>
-                            <pre class="mt-3"><code class="text-xs text-gray-400">> /review 42
-Claude: Reviewing PR #42...
+                            <h4 class="font-semibold text-accent mb-2">플러그인 관리</h4>
+                            <pre><code class="text-xs text-green-400"># 설치된 플러그인 목록
+claude plugins list
 
-[Fetches PR diff]
-[Analyzes changes]
-[Posts review comments]
+# 플러그인 업데이트
+claude plugins update plugin-name
 
-Review complete: 2 suggestions, 1 concern</code></pre>
+# 플러그인 제거
+claude plugins remove plugin-name</code></pre>
                         </div>
                     </div>
 
-                    <h3 class="text-xl font-semibold text-white mt-8">Working with Issues</h3>
-                    <p>Claude can interact with GitHub issues directly:</p>
+                    <h3 class="text-xl font-semibold text-white mt-8">Namespacing</h3>
+                    <p>플러그인의 명령어와 스킬은 네임스페이스로 구분됩니다:</p>
 
-                    <pre><code class="text-green-400"># Start working on an issue
-> "Work on issue #15"
+                    <pre><code class="text-green-400"># Plugin 명령어 호출
+> /deployment-tools:deploy
 
-Claude: Let me check issue #15...
+# Plugin 스킬 호출
+> /deployment-tools:code-review
 
-[Fetches issue details]
-[Creates branch: fix/issue-15]
-[Implements the fix]
-[Commits and creates PR]
+# 네임스페이스 덕분에 같은 이름의 명령어가 있어도 충돌 없음</code></pre>
 
-# Or browse issues
-> "What are the open bugs?"
+                    <h3 class="text-xl font-semibold text-white mt-8">실습: 첫 번째 플러그인 만들기</h3>
+                    <pre><code class="text-green-400"># 1. 플러그인 디렉토리 생성
+mkdir -p my-plugin/.claude-plugin
+mkdir -p my-plugin/commands
+mkdir -p my-plugin/skills/helper
 
-Claude: [Lists open issues labeled 'bug']</code></pre>
+# 2. manifest 작성
+cat > my-plugin/.claude-plugin/plugin.json << 'EOF'
+{
+  "name": "my-first-plugin",
+  "version": "1.0.0",
+  "description": "나의 첫 번째 플러그인",
+  "commands": ["commands/greet.md"],
+  "skills": ["skills/helper"]
+}
+EOF
 
-                    <h3 class="text-xl font-semibold text-white mt-8">GitHub CLI Integration</h3>
-                    <p>Claude uses the <code class="inline-code">gh</code> CLI under the hood. Ensure it's installed and authenticated:</p>
+# 3. 명령어 파일 생성
+cat > my-plugin/commands/greet.md << 'EOF'
+---
+description: 사용자에게 인사합니다
+---
 
-                    <pre><code class="text-green-400"># Install GitHub CLI
-brew install gh  # macOS
-apt install gh   # Ubuntu
+$ARGUMENTS
 
-# Authenticate
-gh auth login
+친절하게 인사해주세요!
+EOF
 
-# Verify
-gh auth status</code></pre>
+# 4. 설치
+claude plugins add ./my-plugin</code></pre>
 
-                    <h3 class="text-xl font-semibold text-white mt-8">GitHub Actions Integration</h3>
-                    <p>Run Claude Code in GitHub Actions for automated workflows:</p>
+                    <div class="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 mt-6">
+                        <p class="text-emerald-200 font-medium">Pro Tip</p>
+                        <p class="text-sm mt-1">플러그인을 GitHub에 올리면 다른 사용자들이 <code class="inline-code">claude plugins add github:your-username/your-plugin</code>으로 쉽게 설치할 수 있습니다.</p>
+                    </div>
+                </div>
 
-                    <pre><code class="text-green-400"># .github/workflows/claude-review.yml
-name: Claude Code Review
+                <div class="mt-8 pt-6 border-t border-white/10 flex justify-between">
+                    <button onclick="showLesson(1)" class="bg-white/10 hover:bg-white/20 px-6 py-3 rounded-xl font-semibold transition-all">
+                        Previous
+                    </button>
+                    <button onclick="showLesson(3)" class="bg-accent hover:bg-emerald-400 text-dark-900 px-6 py-3 rounded-xl font-semibold transition-all">
+                        Next: Skill Discovery
+                    </button>
+                </div>
+            </div>
+        </section>
 
-on:
-  pull_request:
-    types: [opened, synchronize]
+        <!-- Lesson 3: Skill Discovery -->
+        <section id="lesson3" class="lesson-content mb-12">
+            <div class="card rounded-2xl p-8">
+                <div class="flex items-center gap-4 mb-6">
+                    <span class="bg-accent/20 text-accent w-12 h-12 rounded-xl flex items-center justify-center text-xl font-bold">3</span>
+                    <h2 class="text-2xl font-bold">Skill Discovery & Marketplaces</h2>
+                </div>
+
+                <div class="space-y-6 text-gray-300">
+                    <div class="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4">
+                        <p class="text-emerald-200 font-medium">커뮤니티의 힘</p>
+                        <p class="text-sm mt-1">전 세계 개발자들이 만든 스킬과 플러그인을 발견하고 활용하세요. 바퀴를 다시 발명할 필요가 없습니다!</p>
+                    </div>
+
+                    <h3 class="text-xl font-semibold text-white">공식 리소스</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full mt-4 text-sm">
+                            <thead>
+                                <tr class="border-b border-white/10">
+                                    <th class="text-left py-3 px-4 text-accent">리소스</th>
+                                    <th class="text-left py-3 px-4">URL</th>
+                                    <th class="text-left py-3 px-4">설명</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-b border-white/5">
+                                    <td class="py-3 px-4 font-semibold">Anthropic Cookbook</td>
+                                    <td class="py-3 px-4 font-mono text-xs">github.com/anthropics/anthropic-cookbook</td>
+                                    <td class="py-3 px-4">공식 예제 및 레시피</td>
+                                </tr>
+                                <tr class="border-b border-white/5">
+                                    <td class="py-3 px-4 font-semibold">MCP Servers</td>
+                                    <td class="py-3 px-4 font-mono text-xs">github.com/modelcontextprotocol/servers</td>
+                                    <td class="py-3 px-4">공식 MCP 서버 모음</td>
+                                </tr>
+                                <tr class="border-b border-white/5">
+                                    <td class="py-3 px-4 font-semibold">Claude Code Examples</td>
+                                    <td class="py-3 px-4 font-mono text-xs">github.com/anthropics/claude-code</td>
+                                    <td class="py-3 px-4">공식 사용 예제</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h3 class="text-xl font-semibold text-white mt-8">커뮤니티 리소스</h3>
+                    <div class="grid md:grid-cols-2 gap-4 mt-4">
+                        <a href="https://github.com/topics/claude-code" target="_blank" class="bg-dark-700 rounded-xl p-4 hover:border-accent border border-transparent transition-all">
+                            <h4 class="font-semibold text-accent mb-2">GitHub Topics</h4>
+                            <p class="text-sm">github.com/topics/claude-code</p>
+                            <p class="text-xs text-gray-500 mt-1">Claude Code 관련 저장소 검색</p>
+                        </a>
+                        <a href="https://mcp.so" target="_blank" class="bg-dark-700 rounded-xl p-4 hover:border-accent border border-transparent transition-all">
+                            <h4 class="font-semibold text-accent mb-2">MCP Hub</h4>
+                            <p class="text-sm">mcp.so</p>
+                            <p class="text-xs text-gray-500 mt-1">MCP 서버 허브 & 디렉토리</p>
+                        </a>
+                        <a href="https://reddit.com/r/ClaudeAI" target="_blank" class="bg-dark-700 rounded-xl p-4 hover:border-accent border border-transparent transition-all">
+                            <h4 class="font-semibold text-accent mb-2">Reddit r/ClaudeAI</h4>
+                            <p class="text-sm">reddit.com/r/ClaudeAI</p>
+                            <p class="text-xs text-gray-500 mt-1">커뮤니티 토론 및 공유</p>
+                        </a>
+                        <a href="https://anthropic.com/discord" target="_blank" class="bg-dark-700 rounded-xl p-4 hover:border-accent border border-transparent transition-all">
+                            <h4 class="font-semibold text-accent mb-2">Discord</h4>
+                            <p class="text-sm">anthropic.com/discord</p>
+                            <p class="text-xs text-gray-500 mt-1">공식 디스코드 서버</p>
+                        </a>
+                    </div>
+
+                    <h3 class="text-xl font-semibold text-white mt-8">인기 스킬 카테고리</h3>
+                    <div class="grid md:grid-cols-2 gap-4 mt-4">
+                        <div class="bg-dark-700 rounded-xl p-4">
+                            <h4 class="font-semibold text-accent mb-2">📝 Documentation</h4>
+                            <ul class="text-sm space-y-1">
+                                <li>• readme-generator: README 자동 생성</li>
+                                <li>• api-docs: API 문서 생성</li>
+                                <li>• changelog-writer: 변경 로그 작성</li>
+                            </ul>
+                        </div>
+                        <div class="bg-dark-700 rounded-xl p-4">
+                            <h4 class="font-semibold text-accent mb-2">🧪 Testing</h4>
+                            <ul class="text-sm space-y-1">
+                                <li>• test-writer: 테스트 코드 생성</li>
+                                <li>• coverage-analyzer: 커버리지 분석</li>
+                                <li>• code-review: 코드 리뷰 자동화</li>
+                            </ul>
+                        </div>
+                        <div class="bg-dark-700 rounded-xl p-4">
+                            <h4 class="font-semibold text-accent mb-2">🚀 DevOps</h4>
+                            <ul class="text-sm space-y-1">
+                                <li>• docker-helper: Dockerfile 생성/최적화</li>
+                                <li>• k8s-assistant: Kubernetes 설정 도우미</li>
+                                <li>• ci-cd-generator: CI/CD 파이프라인</li>
+                            </ul>
+                        </div>
+                        <div class="bg-dark-700 rounded-xl p-4">
+                            <h4 class="font-semibold text-accent mb-2">🗄️ Database</h4>
+                            <ul class="text-sm space-y-1">
+                                <li>• sql-helper: SQL 쿼리 생성/최적화</li>
+                                <li>• migration-generator: DB 마이그레이션</li>
+                                <li>• schema-designer: 스키마 설계</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <h3 class="text-xl font-semibold text-white mt-8">플러그인 검색 및 설치</h3>
+                    <pre><code class="text-green-400"># GitHub에서 직접 설치
+claude plugins add github:username/awesome-plugin
+
+# 설치된 플러그인 확인
+claude plugins list
+
+# 플러그인 업데이트
+claude plugins update plugin-name
+
+# 플러그인 제거
+claude plugins remove plugin-name</code></pre>
+
+                    <h3 class="text-xl font-semibold text-white mt-8">나만의 스킬 공유하기</h3>
+                    <pre><code class="text-green-400"># 1. GitHub 저장소 생성
+git init my-awesome-skill
+cd my-awesome-skill
+
+# 2. 플러그인 구조로 정리
+mkdir -p .claude-plugin skills/my-skill
+# ... 파일 작성 ...
+
+# 3. GitHub에 push
+git push origin main
+
+# 4. 다른 사용자가 설치
+claude plugins add github:your-username/my-awesome-skill</code></pre>
+
+                    <div class="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 mt-6">
+                        <p class="text-emerald-200 font-medium">Pro Tip</p>
+                        <p class="text-sm mt-1">README.md에 설치 방법과 사용 예시를 상세히 작성하세요. 좋은 문서화가 플러그인 채택의 핵심입니다!</p>
+                    </div>
+                </div>
+
+                <div class="mt-8 pt-6 border-t border-white/10 flex justify-between">
+                    <button onclick="showLesson(2)" class="bg-white/10 hover:bg-white/20 px-6 py-3 rounded-xl font-semibold transition-all">
+                        Previous
+                    </button>
+                    <button onclick="showLesson(4)" class="bg-accent hover:bg-emerald-400 text-dark-900 px-6 py-3 rounded-xl font-semibold transition-all">
+                        Next: 실전 자동화
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Lesson 4: 실전 자동화 -->
+        <section id="lesson4" class="lesson-content mb-12">
+            <div class="card rounded-2xl p-8">
+                <div class="flex items-center gap-4 mb-6">
+                    <span class="bg-accent/20 text-accent w-12 h-12 rounded-xl flex items-center justify-center text-xl font-bold">4</span>
+                    <h2 class="text-2xl font-bold">실전 자동화</h2>
+                </div>
+
+                <div class="space-y-6 text-gray-300">
+                    <div class="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4">
+                        <p class="text-emerald-200 font-medium">Skills + Headless + Commands = 완전 자동화</p>
+                        <p class="text-sm mt-1">지금까지 배운 Skills, Plugins, Headless Mode, Custom Commands를 조합하여 강력한 자동화 파이프라인을 구축합니다.</p>
+                    </div>
+
+                    <h3 class="text-xl font-semibold text-white">Headless Mode 기초</h3>
+                    <p>스크립트, CI/CD 파이프라인에서 Claude Code를 비대화형으로 실행합니다:</p>
+
+                    <pre><code class="text-green-400"># 기본 headless 실행
+claude -p "이 코드를 리뷰해줘" < code.py
+
+# 스킬과 함께 사용
+claude -p "/code-review src/"
+
+# JSON 출력 (자동화용)
+claude -p "분석해줘" --output-format json
+
+# 스트리밍 비활성화
+claude -p "수정해줘" --no-streaming</code></pre>
+
+                    <h3 class="text-xl font-semibold text-white mt-8">Custom Commands 정의</h3>
+                    <p>자주 사용하는 작업을 명령어로 정의합니다:</p>
+
+                    <pre><code class="text-green-400"># .claude/commands/daily-report.md
+---
+description: 일일 작업 리포트 생성
+---
+
+$ARGUMENTS
+
+다음을 수행해주세요:
+1. 오늘 커밋된 내용 요약
+2. 변경된 파일 목록
+3. TODO 항목 확인
+4. 결과를 daily-report.md로 저장</code></pre>
+
+                    <h3 class="text-xl font-semibold text-white mt-8">Skills + Commands 통합</h3>
+                    <p>여러 스킬을 순차적으로 실행하는 워크플로우:</p>
+
+                    <pre><code class="text-green-400"># .claude/commands/full-review.md
+---
+description: 전체 코드 리뷰 워크플로우
+---
+
+다음 스킬들을 순서대로 실행해주세요:
+
+1. /security-scan - 보안 취약점 검사
+2. /code-quality - 코드 품질 분석
+3. /test-coverage - 테스트 커버리지 확인
+4. 결과를 review-report.md로 저장</code></pre>
+
+                    <h3 class="text-xl font-semibold text-white mt-8">CI/CD 통합 예제</h3>
+                    <pre><code class="text-green-400"># .github/workflows/code-review.yml
+name: AI Code Review
+
+on: [pull_request]
 
 jobs:
   review:
@@ -352,119 +606,42 @@ jobs:
       - name: Install Claude Code
         run: npm install -g @anthropic-ai/claude-code
 
-      - name: Review PR
+      - name: Run AI Review
+        run: |
+          claude -p "/code-review --diff HEAD~1" \
+            --output-format json > review.json
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-        run: |
-          claude --headless -p "Review this PR and comment on any issues"</code></pre>
 
-                    <div class="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 mt-6">
-                        <p class="text-emerald-200 font-medium">Pro Tip</p>
-                        <p class="text-sm mt-1">Use <code class="inline-code">gh pr view</code> and <code class="inline-code">gh issue view</code> commands to get context about PRs and issues without leaving Claude Code.</p>
-                    </div>
-                </div>
+      - name: Post Review Comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const review = require('./review.json');
+            // ... PR에 코멘트 작성</code></pre>
 
-                <div class="mt-8 pt-6 border-t border-white/10 flex justify-between">
-                    <button onclick="showLesson(1)" class="bg-white/10 hover:bg-white/20 px-6 py-3 rounded-xl font-semibold transition-all">
-                        Previous
-                    </button>
-                    <button onclick="showLesson(3)" class="bg-accent hover:bg-emerald-400 text-dark-900 px-6 py-3 rounded-xl font-semibold transition-all">
-                        Next: Headless Mode
-                    </button>
-                </div>
-            </div>
-        </section>
-
-        <!-- Lesson 3: Headless Mode -->
-        <section id="lesson3" class="lesson-content mb-12">
-            <div class="card rounded-2xl p-8">
-                <div class="flex items-center gap-4 mb-6">
-                    <span class="bg-accent/20 text-accent w-12 h-12 rounded-xl flex items-center justify-center text-xl font-bold">3</span>
-                    <h2 class="text-2xl font-bold">Headless Mode</h2>
-                </div>
-
-                <div class="space-y-6 text-gray-300">
-                    <div class="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4">
-                        <p class="text-emerald-200 font-medium">What is Headless Mode?</p>
-                        <p class="text-sm mt-1">Headless mode runs Claude Code without an interactive terminal. Perfect for scripts, CI/CD pipelines, and automated workflows.</p>
-                    </div>
-
-                    <h3 class="text-xl font-semibold text-white">Running Headless</h3>
-                    <pre><code class="text-green-400"># Basic headless command
-claude --headless -p "List all TypeScript files"
-
-# With print mode (outputs response to stdout)
-claude --headless --print -p "Generate a README for this project"
-
-# With specific model
-claude --headless --model haiku -p "Quick code analysis"</code></pre>
-
-                    <h3 class="text-xl font-semibold text-white mt-8">Key Flags</h3>
-                    <div class="overflow-x-auto">
-                        <table class="w-full mt-4 text-sm">
-                            <thead>
-                                <tr class="border-b border-white/10">
-                                    <th class="text-left py-3 px-4 text-accent">Flag</th>
-                                    <th class="text-left py-3 px-4">Description</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr class="border-b border-white/5">
-                                    <td class="py-3 px-4 font-mono text-sm">--headless</td>
-                                    <td class="py-3 px-4">Run without interactive terminal</td>
-                                </tr>
-                                <tr class="border-b border-white/5">
-                                    <td class="py-3 px-4 font-mono text-sm">-p, --prompt</td>
-                                    <td class="py-3 px-4">Initial prompt to execute</td>
-                                </tr>
-                                <tr class="border-b border-white/5">
-                                    <td class="py-3 px-4 font-mono text-sm">--print</td>
-                                    <td class="py-3 px-4">Output response to stdout</td>
-                                </tr>
-                                <tr class="border-b border-white/5">
-                                    <td class="py-3 px-4 font-mono text-sm">--yes</td>
-                                    <td class="py-3 px-4">Auto-approve tool use</td>
-                                </tr>
-                                <tr class="border-b border-white/5">
-                                    <td class="py-3 px-4 font-mono text-sm">--allowedTools</td>
-                                    <td class="py-3 px-4">Restrict available tools</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <h3 class="text-xl font-semibold text-white mt-8">Permissions & Security</h3>
-                    <p>In headless mode, you must handle permissions carefully:</p>
-
-                    <pre><code class="text-green-400"># Auto-approve all tool uses (CAUTION!)
-claude --headless --yes -p "Fix all lint errors"
-
-# Restrict to safe tools only
-claude --headless --allowedTools "Read,Grep,Glob" \
-  -p "Analyze the codebase structure"
-
-# Read-only mode (no file modifications)
-claude --headless --allowedTools "Read,Grep,Glob,WebFetch" \
-  -p "Review this code for security issues"</code></pre>
-
-                    <div class="bg-red-500/10 border border-red-500/30 rounded-xl p-4 mt-6">
-                        <p class="text-red-200 font-medium">Security Warning</p>
-                        <p class="text-sm mt-1">Using <code class="inline-code">--yes</code> auto-approves all tool calls including file writes and command execution. Use <code class="inline-code">--allowedTools</code> to restrict capabilities in automated pipelines.</p>
-                    </div>
-
-                    <h3 class="text-xl font-semibold text-white mt-8">Scripting Examples</h3>
-
+                    <h3 class="text-xl font-semibold text-white mt-8">자동화 스크립트</h3>
                     <div class="space-y-4 mt-4">
                         <div class="bg-dark-700 rounded-xl p-4">
-                            <h4 class="font-semibold text-accent mb-2">Code Analysis Script</h4>
+                            <h4 class="font-semibold text-accent mb-2">Morning Standup Generator</h4>
                             <pre><code class="text-xs text-green-400">#!/bin/bash
-# analyze.sh - Get code quality report
+# scripts/morning-standup.sh
 
-report=$(claude --headless --print \
-  --allowedTools "Read,Grep,Glob" \
-  -p "Analyze src/ for code quality issues. Output as JSON.")
+echo "🌅 Generating standup report..."
 
-echo "$report" > quality-report.json</code></pre>
+# 1. 어제 커밋 요약
+claude -p "어제 커밋 내용을 요약해줘" \
+  --output-format json > /tmp/commits.json
+
+# 2. 오늘 TODO 확인
+claude -p "TODO 주석을 찾아서 정리해줘" \
+  --output-format json > /tmp/todos.json
+
+# 3. 리포트 생성
+claude -p "스탠드업 리포트를 작성해줘" \
+  --files /tmp/commits.json,/tmp/todos.json
+
+echo "✅ Standup complete!"</code></pre>
                         </div>
 
                         <div class="bg-dark-700 rounded-xl p-4">
@@ -472,154 +649,49 @@ echo "$report" > quality-report.json</code></pre>
                             <pre><code class="text-xs text-green-400">#!/bin/bash
 # .git/hooks/pre-commit
 
-# Get staged files
-files=$(git diff --cached --name-only)
+# Claude Code로 커밋 전 검사
+result=$(claude -p "/quick-review --staged" \
+  --output-format json)
 
-# Review with Claude
-result=$(claude --headless --print \
-  --allowedTools "Read" \
-  -p "Review these files for issues: $files")
-
-if echo "$result" | grep -q "CRITICAL"; then
-  echo "Critical issues found:"
-  echo "$result"
+if echo "$result" | jq -e '.has_critical_issues' > /dev/null; then
+  echo "❌ Critical issues found:"
+  echo "$result" | jq '.issues[]'
   exit 1
-fi</code></pre>
+fi
+
+echo "✅ Pre-commit check passed"
+exit 0</code></pre>
                         </div>
                     </div>
-                </div>
-
-                <div class="mt-8 pt-6 border-t border-white/10 flex justify-between">
-                    <button onclick="showLesson(2)" class="bg-white/10 hover:bg-white/20 px-6 py-3 rounded-xl font-semibold transition-all">
-                        Previous
-                    </button>
-                    <button onclick="showLesson(4)" class="bg-accent hover:bg-emerald-400 text-dark-900 px-6 py-3 rounded-xl font-semibold transition-all">
-                        Next: Custom Commands
-                    </button>
-                </div>
-            </div>
-        </section>
-
-        <!-- Lesson 4: Custom Commands -->
-        <section id="lesson4" class="lesson-content mb-12">
-            <div class="card rounded-2xl p-8">
-                <div class="flex items-center gap-4 mb-6">
-                    <span class="bg-accent/20 text-accent w-12 h-12 rounded-xl flex items-center justify-center text-xl font-bold">4</span>
-                    <h2 class="text-2xl font-bold">Custom Commands</h2>
-                </div>
-
-                <div class="space-y-6 text-gray-300">
-                    <h3 class="text-xl font-semibold text-white">Slash Commands</h3>
-                    <p>Create custom slash commands to automate repetitive tasks. Define them in your settings or CLAUDE.md:</p>
-
-                    <pre><code class="text-green-400">// .claude/settings.local.json
-{
-  "customCommands": {
-    "test": {
-      "description": "Run tests and fix failures",
-      "prompt": "Run npm test. If any tests fail, analyze the failures and fix them."
-    },
-    "docs": {
-      "description": "Generate documentation",
-      "prompt": "Generate JSDoc comments for all functions in the current file that don't have them."
-    },
-    "security": {
-      "description": "Security audit",
-      "prompt": "Scan the codebase for common security vulnerabilities (OWASP Top 10). Report findings."
-    }
-  }
-}</code></pre>
-
-                    <h3 class="text-xl font-semibold text-white mt-8">Using Custom Commands</h3>
-                    <pre><code class="text-green-400"># Run your custom command
-> /test
-
-Claude: Running tests...
-[Executes npm test]
-[Analyzes failures]
-[Fixes issues]
-
-# List available commands
-> /help
-
-Available commands:
-  /test     - Run tests and fix failures
-  /docs     - Generate documentation
-  /security - Security audit
-  ...</code></pre>
-
-                    <h3 class="text-xl font-semibold text-white mt-8">Project-Level Commands</h3>
-                    <p>Define project-specific commands in CLAUDE.md for team consistency:</p>
-
-                    <pre><code class="text-green-400"># CLAUDE.md
-
-## Custom Commands
-
-### /deploy
-Deploy to staging environment:
-1. Run tests
-2. Build the application
-3. Deploy to staging server
-4. Run smoke tests
-5. Report status
-
-### /review-pr [PR_NUMBER]
-Review a pull request:
-1. Fetch the PR diff
-2. Analyze for bugs, security issues, and code style
-3. Post review comments
-4. Summarize findings
-
-### /db-migrate
-Run database migrations:
-1. Backup current schema
-2. Run pending migrations
-3. Verify data integrity
-4. Report migration status</code></pre>
-
-                    <h3 class="text-xl font-semibold text-white mt-8">Command Parameters</h3>
-                    <p>Commands can accept parameters for flexibility:</p>
-
-                    <pre><code class="text-green-400">{
-  "customCommands": {
-    "refactor": {
-      "description": "Refactor a file",
-      "prompt": "Refactor $1 to improve code quality. Focus on: readability, performance, and maintainability."
-    },
-    "explain": {
-      "description": "Explain code",
-      "prompt": "Explain how $1 works in detail. Include: purpose, inputs, outputs, and key algorithms."
-    }
-  }
-}
-
-# Usage
-> /refactor src/utils/parser.ts
-> /explain src/auth/jwt.ts</code></pre>
 
                     <h3 class="text-xl font-semibold text-white mt-8">Best Practices</h3>
                     <div class="grid md:grid-cols-2 gap-4 mt-4">
                         <div class="bg-dark-700 rounded-xl p-4">
-                            <h4 class="font-semibold text-accent mb-2">Be Specific</h4>
-                            <p class="text-sm">Clear, detailed prompts produce better results than vague instructions.</p>
+                            <h4 class="font-semibold text-accent mb-2">명확한 프롬프트</h4>
+                            <p class="text-sm">상세하고 구체적인 지침이 더 좋은 결과를 만듭니다.</p>
                         </div>
                         <div class="bg-dark-700 rounded-xl p-4">
-                            <h4 class="font-semibold text-accent mb-2">Include Steps</h4>
-                            <p class="text-sm">Break complex tasks into numbered steps for reliable execution.</p>
+                            <h4 class="font-semibold text-accent mb-2">단계별 분리</h4>
+                            <p class="text-sm">복잡한 작업은 번호가 매겨진 단계로 분리하세요.</p>
                         </div>
                         <div class="bg-dark-700 rounded-xl p-4">
-                            <h4 class="font-semibold text-accent mb-2">Define Output</h4>
-                            <p class="text-sm">Specify the expected output format (JSON, Markdown, etc.).</p>
+                            <h4 class="font-semibold text-accent mb-2">출력 형식 지정</h4>
+                            <p class="text-sm">JSON, Markdown 등 원하는 출력 형식을 명시하세요.</p>
                         </div>
                         <div class="bg-dark-700 rounded-xl p-4">
-                            <h4 class="font-semibold text-accent mb-2">Test Thoroughly</h4>
-                            <p class="text-sm">Test commands with various inputs before sharing with team.</p>
+                            <h4 class="font-semibold text-accent mb-2">에러 처리</h4>
+                            <p class="text-sm">자동화 스크립트에서 실패 케이스를 반드시 처리하세요.</p>
                         </div>
                     </div>
 
-                    <div class="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 mt-6">
+                    <div class="bg-red-500/10 border border-red-500/30 rounded-xl p-4 mt-6">
+                        <p class="text-red-200 font-medium">CI/CD 보안 주의사항</p>
+                        <p class="text-sm mt-1"><code class="inline-code">ANTHROPIC_API_KEY</code>는 반드시 GitHub Secrets에 저장하세요. 절대로 코드에 직접 포함하지 마세요!</p>
+                    </div>
+
+                    <div class="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 mt-4">
                         <p class="text-emerald-200 font-medium">Team Tip</p>
-                        <p class="text-sm mt-1">Commit project-level commands in CLAUDE.md to your repository. This ensures all team members have access to the same automation tools.</p>
+                        <p class="text-sm mt-1">프로젝트 레벨 명령어는 <code class="inline-code">.claude/commands/</code>에 저장하여 팀 전체가 동일한 자동화 도구를 사용할 수 있도록 하세요.</p>
                     </div>
                 </div>
 
@@ -689,54 +761,54 @@ Run database migrations:
         // Quiz questions
         const questions = [
             {
-                q: "What package provides the Claude Code SDK?",
-                options: ["@claude/sdk", "@anthropic-ai/claude-agent-sdk", "claude-code-sdk", "@anthropic/claude"],
+                q: "SKILL.md 파일에서 필수로 포함해야 하는 필드는?",
+                options: ["name, allowed-tools", "name, description", "description, model", "user-invocable, hooks"],
                 correct: 1
             },
             {
-                q: "Which function from the SDK runs Claude programmatically?",
-                options: ["run()", "execute()", "query()", "invoke()"],
+                q: "스킬이 여러 위치에 같은 이름으로 존재할 때 우선순위가 가장 높은 것은?",
+                options: ["글로벌 스킬 (~/.claude/skills)", "사용자 스킬", "프로젝트 스킬 (.claude/skills)", "모두 동일"],
                 correct: 2
             },
             {
-                q: "What slash command creates a pull request?",
-                options: ["/create-pr", "/pull", "/pr", "/github pr"],
-                correct: 2
-            },
-            {
-                q: "Which flag runs Claude Code without an interactive terminal?",
-                options: ["--silent", "--batch", "--headless", "--background"],
-                correct: 2
-            },
-            {
-                q: "What flag auto-approves all tool calls in headless mode?",
-                options: ["--auto", "--approve", "--yes", "--force"],
-                correct: 2
-            },
-            {
-                q: "How do you restrict tools in headless mode?",
-                options: ["--tools", "--allowedTools", "--only-tools", "--restrict"],
+                q: "user-invocable: true로 설정하면 어떤 기능이 활성화되나요?",
+                options: ["Claude가 자동으로 스킬을 발견", "/skill-name으로 직접 호출 가능", "다른 사용자와 공유 가능", "API에서 사용 가능"],
                 correct: 1
             },
             {
-                q: "Where are custom commands defined?",
-                options: ["package.json", ".claude/commands.json", ".claude/settings.local.json", "commands.yaml"],
-                correct: 2
-            },
-            {
-                q: "What CLI tool does Claude use for GitHub operations?",
-                options: ["git", "github-cli", "gh", "hub"],
-                correct: 2
-            },
-            {
-                q: "What does the --print flag do in headless mode?",
-                options: ["Prints debug info", "Outputs response to stdout", "Prints command history", "Shows tool calls"],
+                q: "Plugin의 매니페스트 파일 이름은?",
+                options: ["manifest.json", "plugin.json", "package.json", "config.json"],
                 correct: 1
             },
             {
-                q: "What exit code blocks a tool call in a hook using the SDK?",
-                options: ["Exit code 0", "Exit code 1", "Exit code 2", "Exit code -1"],
+                q: "Plugin에 포함될 수 있는 구성요소가 아닌 것은?",
+                options: ["commands", "skills", "templates", "mcp-servers"],
                 correct: 2
+            },
+            {
+                q: "Plugin의 명령어를 호출할 때 사용하는 문법은?",
+                options: ["@plugin-name/command", "plugin-name::command", "/plugin-name:command", "#plugin-name.command"],
+                correct: 2
+            },
+            {
+                q: "GitHub에서 플러그인을 설치하는 올바른 명령어는?",
+                options: ["claude install github:user/repo", "claude plugins add github:user/repo", "claude get github:user/repo", "npm install claude-plugin-name"],
+                correct: 1
+            },
+            {
+                q: "MCP 서버를 찾을 수 있는 공식 리소스는?",
+                options: ["npmjs.com", "github.com/modelcontextprotocol/servers", "claude-plugins.com", "mcp-store.io"],
+                correct: 1
+            },
+            {
+                q: "Headless Mode에서 JSON 출력을 받으려면?",
+                options: ["--json", "--output json", "--output-format json", "--format=json"],
+                correct: 2
+            },
+            {
+                q: "CI/CD에서 Claude Code를 사용할 때 필요한 환경 변수는?",
+                options: ["CLAUDE_API_KEY", "ANTHROPIC_API_KEY", "CLAUDE_TOKEN", "AI_API_KEY"],
+                correct: 1
             }
         ];
 
