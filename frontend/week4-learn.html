@@ -37,6 +37,12 @@
             background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
             border: 1px solid rgba(255,255,255,0.06);
         }
+        .lesson-content { display: none; }
+        .lesson-content.active { display: block; }
+        .lesson-btn.active { background: rgba(52, 211, 153, 0.2); border-color: rgba(52, 211, 153, 0.5); }
+        pre { background: #1a1a2e; border-radius: 8px; padding: 16px; overflow-x: auto; }
+        code { font-size: 0.875rem; }
+        .inline-code { background: rgba(52, 211, 153, 0.2); padding: 2px 6px; border-radius: 4px; font-size: 0.875rem; }
     </style>
 </head>
 <body class="bg-dark-900 text-white min-h-screen">
@@ -49,9 +55,12 @@
                 </svg>
                 <span>Back</span>
             </a>
-            <a href="week4.html" class="text-accent hover:text-emerald-300 transition-colors text-sm font-medium">
-                Go to Challenge
-            </a>
+            <div class="flex items-center gap-4">
+                <span class="text-sm text-gray-500">Quiz Score: <span id="quizScore" class="text-accent font-bold">0</span>/10</span>
+                <a href="week4.html" class="text-accent hover:text-emerald-300 transition-colors text-sm font-medium">
+                    Go to Challenge
+                </a>
+            </div>
         </div>
     </nav>
 
@@ -63,64 +72,605 @@
                 <span class="bg-gray-500/20 text-gray-400 px-3 py-1 rounded-full text-xs font-bold border border-gray-500/30">LEARN</span>
             </div>
             <h1 class="text-4xl md:text-5xl font-bold mb-4 tracking-tight">
-                Bot & App MVP
+                SDK & GitHub Integration
             </h1>
             <p class="text-xl text-gray-400 mb-8 max-w-2xl">
-                Build a Discord bot or web dashboard MVP using Claude Code automation.
+                Build custom automation with the Claude Code SDK and integrate with GitHub workflows.
             </p>
         </div>
     </header>
 
     <main class="max-w-5xl mx-auto px-6 py-12">
-        <section class="mb-16">
-            <div class="card rounded-2xl p-12 text-center">
-                <div class="text-6xl mb-6">🚧</div>
-                <h2 class="text-3xl font-bold mb-4">Coming Soon</h2>
-                <p class="text-gray-400 text-lg mb-8 max-w-md mx-auto">
-                    Week 4 learning content is being prepared. Check back when the challenge begins!
-                </p>
-                <div class="flex flex-wrap justify-center gap-4">
-                    <a href="week1-learn.html" class="bg-accent/20 hover:bg-accent/30 border border-accent/30 px-6 py-3 rounded-xl transition-all font-medium text-accent">
-                        Review Week 1
-                    </a>
-                    <a href="index.html" class="bg-white/5 hover:bg-white/10 border border-white/10 px-6 py-3 rounded-xl transition-all font-medium">
-                        Back to Home
-                    </a>
+        <!-- Lesson Navigation -->
+        <div class="flex flex-wrap gap-3 mb-8">
+            <button class="lesson-btn active px-4 py-2 rounded-xl border border-white/10 text-sm font-medium transition-all hover:bg-white/5" data-lesson="1">
+                1. Claude Code SDK
+            </button>
+            <button class="lesson-btn px-4 py-2 rounded-xl border border-white/10 text-sm font-medium transition-all hover:bg-white/5" data-lesson="2">
+                2. GitHub Integration
+            </button>
+            <button class="lesson-btn px-4 py-2 rounded-xl border border-white/10 text-sm font-medium transition-all hover:bg-white/5" data-lesson="3">
+                3. Headless Mode
+            </button>
+            <button class="lesson-btn px-4 py-2 rounded-xl border border-white/10 text-sm font-medium transition-all hover:bg-white/5" data-lesson="4">
+                4. Custom Commands
+            </button>
+        </div>
+
+        <!-- Lesson 1: Claude Code SDK -->
+        <section id="lesson1" class="lesson-content active mb-12">
+            <div class="card rounded-2xl p-8">
+                <div class="flex items-center gap-4 mb-6">
+                    <span class="bg-accent/20 text-accent w-12 h-12 rounded-xl flex items-center justify-center text-xl font-bold">1</span>
+                    <h2 class="text-2xl font-bold">Claude Code SDK</h2>
+                </div>
+
+                <div class="space-y-6 text-gray-300">
+                    <div class="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4">
+                        <p class="text-emerald-200 font-medium">The Claude Agent SDK</p>
+                        <p class="text-sm mt-1">The <code class="inline-code">@anthropic-ai/claude-agent-sdk</code> package lets you run Claude Code programmatically. Build custom tools, automation pipelines, and integrate Claude into your applications.</p>
+                    </div>
+
+                    <h3 class="text-xl font-semibold text-white">Installation</h3>
+                    <pre><code class="text-green-400"># Install the SDK
+npm install @anthropic-ai/claude-agent-sdk
+
+# Or with pnpm/yarn
+pnpm add @anthropic-ai/claude-agent-sdk
+yarn add @anthropic-ai/claude-agent-sdk</code></pre>
+
+                    <h3 class="text-xl font-semibold text-white mt-8">Basic Usage</h3>
+                    <p>The SDK provides a <code class="inline-code">query()</code> function to run Claude Code programmatically:</p>
+
+                    <pre><code class="text-green-400">import { query } from "@anthropic-ai/claude-agent-sdk";
+
+async function main() {
+  const result = await query({
+    prompt: "What files are in the src directory?",
+    options: {
+      maxTurns: 5,           // Limit agent iterations
+      allowedTools: ["Read", "Glob", "Grep"],  // Restrict tools
+    }
+  });
+
+  console.log(result.response);
+}
+
+main();</code></pre>
+
+                    <h3 class="text-xl font-semibold text-white mt-8">SDK in Hooks</h3>
+                    <p>The SDK is particularly powerful when used in hooks. Here's an example that prevents duplicate query functions:</p>
+
+                    <pre><code class="text-green-400">// hooks/query_hook.js
+import { query } from "@anthropic-ai/claude-agent-sdk";
+
+async function main() {
+  // Read the tool input from stdin
+  const chunks = [];
+  for await (const chunk of process.stdin) {
+    chunks.push(chunk);
+  }
+  const toolInput = JSON.parse(Buffer.concat(chunks).toString());
+
+  // Get the new code being written
+  const newCode = toolInput.tool_input?.content || "";
+
+  // Ask Claude to review for duplicates
+  const review = await query({
+    prompt: `Review this code for duplicate functions:
+
+${newCode}
+
+If duplicates exist, respond with "DUPLICATE: [reason]".
+If no duplicates, respond with "OK".`,
+    options: {
+      maxTurns: 1,
+      allowedTools: ["Read", "Grep"]
+    }
+  });
+
+  if (review.response.includes("DUPLICATE:")) {
+    console.error(review.response);
+    process.exit(2);  // Block the tool call
+  }
+
+  process.exit(0);  // Allow the tool call
+}
+
+main();</code></pre>
+
+                    <h3 class="text-xl font-semibold text-white mt-8">SDK Options</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full mt-4 text-sm">
+                            <thead>
+                                <tr class="border-b border-white/10">
+                                    <th class="text-left py-3 px-4 text-accent">Option</th>
+                                    <th class="text-left py-3 px-4">Description</th>
+                                    <th class="text-left py-3 px-4">Default</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-b border-white/5">
+                                    <td class="py-3 px-4 font-mono text-sm">maxTurns</td>
+                                    <td class="py-3 px-4">Maximum agent iterations</td>
+                                    <td class="py-3 px-4">10</td>
+                                </tr>
+                                <tr class="border-b border-white/5">
+                                    <td class="py-3 px-4 font-mono text-sm">allowedTools</td>
+                                    <td class="py-3 px-4">Tools the agent can use</td>
+                                    <td class="py-3 px-4">All tools</td>
+                                </tr>
+                                <tr class="border-b border-white/5">
+                                    <td class="py-3 px-4 font-mono text-sm">model</td>
+                                    <td class="py-3 px-4">Claude model to use</td>
+                                    <td class="py-3 px-4">sonnet</td>
+                                </tr>
+                                <tr class="border-b border-white/5">
+                                    <td class="py-3 px-4 font-mono text-sm">cwd</td>
+                                    <td class="py-3 px-4">Working directory</td>
+                                    <td class="py-3 px-4">Current dir</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h3 class="text-xl font-semibold text-white mt-8">Use Cases</h3>
+                    <div class="grid md:grid-cols-2 gap-4 mt-4">
+                        <div class="bg-dark-700 rounded-xl p-4">
+                            <h4 class="font-semibold text-accent mb-2">Automated Code Review</h4>
+                            <p class="text-sm">Run Claude to review PRs, check for bugs, and suggest improvements automatically.</p>
+                        </div>
+                        <div class="bg-dark-700 rounded-xl p-4">
+                            <h4 class="font-semibold text-accent mb-2">Custom CLI Tools</h4>
+                            <p class="text-sm">Build domain-specific tools that leverage Claude's capabilities.</p>
+                        </div>
+                        <div class="bg-dark-700 rounded-xl p-4">
+                            <h4 class="font-semibold text-accent mb-2">Pre-commit Hooks</h4>
+                            <p class="text-sm">Validate code quality, check for security issues, enforce patterns.</p>
+                        </div>
+                        <div class="bg-dark-700 rounded-xl p-4">
+                            <h4 class="font-semibold text-accent mb-2">CI/CD Integration</h4>
+                            <p class="text-sm">Integrate Claude into your build pipelines for automated tasks.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-8 pt-6 border-t border-white/10">
+                    <button onclick="showLesson(2)" class="bg-accent hover:bg-emerald-400 text-dark-900 px-6 py-3 rounded-xl font-semibold transition-all">
+                        Next: GitHub Integration
+                    </button>
                 </div>
             </div>
         </section>
 
-        <!-- Preview of Topics -->
-        <section class="mb-16">
-            <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-6">TOPICS PREVIEW</h2>
-            <div class="grid md:grid-cols-2 gap-4">
-                <div class="card rounded-2xl p-6 opacity-60">
-                    <div class="flex items-center gap-3 mb-3">
-                        <span class="text-2xl">📝</span>
-                        <h3 class="font-bold text-lg">CLAUDE.md Advanced</h3>
-                    </div>
-                    <p class="text-gray-400 text-sm">Advanced memory patterns for complex projects.</p>
+        <!-- Lesson 2: GitHub Integration -->
+        <section id="lesson2" class="lesson-content mb-12">
+            <div class="card rounded-2xl p-8">
+                <div class="flex items-center gap-4 mb-6">
+                    <span class="bg-accent/20 text-accent w-12 h-12 rounded-xl flex items-center justify-center text-xl font-bold">2</span>
+                    <h2 class="text-2xl font-bold">GitHub Integration</h2>
                 </div>
-                <div class="card rounded-2xl p-6 opacity-60">
-                    <div class="flex items-center gap-3 mb-3">
-                        <span class="text-2xl">🖥️</span>
-                        <h3 class="font-bold text-lg">Headless Mode</h3>
+
+                <div class="space-y-6 text-gray-300">
+                    <h3 class="text-xl font-semibold text-white">Built-in Git Commands</h3>
+                    <p>Claude Code has powerful GitHub integration. Use slash commands for common operations:</p>
+
+                    <div class="space-y-4 mt-4">
+                        <div class="bg-dark-700 rounded-xl p-4">
+                            <div class="flex items-center gap-3 mb-2">
+                                <code class="inline-code">/commit</code>
+                            </div>
+                            <p class="text-sm">Stage changes, generate a descriptive commit message, and commit. Claude analyzes your changes and writes meaningful messages.</p>
+                            <pre class="mt-3"><code class="text-xs text-gray-400">> /commit
+Claude: I'll analyze the changes and create a commit.
+
+[Stages modified files]
+[Generates commit message based on diff]
+[Creates commit]
+
+Committed: "Add user authentication with JWT tokens"</code></pre>
+                        </div>
+
+                        <div class="bg-dark-700 rounded-xl p-4">
+                            <div class="flex items-center gap-3 mb-2">
+                                <code class="inline-code">/pr</code>
+                            </div>
+                            <p class="text-sm">Create a pull request with auto-generated title and description based on your commits.</p>
+                            <pre class="mt-3"><code class="text-xs text-gray-400">> /pr
+Claude: Creating PR for branch 'feature/auth'...
+
+[Analyzes commits in branch]
+[Generates PR title and description]
+[Creates PR on GitHub]
+
+PR #42 created: "Implement user authentication"</code></pre>
+                        </div>
+
+                        <div class="bg-dark-700 rounded-xl p-4">
+                            <div class="flex items-center gap-3 mb-2">
+                                <code class="inline-code">/review</code>
+                            </div>
+                            <p class="text-sm">Review a PR, analyze changes, identify issues, and suggest improvements.</p>
+                            <pre class="mt-3"><code class="text-xs text-gray-400">> /review 42
+Claude: Reviewing PR #42...
+
+[Fetches PR diff]
+[Analyzes changes]
+[Posts review comments]
+
+Review complete: 2 suggestions, 1 concern</code></pre>
+                        </div>
                     </div>
-                    <p class="text-gray-400 text-sm">Run Claude Code in automated pipelines.</p>
+
+                    <h3 class="text-xl font-semibold text-white mt-8">Working with Issues</h3>
+                    <p>Claude can interact with GitHub issues directly:</p>
+
+                    <pre><code class="text-green-400"># Start working on an issue
+> "Work on issue #15"
+
+Claude: Let me check issue #15...
+
+[Fetches issue details]
+[Creates branch: fix/issue-15]
+[Implements the fix]
+[Commits and creates PR]
+
+# Or browse issues
+> "What are the open bugs?"
+
+Claude: [Lists open issues labeled 'bug']</code></pre>
+
+                    <h3 class="text-xl font-semibold text-white mt-8">GitHub CLI Integration</h3>
+                    <p>Claude uses the <code class="inline-code">gh</code> CLI under the hood. Ensure it's installed and authenticated:</p>
+
+                    <pre><code class="text-green-400"># Install GitHub CLI
+brew install gh  # macOS
+apt install gh   # Ubuntu
+
+# Authenticate
+gh auth login
+
+# Verify
+gh auth status</code></pre>
+
+                    <h3 class="text-xl font-semibold text-white mt-8">GitHub Actions Integration</h3>
+                    <p>Run Claude Code in GitHub Actions for automated workflows:</p>
+
+                    <pre><code class="text-green-400"># .github/workflows/claude-review.yml
+name: Claude Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Claude Code
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Review PR
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          claude --headless -p "Review this PR and comment on any issues"</code></pre>
+
+                    <div class="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 mt-6">
+                        <p class="text-emerald-200 font-medium">Pro Tip</p>
+                        <p class="text-sm mt-1">Use <code class="inline-code">gh pr view</code> and <code class="inline-code">gh issue view</code> commands to get context about PRs and issues without leaving Claude Code.</p>
+                    </div>
                 </div>
-                <div class="card rounded-2xl p-6 opacity-60">
-                    <div class="flex items-center gap-3 mb-3">
-                        <span class="text-2xl">🔐</span>
-                        <h3 class="font-bold text-lg">Permissions</h3>
-                    </div>
-                    <p class="text-gray-400 text-sm">Configure tool access and security settings.</p>
+
+                <div class="mt-8 pt-6 border-t border-white/10 flex justify-between">
+                    <button onclick="showLesson(1)" class="bg-white/10 hover:bg-white/20 px-6 py-3 rounded-xl font-semibold transition-all">
+                        Previous
+                    </button>
+                    <button onclick="showLesson(3)" class="bg-accent hover:bg-emerald-400 text-dark-900 px-6 py-3 rounded-xl font-semibold transition-all">
+                        Next: Headless Mode
+                    </button>
                 </div>
-                <div class="card rounded-2xl p-6 opacity-60">
-                    <div class="flex items-center gap-3 mb-3">
-                        <span class="text-2xl">🔄</span>
-                        <h3 class="font-bold text-lg">Git Workflows</h3>
+            </div>
+        </section>
+
+        <!-- Lesson 3: Headless Mode -->
+        <section id="lesson3" class="lesson-content mb-12">
+            <div class="card rounded-2xl p-8">
+                <div class="flex items-center gap-4 mb-6">
+                    <span class="bg-accent/20 text-accent w-12 h-12 rounded-xl flex items-center justify-center text-xl font-bold">3</span>
+                    <h2 class="text-2xl font-bold">Headless Mode</h2>
+                </div>
+
+                <div class="space-y-6 text-gray-300">
+                    <div class="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4">
+                        <p class="text-emerald-200 font-medium">What is Headless Mode?</p>
+                        <p class="text-sm mt-1">Headless mode runs Claude Code without an interactive terminal. Perfect for scripts, CI/CD pipelines, and automated workflows.</p>
                     </div>
-                    <p class="text-gray-400 text-sm">Integrate Claude Code with Git for PRs and commits.</p>
+
+                    <h3 class="text-xl font-semibold text-white">Running Headless</h3>
+                    <pre><code class="text-green-400"># Basic headless command
+claude --headless -p "List all TypeScript files"
+
+# With print mode (outputs response to stdout)
+claude --headless --print -p "Generate a README for this project"
+
+# With specific model
+claude --headless --model haiku -p "Quick code analysis"</code></pre>
+
+                    <h3 class="text-xl font-semibold text-white mt-8">Key Flags</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full mt-4 text-sm">
+                            <thead>
+                                <tr class="border-b border-white/10">
+                                    <th class="text-left py-3 px-4 text-accent">Flag</th>
+                                    <th class="text-left py-3 px-4">Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-b border-white/5">
+                                    <td class="py-3 px-4 font-mono text-sm">--headless</td>
+                                    <td class="py-3 px-4">Run without interactive terminal</td>
+                                </tr>
+                                <tr class="border-b border-white/5">
+                                    <td class="py-3 px-4 font-mono text-sm">-p, --prompt</td>
+                                    <td class="py-3 px-4">Initial prompt to execute</td>
+                                </tr>
+                                <tr class="border-b border-white/5">
+                                    <td class="py-3 px-4 font-mono text-sm">--print</td>
+                                    <td class="py-3 px-4">Output response to stdout</td>
+                                </tr>
+                                <tr class="border-b border-white/5">
+                                    <td class="py-3 px-4 font-mono text-sm">--yes</td>
+                                    <td class="py-3 px-4">Auto-approve tool use</td>
+                                </tr>
+                                <tr class="border-b border-white/5">
+                                    <td class="py-3 px-4 font-mono text-sm">--allowedTools</td>
+                                    <td class="py-3 px-4">Restrict available tools</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h3 class="text-xl font-semibold text-white mt-8">Permissions & Security</h3>
+                    <p>In headless mode, you must handle permissions carefully:</p>
+
+                    <pre><code class="text-green-400"># Auto-approve all tool uses (CAUTION!)
+claude --headless --yes -p "Fix all lint errors"
+
+# Restrict to safe tools only
+claude --headless --allowedTools "Read,Grep,Glob" \
+  -p "Analyze the codebase structure"
+
+# Read-only mode (no file modifications)
+claude --headless --allowedTools "Read,Grep,Glob,WebFetch" \
+  -p "Review this code for security issues"</code></pre>
+
+                    <div class="bg-red-500/10 border border-red-500/30 rounded-xl p-4 mt-6">
+                        <p class="text-red-200 font-medium">Security Warning</p>
+                        <p class="text-sm mt-1">Using <code class="inline-code">--yes</code> auto-approves all tool calls including file writes and command execution. Use <code class="inline-code">--allowedTools</code> to restrict capabilities in automated pipelines.</p>
+                    </div>
+
+                    <h3 class="text-xl font-semibold text-white mt-8">Scripting Examples</h3>
+
+                    <div class="space-y-4 mt-4">
+                        <div class="bg-dark-700 rounded-xl p-4">
+                            <h4 class="font-semibold text-accent mb-2">Code Analysis Script</h4>
+                            <pre><code class="text-xs text-green-400">#!/bin/bash
+# analyze.sh - Get code quality report
+
+report=$(claude --headless --print \
+  --allowedTools "Read,Grep,Glob" \
+  -p "Analyze src/ for code quality issues. Output as JSON.")
+
+echo "$report" > quality-report.json</code></pre>
+                        </div>
+
+                        <div class="bg-dark-700 rounded-xl p-4">
+                            <h4 class="font-semibold text-accent mb-2">Pre-commit Hook</h4>
+                            <pre><code class="text-xs text-green-400">#!/bin/bash
+# .git/hooks/pre-commit
+
+# Get staged files
+files=$(git diff --cached --name-only)
+
+# Review with Claude
+result=$(claude --headless --print \
+  --allowedTools "Read" \
+  -p "Review these files for issues: $files")
+
+if echo "$result" | grep -q "CRITICAL"; then
+  echo "Critical issues found:"
+  echo "$result"
+  exit 1
+fi</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-8 pt-6 border-t border-white/10 flex justify-between">
+                    <button onclick="showLesson(2)" class="bg-white/10 hover:bg-white/20 px-6 py-3 rounded-xl font-semibold transition-all">
+                        Previous
+                    </button>
+                    <button onclick="showLesson(4)" class="bg-accent hover:bg-emerald-400 text-dark-900 px-6 py-3 rounded-xl font-semibold transition-all">
+                        Next: Custom Commands
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Lesson 4: Custom Commands -->
+        <section id="lesson4" class="lesson-content mb-12">
+            <div class="card rounded-2xl p-8">
+                <div class="flex items-center gap-4 mb-6">
+                    <span class="bg-accent/20 text-accent w-12 h-12 rounded-xl flex items-center justify-center text-xl font-bold">4</span>
+                    <h2 class="text-2xl font-bold">Custom Commands</h2>
+                </div>
+
+                <div class="space-y-6 text-gray-300">
+                    <h3 class="text-xl font-semibold text-white">Slash Commands</h3>
+                    <p>Create custom slash commands to automate repetitive tasks. Define them in your settings or CLAUDE.md:</p>
+
+                    <pre><code class="text-green-400">// .claude/settings.local.json
+{
+  "customCommands": {
+    "test": {
+      "description": "Run tests and fix failures",
+      "prompt": "Run npm test. If any tests fail, analyze the failures and fix them."
+    },
+    "docs": {
+      "description": "Generate documentation",
+      "prompt": "Generate JSDoc comments for all functions in the current file that don't have them."
+    },
+    "security": {
+      "description": "Security audit",
+      "prompt": "Scan the codebase for common security vulnerabilities (OWASP Top 10). Report findings."
+    }
+  }
+}</code></pre>
+
+                    <h3 class="text-xl font-semibold text-white mt-8">Using Custom Commands</h3>
+                    <pre><code class="text-green-400"># Run your custom command
+> /test
+
+Claude: Running tests...
+[Executes npm test]
+[Analyzes failures]
+[Fixes issues]
+
+# List available commands
+> /help
+
+Available commands:
+  /test     - Run tests and fix failures
+  /docs     - Generate documentation
+  /security - Security audit
+  ...</code></pre>
+
+                    <h3 class="text-xl font-semibold text-white mt-8">Project-Level Commands</h3>
+                    <p>Define project-specific commands in CLAUDE.md for team consistency:</p>
+
+                    <pre><code class="text-green-400"># CLAUDE.md
+
+## Custom Commands
+
+### /deploy
+Deploy to staging environment:
+1. Run tests
+2. Build the application
+3. Deploy to staging server
+4. Run smoke tests
+5. Report status
+
+### /review-pr [PR_NUMBER]
+Review a pull request:
+1. Fetch the PR diff
+2. Analyze for bugs, security issues, and code style
+3. Post review comments
+4. Summarize findings
+
+### /db-migrate
+Run database migrations:
+1. Backup current schema
+2. Run pending migrations
+3. Verify data integrity
+4. Report migration status</code></pre>
+
+                    <h3 class="text-xl font-semibold text-white mt-8">Command Parameters</h3>
+                    <p>Commands can accept parameters for flexibility:</p>
+
+                    <pre><code class="text-green-400">{
+  "customCommands": {
+    "refactor": {
+      "description": "Refactor a file",
+      "prompt": "Refactor $1 to improve code quality. Focus on: readability, performance, and maintainability."
+    },
+    "explain": {
+      "description": "Explain code",
+      "prompt": "Explain how $1 works in detail. Include: purpose, inputs, outputs, and key algorithms."
+    }
+  }
+}
+
+# Usage
+> /refactor src/utils/parser.ts
+> /explain src/auth/jwt.ts</code></pre>
+
+                    <h3 class="text-xl font-semibold text-white mt-8">Best Practices</h3>
+                    <div class="grid md:grid-cols-2 gap-4 mt-4">
+                        <div class="bg-dark-700 rounded-xl p-4">
+                            <h4 class="font-semibold text-accent mb-2">Be Specific</h4>
+                            <p class="text-sm">Clear, detailed prompts produce better results than vague instructions.</p>
+                        </div>
+                        <div class="bg-dark-700 rounded-xl p-4">
+                            <h4 class="font-semibold text-accent mb-2">Include Steps</h4>
+                            <p class="text-sm">Break complex tasks into numbered steps for reliable execution.</p>
+                        </div>
+                        <div class="bg-dark-700 rounded-xl p-4">
+                            <h4 class="font-semibold text-accent mb-2">Define Output</h4>
+                            <p class="text-sm">Specify the expected output format (JSON, Markdown, etc.).</p>
+                        </div>
+                        <div class="bg-dark-700 rounded-xl p-4">
+                            <h4 class="font-semibold text-accent mb-2">Test Thoroughly</h4>
+                            <p class="text-sm">Test commands with various inputs before sharing with team.</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 mt-6">
+                        <p class="text-emerald-200 font-medium">Team Tip</p>
+                        <p class="text-sm mt-1">Commit project-level commands in CLAUDE.md to your repository. This ensures all team members have access to the same automation tools.</p>
+                    </div>
+                </div>
+
+                <div class="mt-8 pt-6 border-t border-white/10 flex justify-between">
+                    <button onclick="showLesson(3)" class="bg-white/10 hover:bg-white/20 px-6 py-3 rounded-xl font-semibold transition-all">
+                        Previous
+                    </button>
+                    <button onclick="startQuiz()" class="bg-accent hover:bg-emerald-400 text-dark-900 px-6 py-3 rounded-xl font-semibold transition-all">
+                        Take the Quiz
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quiz Section -->
+        <section id="quizSection" class="hidden mb-12">
+            <div class="card rounded-2xl p-8">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-2xl font-bold">Week 4 Quiz</h2>
+                    <span class="text-sm text-gray-400">Question <span id="currentQ">1</span>/10</span>
+                </div>
+
+                <div id="quizContainer">
+                    <!-- Questions injected by JS -->
+                </div>
+
+                <div class="mt-8 pt-6 border-t border-white/10 flex justify-between">
+                    <button id="prevQ" onclick="prevQuestion()" class="bg-white/10 hover:bg-white/20 px-6 py-3 rounded-xl font-semibold transition-all hidden">
+                        Previous
+                    </button>
+                    <button id="nextQ" onclick="nextQuestion()" class="bg-accent hover:bg-emerald-400 text-dark-900 px-6 py-3 rounded-xl font-semibold transition-all ml-auto">
+                        Next
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quiz Complete -->
+        <section id="quizComplete" class="hidden mb-12">
+            <div class="card rounded-2xl p-12 text-center">
+                <div class="text-6xl mb-6">🎉</div>
+                <h2 class="text-3xl font-bold mb-4">Quiz Complete!</h2>
+                <p class="text-gray-400 text-lg mb-2">Your Score</p>
+                <p class="text-5xl font-bold text-accent mb-8"><span id="finalScore">0</span>/10</p>
+                <div class="flex flex-wrap justify-center gap-4">
+                    <button onclick="retakeQuiz()" class="bg-white/10 hover:bg-white/20 border border-white/10 px-6 py-3 rounded-xl transition-all font-medium">
+                        Retake Quiz
+                    </button>
+                    <a href="week4.html" class="bg-accent hover:bg-emerald-400 text-dark-900 px-6 py-3 rounded-xl font-semibold transition-all inline-block">
+                        Go to Challenge
+                    </a>
                 </div>
             </div>
         </section>
@@ -134,5 +684,167 @@
             </a>
         </div>
     </footer>
+
+    <script>
+        // Quiz questions
+        const questions = [
+            {
+                q: "What package provides the Claude Code SDK?",
+                options: ["@claude/sdk", "@anthropic-ai/claude-agent-sdk", "claude-code-sdk", "@anthropic/claude"],
+                correct: 1
+            },
+            {
+                q: "Which function from the SDK runs Claude programmatically?",
+                options: ["run()", "execute()", "query()", "invoke()"],
+                correct: 2
+            },
+            {
+                q: "What slash command creates a pull request?",
+                options: ["/create-pr", "/pull", "/pr", "/github pr"],
+                correct: 2
+            },
+            {
+                q: "Which flag runs Claude Code without an interactive terminal?",
+                options: ["--silent", "--batch", "--headless", "--background"],
+                correct: 2
+            },
+            {
+                q: "What flag auto-approves all tool calls in headless mode?",
+                options: ["--auto", "--approve", "--yes", "--force"],
+                correct: 2
+            },
+            {
+                q: "How do you restrict tools in headless mode?",
+                options: ["--tools", "--allowedTools", "--only-tools", "--restrict"],
+                correct: 1
+            },
+            {
+                q: "Where are custom commands defined?",
+                options: ["package.json", ".claude/commands.json", ".claude/settings.local.json", "commands.yaml"],
+                correct: 2
+            },
+            {
+                q: "What CLI tool does Claude use for GitHub operations?",
+                options: ["git", "github-cli", "gh", "hub"],
+                correct: 2
+            },
+            {
+                q: "What does the --print flag do in headless mode?",
+                options: ["Prints debug info", "Outputs response to stdout", "Prints command history", "Shows tool calls"],
+                correct: 1
+            },
+            {
+                q: "What exit code blocks a tool call in a hook using the SDK?",
+                options: ["Exit code 0", "Exit code 1", "Exit code 2", "Exit code -1"],
+                correct: 2
+            }
+        ];
+
+        let currentQuestion = 0;
+        let answers = new Array(questions.length).fill(null);
+        let score = 0;
+
+        // Load saved progress
+        function loadProgress() {
+            const saved = sessionStorage.getItem('week4_quiz');
+            if (saved) {
+                const data = JSON.parse(saved);
+                answers = data.answers || answers;
+                score = data.score || 0;
+                document.getElementById('quizScore').textContent = score;
+            }
+        }
+
+        function saveProgress() {
+            sessionStorage.setItem('week4_quiz', JSON.stringify({ answers, score }));
+            document.getElementById('quizScore').textContent = score;
+        }
+
+        // Lesson navigation
+        function showLesson(num) {
+            document.querySelectorAll('.lesson-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.lesson-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(`lesson${num}`).classList.add('active');
+            document.querySelector(`[data-lesson="${num}"]`).classList.add('active');
+            document.getElementById('quizSection').classList.add('hidden');
+            document.getElementById('quizComplete').classList.add('hidden');
+        }
+
+        document.querySelectorAll('.lesson-btn').forEach(btn => {
+            btn.addEventListener('click', () => showLesson(parseInt(btn.dataset.lesson)));
+        });
+
+        // Quiz functions
+        function startQuiz() {
+            document.querySelectorAll('.lesson-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.lesson-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById('quizSection').classList.remove('hidden');
+            document.getElementById('quizComplete').classList.add('hidden');
+            currentQuestion = 0;
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            const q = questions[currentQuestion];
+            document.getElementById('currentQ').textContent = currentQuestion + 1;
+
+            let html = `<p class="text-lg mb-6">${q.q}</p><div class="space-y-3">`;
+            q.options.forEach((opt, i) => {
+                const selected = answers[currentQuestion] === i;
+                const selectedClass = selected ? 'bg-accent/20 border-accent' : 'bg-dark-700 border-white/10';
+                html += `
+                    <button onclick="selectAnswer(${i})" class="w-full text-left p-4 rounded-xl border ${selectedClass} hover:border-accent/50 transition-all">
+                        <span class="inline-block w-6 h-6 rounded-full border border-current text-center text-sm mr-3">${String.fromCharCode(65 + i)}</span>
+                        ${opt}
+                    </button>
+                `;
+            });
+            html += '</div>';
+            document.getElementById('quizContainer').innerHTML = html;
+
+            document.getElementById('prevQ').classList.toggle('hidden', currentQuestion === 0);
+            document.getElementById('nextQ').textContent = currentQuestion === questions.length - 1 ? 'Finish' : 'Next';
+        }
+
+        function selectAnswer(idx) {
+            answers[currentQuestion] = idx;
+            renderQuestion();
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                renderQuestion();
+            } else {
+                finishQuiz();
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                renderQuestion();
+            }
+        }
+
+        function finishQuiz() {
+            score = answers.reduce((acc, ans, i) => acc + (ans === questions[i].correct ? 1 : 0), 0);
+            saveProgress();
+            document.getElementById('quizSection').classList.add('hidden');
+            document.getElementById('quizComplete').classList.remove('hidden');
+            document.getElementById('finalScore').textContent = score;
+        }
+
+        function retakeQuiz() {
+            answers = new Array(questions.length).fill(null);
+            currentQuestion = 0;
+            document.getElementById('quizComplete').classList.add('hidden');
+            document.getElementById('quizSection').classList.remove('hidden');
+            renderQuestion();
+        }
+
+        // Initialize
+        loadProgress();
+    </script>
 </body>
 </html>

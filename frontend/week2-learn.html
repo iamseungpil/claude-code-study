@@ -25,17 +25,142 @@
         * { font-family: 'Outfit', sans-serif; }
         code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
         html { scroll-behavior: smooth; }
+
         .hero-gradient {
             background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(167, 139, 250, 0.2) 0%, transparent 50%),
                         linear-gradient(180deg, #0f172a 0%, #0a0a0f 100%);
         }
+
         .nav-blur {
             background: rgba(10, 10, 15, 0.85);
             backdrop-filter: blur(20px);
         }
+
         .card {
             background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
             border: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .lesson-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
+            border: 1px solid rgba(255,255,255,0.06);
+            transition: all 0.3s ease;
+        }
+        .lesson-card:hover {
+            border-color: rgba(167, 139, 250, 0.3);
+        }
+        .lesson-card.open {
+            border-color: rgba(167, 139, 250, 0.5);
+        }
+
+        .lesson-header { cursor: pointer; }
+
+        .lesson-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease;
+        }
+        .lesson-content.open {
+            max-height: 3000px;
+        }
+
+        .chevron {
+            transition: transform 0.3s ease;
+        }
+        .chevron.open {
+            transform: rotate(180deg);
+        }
+
+        .code-block {
+            background: #0d1117;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .code-block-header {
+            background: rgba(255,255,255,0.03);
+            padding: 10px 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 0.75rem;
+            color: #8b949e;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .code-block pre {
+            padding: 16px;
+            font-size: 0.875rem;
+            line-height: 1.6;
+            color: #c9d1d9;
+            overflow-x: auto;
+        }
+        .code-comment { color: #6e7681; }
+        .code-keyword { color: #ff7b72; }
+        .code-string { color: #a5d6ff; }
+        .code-function { color: #d2a8ff; }
+
+        .tip-box {
+            background: rgba(167, 139, 250, 0.1);
+            border: 1px solid rgba(167, 139, 250, 0.3);
+            border-radius: 12px;
+            padding: 16px;
+        }
+
+        .warning-box {
+            background: rgba(251, 191, 36, 0.1);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            border-radius: 12px;
+            padding: 16px;
+        }
+
+        .quiz-option {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .quiz-option:hover {
+            border-color: rgba(167, 139, 250, 0.5);
+            background: rgba(167, 139, 250, 0.05);
+        }
+        .quiz-option.selected {
+            border-color: rgba(167, 139, 250, 0.8);
+            background: rgba(167, 139, 250, 0.1);
+        }
+        .quiz-option.correct {
+            border-color: rgba(52, 211, 153, 0.8);
+            background: rgba(52, 211, 153, 0.1);
+        }
+        .quiz-option.incorrect {
+            border-color: rgba(248, 113, 113, 0.8);
+            background: rgba(248, 113, 113, 0.1);
+        }
+
+        .progress-bar {
+            background: rgba(255,255,255,0.1);
+            border-radius: 9999px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            background: linear-gradient(90deg, #a78bfa 0%, #8b5cf6 100%);
+            height: 100%;
+            border-radius: 9999px;
+            transition: width 0.5s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%);
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px -10px rgba(167, 139, 250, 0.5);
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s ease;
+        }
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.1);
         }
     </style>
 </head>
@@ -49,9 +174,11 @@
                 </svg>
                 <span>Back</span>
             </a>
-            <a href="week2.html" class="text-accent hover:text-purple-300 transition-colors text-sm font-medium">
-                Go to Challenge
-            </a>
+            <div class="flex items-center gap-4">
+                <a href="week2.html" class="text-accent hover:text-purple-300 transition-colors text-sm font-medium">
+                    Go to Challenge
+                </a>
+            </div>
         </div>
     </nav>
 
@@ -60,67 +187,460 @@
         <div class="max-w-5xl mx-auto">
             <div class="flex flex-wrap items-center gap-3 mb-6">
                 <span class="bg-accent text-dark-900 px-4 py-1.5 rounded-full text-sm font-bold">WEEK 2</span>
-                <span class="bg-gray-500/20 text-gray-400 px-3 py-1 rounded-full text-xs font-bold border border-gray-500/30">LEARN</span>
+                <span class="bg-purple-500/20 text-purple-400 px-3 py-1 rounded-full text-xs font-bold border border-purple-500/30">LEARN</span>
             </div>
+
             <h1 class="text-4xl md:text-5xl font-bold mb-4 tracking-tight">
-                CLI Tools & Hooks
+                Hooks & Automation
             </h1>
             <p class="text-xl text-gray-400 mb-8 max-w-2xl">
-                Build command-line tools and set up automatic linting with Claude Code hooks.
+                Intercept and control Claude's actions with powerful hooks for automated workflows.
             </p>
+
+            <!-- Progress Tracker -->
+            <div class="card rounded-2xl p-6 max-w-md">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-sm font-medium text-gray-400">Learning Progress</span>
+                    <span id="progressText" class="text-sm font-bold text-accent">0/4 Lessons</span>
+                </div>
+                <div class="progress-bar h-2">
+                    <div id="progressFill" class="progress-fill" style="width: 0%"></div>
+                </div>
+                <div class="mt-3 flex items-center justify-between text-xs text-gray-500">
+                    <span>Quiz Score: <span id="quizScoreDisplay" class="text-accent font-bold">0</span>/10</span>
+                    <span id="completionStatus" class="hidden text-green-400">Ready for Challenge!</span>
+                </div>
+            </div>
         </div>
     </header>
 
     <main class="max-w-5xl mx-auto px-6 py-12">
+        <!-- Lessons Section -->
         <section class="mb-16">
-            <div class="card rounded-2xl p-12 text-center">
-                <div class="text-6xl mb-6">🚧</div>
-                <h2 class="text-3xl font-bold mb-4">Coming Soon</h2>
-                <p class="text-gray-400 text-lg mb-8 max-w-md mx-auto">
-                    Week 2 learning content is being prepared. Check back when the challenge begins!
-                </p>
-                <div class="flex flex-wrap justify-center gap-4">
-                    <a href="week1-learn.html" class="bg-accent/20 hover:bg-accent/30 border border-accent/30 px-6 py-3 rounded-xl transition-all font-medium text-accent">
-                        Review Week 1
-                    </a>
-                    <a href="index.html" class="bg-white/5 hover:bg-white/10 border border-white/10 px-6 py-3 rounded-xl transition-all font-medium">
-                        Back to Home
-                    </a>
+            <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-6">LESSONS</h2>
+
+            <div class="space-y-4">
+                <!-- Lesson 1: Introducing Hooks -->
+                <div id="lesson1" class="lesson-card rounded-2xl overflow-hidden">
+                    <div class="lesson-header p-6 flex items-center justify-between" onclick="toggleLesson(1)">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-accent/20 flex items-center justify-center text-2xl">1</div>
+                            <div>
+                                <h3 class="font-bold text-xl">Introducing Hooks</h3>
+                                <p class="text-gray-400 text-sm">PreToolUse, PostToolUse, and hook concepts</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span id="lesson1-status" class="text-xs px-3 py-1 rounded-full bg-gray-700 text-gray-400">Not Started</span>
+                            <svg class="chevron w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="lesson-content">
+                        <div class="px-6 pb-6 space-y-6">
+                            <div>
+                                <h4 class="font-bold text-lg mb-3 text-accent">What are Hooks?</h4>
+                                <p class="text-gray-300 mb-4">
+                                    Hooks allow you to run commands <strong class="text-white">before or after</strong> Claude Code does something. You can also optionally <strong class="text-white">block</strong> Claude's action.
+                                </p>
+                                <div class="grid md:grid-cols-2 gap-4 mb-4">
+                                    <div class="card rounded-xl p-4 border-l-4 border-blue-500">
+                                        <div class="font-bold text-blue-400 mb-2">PreToolUse</div>
+                                        <p class="text-sm text-gray-400">Runs <strong>before</strong> a tool executes. Can prevent the tool call from running.</p>
+                                    </div>
+                                    <div class="card rounded-xl p-4 border-l-4 border-green-500">
+                                        <div class="font-bold text-green-400 mb-2">PostToolUse</div>
+                                        <p class="text-sm text-gray-400">Runs <strong>after</strong> a tool has executed. Cannot block, but can provide feedback.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h4 class="font-bold text-lg mb-3 text-accent">Example Use Cases</h4>
+                                <ul class="space-y-2 text-gray-300 text-sm">
+                                    <li class="flex gap-2"><span class="text-accent">•</span> Run a code formatter after Claude edits a file</li>
+                                    <li class="flex gap-2"><span class="text-accent">•</span> Stop Claude from reading sensitive files like .env</li>
+                                    <li class="flex gap-2"><span class="text-accent">•</span> Check for TODO comments and log them automatically</li>
+                                    <li class="flex gap-2"><span class="text-accent">•</span> Run tests automatically after a file is changed</li>
+                                    <li class="flex gap-2"><span class="text-accent">•</span> Block file edits that violate naming conventions</li>
+                                    <li class="flex gap-2"><span class="text-accent">•</span> Prevent usage of deprecated functions</li>
+                                </ul>
+                            </div>
+
+                            <div>
+                                <h4 class="font-bold text-lg mb-3 text-accent">Available Tools to Monitor</h4>
+                                <div class="code-block">
+                                    <div class="code-block-header">Tools</div>
+                                    <pre><code><span class="code-keyword">Read</span>       <span class="code-comment"># Read a file</span>
+<span class="code-keyword">Edit</span>       <span class="code-comment"># Edit an existing file</span>
+<span class="code-keyword">MultiEdit</span>  <span class="code-comment"># Multiple edits in one operation</span>
+<span class="code-keyword">Write</span>      <span class="code-comment"># Create a file and write to it</span>
+<span class="code-keyword">Bash</span>       <span class="code-comment"># Execute a shell command</span>
+<span class="code-keyword">Glob</span>       <span class="code-comment"># Find files/folders by pattern</span>
+<span class="code-keyword">Grep</span>       <span class="code-comment"># Search for content in files</span>
+<span class="code-keyword">Task</span>       <span class="code-comment"># Create a sub-agent</span></code></pre>
+                                </div>
+                            </div>
+
+                            <button onclick="completeLesson(1)" class="btn-secondary px-6 py-3 rounded-xl text-sm font-medium">
+                                Mark as Complete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lesson 2: Defining Hooks -->
+                <div id="lesson2" class="lesson-card rounded-2xl overflow-hidden">
+                    <div class="lesson-header p-6 flex items-center justify-between" onclick="toggleLesson(2)">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center text-2xl">2</div>
+                            <div>
+                                <h3 class="font-bold text-xl">Defining Hooks</h3>
+                                <p class="text-gray-400 text-sm">Configuration, matchers, and exit codes</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span id="lesson2-status" class="text-xs px-3 py-1 rounded-full bg-gray-700 text-gray-400">Not Started</span>
+                            <svg class="chevron w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="lesson-content">
+                        <div class="px-6 pb-6 space-y-6">
+                            <div>
+                                <h4 class="font-bold text-lg mb-3 text-purple-400">Building a Hook: 4 Steps</h4>
+                                <div class="space-y-3">
+                                    <div class="card rounded-xl p-4 flex gap-4">
+                                        <span class="bg-accent/20 text-accent w-8 h-8 rounded-lg flex items-center justify-center font-bold flex-shrink-0">1</span>
+                                        <div>
+                                            <div class="font-medium">Choose PreToolUse or PostToolUse</div>
+                                            <p class="text-sm text-gray-400">PreToolUse can prevent actions; PostToolUse runs after</p>
+                                        </div>
+                                    </div>
+                                    <div class="card rounded-xl p-4 flex gap-4">
+                                        <span class="bg-accent/20 text-accent w-8 h-8 rounded-lg flex items-center justify-center font-bold flex-shrink-0">2</span>
+                                        <div>
+                                            <div class="font-medium">Determine which tools to watch</div>
+                                            <p class="text-sm text-gray-400">Use matchers like "Read|Grep" or "*" for all tools</p>
+                                        </div>
+                                    </div>
+                                    <div class="card rounded-xl p-4 flex gap-4">
+                                        <span class="bg-accent/20 text-accent w-8 h-8 rounded-lg flex items-center justify-center font-bold flex-shrink-0">3</span>
+                                        <div>
+                                            <div class="font-medium">Write a command to receive the tool call</div>
+                                            <p class="text-sm text-gray-400">Your command receives JSON data via stdin</p>
+                                        </div>
+                                    </div>
+                                    <div class="card rounded-xl p-4 flex gap-4">
+                                        <span class="bg-accent/20 text-accent w-8 h-8 rounded-lg flex items-center justify-center font-bold flex-shrink-0">4</span>
+                                        <div>
+                                            <div class="font-medium">Provide feedback via exit codes</div>
+                                            <p class="text-sm text-gray-400">Exit code determines if action is allowed or blocked</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h4 class="font-bold text-lg mb-3 text-purple-400">Exit Codes</h4>
+                                <div class="grid md:grid-cols-2 gap-4">
+                                    <div class="card rounded-xl p-4 border-l-4 border-green-500">
+                                        <div class="font-bold text-green-400 mb-1">Exit Code 0</div>
+                                        <p class="text-sm text-gray-400">Allow the tool call to proceed</p>
+                                    </div>
+                                    <div class="card rounded-xl p-4 border-l-4 border-red-500">
+                                        <div class="font-bold text-red-400 mb-1">Exit Code 2</div>
+                                        <p class="text-sm text-gray-400">Block the tool call (PreToolUse only). Stderr is sent to Claude as feedback.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h4 class="font-bold text-lg mb-3 text-purple-400">Configuration File</h4>
+                                <div class="code-block">
+                                    <div class="code-block-header">.claude/settings.local.json</div>
+                                    <pre><code>{
+  <span class="code-string">"hooks"</span>: {
+    <span class="code-string">"PreToolUse"</span>: [
+      {
+        <span class="code-string">"matcher"</span>: <span class="code-string">"Read|Grep"</span>,
+        <span class="code-string">"hooks"</span>: [
+          {
+            <span class="code-string">"type"</span>: <span class="code-string">"command"</span>,
+            <span class="code-string">"command"</span>: <span class="code-string">"node /path/to/hook.js"</span>
+          }
+        ]
+      }
+    ],
+    <span class="code-string">"PostToolUse"</span>: [
+      {
+        <span class="code-string">"matcher"</span>: <span class="code-string">"Write|Edit"</span>,
+        <span class="code-string">"hooks"</span>: [
+          {
+            <span class="code-string">"type"</span>: <span class="code-string">"command"</span>,
+            <span class="code-string">"command"</span>: <span class="code-string">"npx prettier --write"</span>
+          }
+        ]
+      }
+    ]
+  }
+}</code></pre>
+                                </div>
+                            </div>
+
+                            <button onclick="completeLesson(2)" class="btn-secondary px-6 py-3 rounded-xl text-sm font-medium">
+                                Mark as Complete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lesson 3: Implementing Hooks -->
+                <div id="lesson3" class="lesson-card rounded-2xl overflow-hidden">
+                    <div class="lesson-header p-6 flex items-center justify-between" onclick="toggleLesson(3)">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-amber-500/20 flex items-center justify-center text-2xl">3</div>
+                            <div>
+                                <h3 class="font-bold text-xl">Implementing Hooks</h3>
+                                <p class="text-gray-400 text-sm">Practical examples: .env protection, TypeScript checking</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span id="lesson3-status" class="text-xs px-3 py-1 rounded-full bg-gray-700 text-gray-400">Not Started</span>
+                            <svg class="chevron w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="lesson-content">
+                        <div class="px-6 pb-6 space-y-6">
+                            <div>
+                                <h4 class="font-bold text-lg mb-3 text-amber-400">Example 1: Protect .env Files</h4>
+                                <p class="text-gray-300 mb-4">
+                                    This hook prevents Claude from reading sensitive files like .env that contain API keys and secrets.
+                                </p>
+                                <div class="code-block mb-4">
+                                    <div class="code-block-header">hooks/read_hook.js</div>
+                                    <pre><code><span class="code-keyword">async function</span> <span class="code-function">main</span>() {
+  <span class="code-keyword">const</span> chunks = [];
+  <span class="code-keyword">for await</span> (<span class="code-keyword">const</span> chunk <span class="code-keyword">of</span> process.stdin) {
+    chunks.push(chunk);
+  }
+  <span class="code-keyword">const</span> toolArgs = JSON.parse(Buffer.concat(chunks).toString());
+
+  <span class="code-comment">// Get the file path Claude is trying to read</span>
+  <span class="code-keyword">const</span> readPath = toolArgs.tool_input?.file_path ||
+                   toolArgs.tool_input?.path || <span class="code-string">""</span>;
+
+  <span class="code-comment">// Block .env files</span>
+  <span class="code-keyword">if</span> (readPath.includes(<span class="code-string">".env"</span>)) {
+    console.error(<span class="code-string">"Access denied: .env files are protected"</span>);
+    process.exit(<span class="code-keyword">2</span>); <span class="code-comment">// Block the read</span>
+  }
+
+  process.exit(<span class="code-keyword">0</span>); <span class="code-comment">// Allow other reads</span>
+}
+
+main();</code></pre>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h4 class="font-bold text-lg mb-3 text-amber-400">Example 2: TypeScript Type Checking</h4>
+                                <p class="text-gray-300 mb-4">
+                                    Run the TypeScript compiler after every edit to catch type errors immediately.
+                                </p>
+                                <div class="code-block mb-4">
+                                    <div class="code-block-header">hooks/tsc.js</div>
+                                    <pre><code><span class="code-keyword">import</span> * <span class="code-keyword">as</span> ts <span class="code-keyword">from</span> <span class="code-string">"typescript"</span>;
+
+<span class="code-keyword">async function</span> <span class="code-function">main</span>() {
+  <span class="code-keyword">const</span> input = <span class="code-keyword">await</span> readInput();
+  <span class="code-keyword">const</span> file = input.tool_response?.filePath ||
+               input.tool_input?.file_path;
+
+  <span class="code-comment">// Only check TypeScript files</span>
+  <span class="code-keyword">if</span> (!file || !/\.(ts|tsx)$/.test(file)) {
+    process.exit(<span class="code-keyword">0</span>);
+  }
+
+  <span class="code-keyword">const</span> errors = runTypeCheck(<span class="code-string">"./tsconfig.json"</span>);
+  <span class="code-keyword">if</span> (errors) {
+    console.error(errors);
+    process.exit(<span class="code-keyword">2</span>); <span class="code-comment">// Report errors to Claude</span>
+  }
+}
+
+main();</code></pre>
+                                </div>
+                            </div>
+
+                            <div class="warning-box">
+                                <div class="flex items-start gap-3">
+                                    <span class="text-xl">⚠️</span>
+                                    <div>
+                                        <div class="font-medium text-amber-400 mb-1">Security Best Practices</div>
+                                        <ul class="text-sm text-gray-300 space-y-1">
+                                            <li>• Always validate and sanitize inputs</li>
+                                            <li>• Use absolute paths for scripts (prevents path interception)</li>
+                                            <li>• Quote shell variables: "$VAR" not $VAR</li>
+                                            <li>• Block path traversal: check for ".." in paths</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button onclick="completeLesson(3)" class="btn-secondary px-6 py-3 rounded-xl text-sm font-medium">
+                                Mark as Complete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lesson 4: Other Hook Types -->
+                <div id="lesson4" class="lesson-card rounded-2xl overflow-hidden">
+                    <div class="lesson-header p-6 flex items-center justify-between" onclick="toggleLesson(4)">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center text-2xl">4</div>
+                            <div>
+                                <h3 class="font-bold text-xl">Other Hook Types</h3>
+                                <p class="text-gray-400 text-sm">Notification, Stop, UserPromptSubmit, and more</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span id="lesson4-status" class="text-xs px-3 py-1 rounded-full bg-gray-700 text-gray-400">Not Started</span>
+                            <svg class="chevron w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="lesson-content">
+                        <div class="px-6 pb-6 space-y-6">
+                            <div>
+                                <h4 class="font-bold text-lg mb-3 text-emerald-400">Beyond PreToolUse and PostToolUse</h4>
+                                <p class="text-gray-300 mb-4">
+                                    Claude Code provides several additional hook types for different lifecycle events:
+                                </p>
+                                <div class="space-y-3">
+                                    <div class="card rounded-xl p-4">
+                                        <div class="font-bold text-blue-400">Notification</div>
+                                        <p class="text-sm text-gray-400">Runs when Claude needs permission or after 60 seconds of idle time</p>
+                                    </div>
+                                    <div class="card rounded-xl p-4">
+                                        <div class="font-bold text-green-400">Stop</div>
+                                        <p class="text-sm text-gray-400">Runs when Claude has finished responding</p>
+                                    </div>
+                                    <div class="card rounded-xl p-4">
+                                        <div class="font-bold text-purple-400">SubagentStop</div>
+                                        <p class="text-sm text-gray-400">Runs when a subagent (Task) has finished</p>
+                                    </div>
+                                    <div class="card rounded-xl p-4">
+                                        <div class="font-bold text-amber-400">PreCompact</div>
+                                        <p class="text-sm text-gray-400">Runs before a compact operation (manual or automatic)</p>
+                                    </div>
+                                    <div class="card rounded-xl p-4">
+                                        <div class="font-bold text-pink-400">UserPromptSubmit</div>
+                                        <p class="text-sm text-gray-400">Runs when user submits a prompt, before Claude processes it</p>
+                                    </div>
+                                    <div class="card rounded-xl p-4">
+                                        <div class="font-bold text-cyan-400">SessionStart / SessionEnd</div>
+                                        <p class="text-sm text-gray-400">Runs when starting/resuming or ending a session</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tip-box">
+                                <div class="flex items-start gap-3">
+                                    <span class="text-xl">💡</span>
+                                    <div>
+                                        <div class="font-medium text-accent mb-1">Debugging Tip</div>
+                                        <p class="text-sm text-gray-300">
+                                            Create a helper hook that logs all inputs to a file with <code class="bg-dark-800 px-2 py-1 rounded">jq . > hook-log.json</code>.
+                                            This helps you understand the exact structure of data your command receives.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h4 class="font-bold text-lg mb-3 text-emerald-400">Practical Example: Auto-Format on Save</h4>
+                                <div class="code-block">
+                                    <div class="code-block-header">settings.local.json</div>
+                                    <pre><code>{
+  <span class="code-string">"hooks"</span>: {
+    <span class="code-string">"PostToolUse"</span>: [
+      {
+        <span class="code-string">"matcher"</span>: <span class="code-string">"Write|Edit|MultiEdit"</span>,
+        <span class="code-string">"hooks"</span>: [
+          {
+            <span class="code-string">"type"</span>: <span class="code-string">"command"</span>,
+            <span class="code-string">"command"</span>: <span class="code-string">"jq -r '.tool_response.filePath // .tool_input.file_path' | xargs npx prettier --write"</span>
+          }
+        ]
+      }
+    ]
+  }
+}</code></pre>
+                                </div>
+                            </div>
+
+                            <button onclick="completeLesson(4)" class="btn-secondary px-6 py-3 rounded-xl text-sm font-medium">
+                                Mark as Complete
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
 
-        <!-- Preview of Topics -->
+        <!-- Quiz Section -->
         <section class="mb-16">
-            <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-6">TOPICS PREVIEW</h2>
-            <div class="grid md:grid-cols-2 gap-4">
-                <div class="card rounded-2xl p-6 opacity-60">
-                    <div class="flex items-center gap-3 mb-3">
-                        <span class="text-2xl">⌨️</span>
-                        <h3 class="font-bold text-lg">Custom Commands</h3>
-                    </div>
-                    <p class="text-gray-400 text-sm">Create and configure custom slash commands for your workflow.</p>
+            <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-6">KNOWLEDGE CHECK</h2>
+            <div class="card rounded-2xl p-8">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="font-bold text-2xl">Quiz: Hooks & Automation</h3>
+                    <span id="quizProgress" class="text-sm text-gray-400">Question 1/10</span>
                 </div>
-                <div class="card rounded-2xl p-6 opacity-60">
-                    <div class="flex items-center gap-3 mb-3">
-                        <span class="text-2xl">🎨</span>
-                        <h3 class="font-bold text-lg">Skills</h3>
-                    </div>
-                    <p class="text-gray-400 text-sm">Define reusable skills that Claude can invoke automatically.</p>
+
+                <div id="quizContainer">
+                    <!-- Quiz questions will be rendered here -->
                 </div>
-                <div class="card rounded-2xl p-6 opacity-60">
-                    <div class="flex items-center gap-3 mb-3">
-                        <span class="text-2xl">🪝</span>
-                        <h3 class="font-bold text-lg">Hooks</h3>
+
+                <div id="quizResults" class="hidden text-center py-8">
+                    <div class="text-6xl mb-4" id="resultEmoji">🎉</div>
+                    <h4 class="text-2xl font-bold mb-2">Quiz Complete!</h4>
+                    <p class="text-gray-400 mb-6">You scored <span id="finalScore" class="text-accent font-bold">0</span>/10</p>
+                    <div class="flex gap-4 justify-center">
+                        <button onclick="retakeQuiz()" class="btn-secondary px-6 py-3 rounded-xl text-sm font-medium">
+                            Retake Quiz
+                        </button>
+                        <a href="week2.html" class="btn-primary px-6 py-3 rounded-xl text-sm font-medium inline-flex items-center gap-2">
+                            Go to Challenge
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                            </svg>
+                        </a>
                     </div>
-                    <p class="text-gray-400 text-sm">Automate actions with pre and post-command hooks.</p>
                 </div>
-                <div class="card rounded-2xl p-6 opacity-60">
-                    <div class="flex items-center gap-3 mb-3">
-                        <span class="text-2xl">🔧</span>
-                        <h3 class="font-bold text-lg">VS Code Integration</h3>
+            </div>
+        </section>
+
+        <!-- Go to Challenge CTA -->
+        <section class="mb-16">
+            <div class="card rounded-3xl p-8 border-accent/30 bg-gradient-to-br from-accent/5 to-transparent">
+                <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div>
+                        <h3 class="text-2xl font-bold mb-2">Ready for the Challenge?</h3>
+                        <p class="text-gray-400">Build automated workflows with hooks in a real project.</p>
                     </div>
-                    <p class="text-gray-400 text-sm">Integrate Claude Code with your VS Code environment.</p>
+                    <a href="week2.html" class="btn-primary px-8 py-4 rounded-xl font-bold text-lg flex items-center gap-3 whitespace-nowrap">
+                        Start Challenge
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                        </svg>
+                    </a>
                 </div>
             </div>
         </section>
@@ -134,5 +654,280 @@
             </a>
         </div>
     </footer>
+
+    <script>
+        // Quiz Data
+        const quizQuestions = [
+            {
+                question: "What is the primary difference between PreToolUse and PostToolUse hooks?",
+                options: [
+                    "PreToolUse runs after, PostToolUse runs before",
+                    "PreToolUse can block actions, PostToolUse cannot",
+                    "PostToolUse can block actions, PreToolUse cannot",
+                    "There is no difference"
+                ],
+                correct: 1
+            },
+            {
+                question: "Which exit code should a hook use to BLOCK a tool call?",
+                options: ["0", "1", "2", "3"],
+                correct: 2
+            },
+            {
+                question: "Which exit code means 'allow the tool call to proceed'?",
+                options: ["0", "1", "2", "-1"],
+                correct: 0
+            },
+            {
+                question: "Where should hooks be configured?",
+                options: [
+                    "package.json",
+                    ".claude/settings.local.json",
+                    "CLAUDE.md",
+                    "tsconfig.json"
+                ],
+                correct: 1
+            },
+            {
+                question: "Which matcher would catch both Read and Grep operations?",
+                options: ["Read,Grep", "Read&Grep", "Read|Grep", "[Read,Grep]"],
+                correct: 2
+            },
+            {
+                question: "How does a hook receive information about the tool call?",
+                options: [
+                    "Command line arguments",
+                    "Environment variables",
+                    "JSON via stdin",
+                    "HTTP request"
+                ],
+                correct: 2
+            },
+            {
+                question: "What happens when a PreToolUse hook writes to stderr and exits with code 2?",
+                options: [
+                    "Nothing happens",
+                    "The stderr message is sent to Claude as feedback",
+                    "The error is logged silently",
+                    "Claude Code crashes"
+                ],
+                correct: 1
+            },
+            {
+                question: "Which hook type runs when a user submits a prompt?",
+                options: ["PreToolUse", "Stop", "UserPromptSubmit", "SessionStart"],
+                correct: 2
+            },
+            {
+                question: "Why is it recommended to use absolute paths for hook scripts?",
+                options: [
+                    "Relative paths don't work",
+                    "It's faster",
+                    "To prevent path interception attacks",
+                    "It's required by Node.js"
+                ],
+                correct: 2
+            },
+            {
+                question: "Which hook would you use to run Prettier after Claude edits a file?",
+                options: [
+                    "PreToolUse with Edit matcher",
+                    "PostToolUse with Edit matcher",
+                    "Stop hook",
+                    "Notification hook"
+                ],
+                correct: 1
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let answeredQuestions = new Array(quizQuestions.length).fill(null);
+        let completedLessons = new Set();
+
+        // Load saved state from sessionStorage
+        function loadState() {
+            const saved = sessionStorage.getItem('week2_learn_state');
+            if (saved) {
+                const state = JSON.parse(saved);
+                completedLessons = new Set(state.completedLessons || []);
+                score = state.quizScore || 0;
+                answeredQuestions = state.answeredQuestions || new Array(quizQuestions.length).fill(null);
+                currentQuestion = state.currentQuestion || 0;
+            }
+            updateProgress();
+            updateLessonStatuses();
+            renderQuiz();
+        }
+
+        // Save state to sessionStorage
+        function saveState() {
+            const state = {
+                completedLessons: Array.from(completedLessons),
+                quizScore: score,
+                answeredQuestions: answeredQuestions,
+                currentQuestion: currentQuestion
+            };
+            sessionStorage.setItem('week2_learn_state', JSON.stringify(state));
+        }
+
+        // Lesson Functions
+        function toggleLesson(num) {
+            const lesson = document.getElementById(`lesson${num}`);
+            const content = lesson.querySelector('.lesson-content');
+            const chevron = lesson.querySelector('.chevron');
+
+            document.querySelectorAll('.lesson-card').forEach(card => {
+                if (card.id !== `lesson${num}`) {
+                    card.classList.remove('open');
+                    card.querySelector('.lesson-content').classList.remove('open');
+                    card.querySelector('.chevron').classList.remove('open');
+                }
+            });
+
+            lesson.classList.toggle('open');
+            content.classList.toggle('open');
+            chevron.classList.toggle('open');
+        }
+
+        function completeLesson(num) {
+            completedLessons.add(num);
+            saveState();
+            updateLessonStatuses();
+            updateProgress();
+
+            if (num < 4) {
+                setTimeout(() => toggleLesson(num + 1), 300);
+            }
+        }
+
+        function updateLessonStatuses() {
+            for (let i = 1; i <= 4; i++) {
+                const status = document.getElementById(`lesson${i}-status`);
+                if (completedLessons.has(i)) {
+                    status.textContent = 'Completed';
+                    status.className = 'text-xs px-3 py-1 rounded-full bg-green-500/20 text-green-400';
+                }
+            }
+        }
+
+        function updateProgress() {
+            const lessonProgress = completedLessons.size;
+            const progressPercent = (lessonProgress / 4) * 100;
+
+            document.getElementById('progressText').textContent = `${lessonProgress}/4 Lessons`;
+            document.getElementById('progressFill').style.width = `${progressPercent}%`;
+            document.getElementById('quizScoreDisplay').textContent = score;
+
+            if (lessonProgress === 4 && score >= 7) {
+                document.getElementById('completionStatus').classList.remove('hidden');
+            }
+        }
+
+        // Quiz Functions
+        function renderQuiz() {
+            const container = document.getElementById('quizContainer');
+            const results = document.getElementById('quizResults');
+
+            if (answeredQuestions.every(a => a !== null)) {
+                container.classList.add('hidden');
+                results.classList.remove('hidden');
+                document.getElementById('finalScore').textContent = score;
+                document.getElementById('resultEmoji').textContent = score >= 7 ? '🎉' : score >= 5 ? '👍' : '📚';
+                return;
+            }
+
+            container.classList.remove('hidden');
+            results.classList.add('hidden');
+
+            const q = quizQuestions[currentQuestion];
+            document.getElementById('quizProgress').textContent = `Question ${currentQuestion + 1}/10`;
+
+            container.innerHTML = `
+                <div class="mb-6">
+                    <p class="text-lg font-medium mb-6">${q.question}</p>
+                    <div class="space-y-3">
+                        ${q.options.map((opt, i) => `
+                            <div class="quiz-option card rounded-xl p-4 ${answeredQuestions[currentQuestion] === i ? (i === q.correct ? 'correct' : 'incorrect') : ''}"
+                                 onclick="selectAnswer(${i})" ${answeredQuestions[currentQuestion] !== null ? 'style="pointer-events: none;"' : ''}>
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-lg bg-dark-600 flex items-center justify-center text-sm font-bold">
+                                        ${String.fromCharCode(65 + i)}
+                                    </div>
+                                    <span>${opt}</span>
+                                    ${answeredQuestions[currentQuestion] === i ? (i === q.correct ? '<span class="ml-auto text-green-400">✓</span>' : '<span class="ml-auto text-red-400">✗</span>') : ''}
+                                    ${answeredQuestions[currentQuestion] !== null && i === q.correct && answeredQuestions[currentQuestion] !== i ? '<span class="ml-auto text-green-400">✓ Correct</span>' : ''}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                <div class="flex justify-between items-center">
+                    <button onclick="prevQuestion()" class="btn-secondary px-4 py-2 rounded-xl text-sm" ${currentQuestion === 0 ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>
+                        Previous
+                    </button>
+                    <div class="flex gap-1">
+                        ${quizQuestions.map((_, i) => `
+                            <div class="w-2 h-2 rounded-full ${i === currentQuestion ? 'bg-accent' : answeredQuestions[i] !== null ? (answeredQuestions[i] === quizQuestions[i].correct ? 'bg-green-500' : 'bg-red-500') : 'bg-gray-600'}"></div>
+                        `).join('')}
+                    </div>
+                    <button onclick="nextQuestion()" class="btn-primary px-4 py-2 rounded-xl text-sm" ${answeredQuestions[currentQuestion] === null ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>
+                        ${currentQuestion === quizQuestions.length - 1 ? 'Finish' : 'Next'}
+                    </button>
+                </div>
+            `;
+        }
+
+        function selectAnswer(index) {
+            if (answeredQuestions[currentQuestion] !== null) return;
+
+            answeredQuestions[currentQuestion] = index;
+            if (index === quizQuestions[currentQuestion].correct) {
+                score++;
+            }
+            saveState();
+            updateProgress();
+            renderQuiz();
+        }
+
+        function nextQuestion() {
+            if (answeredQuestions[currentQuestion] === null) return;
+            if (currentQuestion < quizQuestions.length - 1) {
+                currentQuestion++;
+                saveState();
+                renderQuiz();
+            } else {
+                renderQuiz();
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                saveState();
+                renderQuiz();
+            }
+        }
+
+        function retakeQuiz() {
+            currentQuestion = 0;
+            score = 0;
+            answeredQuestions = new Array(quizQuestions.length).fill(null);
+            saveState();
+            updateProgress();
+            renderQuiz();
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadState();
+            for (let i = 1; i <= 4; i++) {
+                if (!completedLessons.has(i)) {
+                    toggleLesson(i);
+                    break;
+                }
+            }
+        });
+    </script>
 </body>
 </html>
