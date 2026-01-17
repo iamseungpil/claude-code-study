@@ -9,7 +9,29 @@ UIGen (AI Component Generator)에 3가지 기능을 구현하는 Memory-Driven D
 
 ---
 
+## Evaluation Process
+
+### Step 1: 코드 실행 검증 (필수)
+```bash
+cd submissions/week1/{participant_id}
+npm install          # 의존성 설치
+npm run build        # TypeScript 컴파일
+```
+
+**빌드 실패 시**: 최대 40점까지만 획득 가능 (Stage 점수 50% 감점)
+
+### Step 2: 코드 리뷰 (Claude)
+빌드 통과 후, 아래 Rubric에 따라 코드 검토
+
+---
+
 ## Rubric Breakdown (80 points)
+
+### Build Validation (필수 조건)
+| Item | Result | Impact |
+|------|--------|--------|
+| `npm install` | Pass/Fail | Fail 시 평가 중단 |
+| `npm run build` | Pass/Fail | Fail 시 Stage 점수 50% 감점 |
 
 ### Stage 1: Clear All Files (20 points)
 | Item | Points | Criteria |
@@ -78,9 +100,10 @@ UIGen (AI Component Generator)에 3가지 기능을 구현하는 Memory-Driven D
 ---
 
 ## Evaluation Notes
-1. **코드 실행 없음** - 파일 구조와 코드 로직만 검토
-2. **패턴 준수** - 기존 코드 스타일 따르는지 확인
-3. **Memory-Driven** - CLAUDE.md에 학습 내용 기록 여부 중요
+1. **코드 실행 필수** - `npm install` → `npm run build` 순서로 실행
+2. **빌드 실패 = 감점** - 컴파일 에러 시 Stage 점수 50% 감점
+3. **패턴 준수** - 기존 코드 스타일 따르는지 확인
+4. **Memory-Driven** - CLAUDE.md에 학습 내용 기록 여부 중요
 
 ---
 
@@ -88,14 +111,19 @@ UIGen (AI Component Generator)에 3가지 기능을 구현하는 Memory-Driven D
 \`\`\`json
 {
   "rubric_score": 65,
+  "build_status": {
+    "npm_install": "pass",
+    "npm_build": "pass"
+  },
   "breakdown": {
     "stage_1_clear_all": 20,
     "stage_2_download_zip": 25,
     "stage_3_keyboard": 10,
     "claude_md_quality": 10
   },
-  "feedback": "Stage 1, 2를 완성했고 Stage 3는 부분 구현. CLAUDE.md 문서화 양호.",
+  "feedback": "빌드 성공. Stage 1, 2 완성. Stage 3 부분 구현. CLAUDE.md 양호.",
   "strengths": [
+    "TypeScript 컴파일 에러 없음",
     "Dialog 컴포넌트 올바르게 사용",
     "JSZip으로 ZIP 다운로드 구현 완료"
   ],
@@ -103,5 +131,26 @@ UIGen (AI Component Generator)에 3가지 기능을 구현하는 Memory-Driven D
     "Stage 3 Command Palette 완성 필요",
     "에러 핸들링 추가 권장"
   ]
+}
+\`\`\`
+
+## Build Failure Example
+\`\`\`json
+{
+  "rubric_score": 32,
+  "build_status": {
+    "npm_install": "pass",
+    "npm_build": "fail",
+    "build_error": "Type error: Property 'reset' does not exist on type..."
+  },
+  "breakdown": {
+    "stage_1_clear_all": 10,
+    "stage_2_download_zip": 12,
+    "stage_3_keyboard": 5,
+    "claude_md_quality": 5
+  },
+  "feedback": "빌드 실패로 50% 감점. 타입 에러 수정 필요.",
+  "strengths": ["기능 구현 시도함"],
+  "improvements": ["TypeScript 타입 에러 수정 필수"]
 }
 \`\`\`

@@ -9,7 +9,38 @@ Claude Code Hook 시스템을 이해하고, 보안/자동화 Hook을 구현하�
 
 ---
 
+## Evaluation Process
+
+### Step 1: Hook 실행 검증 (필수)
+```bash
+cd submissions/week2/{participant_id}
+
+# Stage 1: Security Hook 테스트
+echo '{"tool_input":{"file_path":"/path/to/.env"}}' | node hooks/read_hook.js
+# 기대: exit code 2 + 에러 메시지
+
+echo '{"tool_input":{"file_path":"/path/to/safe.txt"}}' | node hooks/read_hook.js
+# 기대: exit code 0
+
+# Settings 유효성 검사
+node -e "JSON.parse(require('fs').readFileSync('.claude/settings.json'))"
+```
+
+**Hook 실행 실패 시**: 해당 Stage 점수 0점
+
+### Step 2: 코드 리뷰 (Claude)
+실행 검증 후, 아래 Rubric에 따라 코드 검토
+
+---
+
 ## Rubric Breakdown (80 points)
+
+### Hook Validation (필수 조건)
+| Test | Expected | Impact |
+|------|----------|--------|
+| `read_hook.js` with .env | exit 2 | Stage 1 점수 영향 |
+| `read_hook.js` with safe file | exit 0 | Stage 1 점수 영향 |
+| `settings.json` valid | JSON parse OK | Stage 2 점수 영향 |
 
 ### Stage 1: Security Hook (25 points)
 | Item | Points | Criteria |
@@ -90,8 +121,8 @@ process.exit(0)
 ---
 
 ## Evaluation Notes
-1. **코드 실행 없음** - Hook 파일 로직만 검토
-2. **설정 파일** - settings.json 구조 확인
+1. **Hook 실행 필수** - read_hook.js를 실제로 실행하여 exit code 검증
+2. **설정 파일** - settings.json이 valid JSON인지 확인
 3. **참고 파일** - tsc.js를 참고했는지 확인
 4. **queries_COMPLETED.zip** - 정답 참고용 (비교 평가에 활용)
 
@@ -101,21 +132,49 @@ process.exit(0)
 ```json
 {
   "rubric_score": 55,
+  "hook_tests": {
+    "read_hook_block_env": "pass",
+    "read_hook_allow_safe": "pass",
+    "settings_json_valid": "pass"
+  },
   "breakdown": {
     "stage_1_security_hook": 25,
     "stage_2_query_hook": 20,
     "stage_3_custom_hook": 5,
     "claude_md_quality": 5
   },
-  "feedback": "Security Hook 완벽 구현. Query Hook 활성화됨. Custom Hook 미완성.",
+  "feedback": "Hook 테스트 통과. Security Hook 완벽 구현. Query Hook 활성화됨.",
   "strengths": [
-    ".env 차단 로직 정확",
-    "exit code 올바르게 사용"
+    ".env 차단 테스트 통과 (exit 2)",
+    "일반 파일 허용 테스트 통과 (exit 0)",
+    "settings.json 유효"
   ],
   "improvements": [
     "Custom Hook 기능 추가 필요",
     "CLAUDE.md에 디버깅 팁 보강"
   ]
+}
+```
+
+## Hook Test Failure Example
+```json
+{
+  "rubric_score": 10,
+  "hook_tests": {
+    "read_hook_block_env": "fail",
+    "read_hook_allow_safe": "pass",
+    "settings_json_valid": "pass",
+    "error": "Expected exit code 2, got 0"
+  },
+  "breakdown": {
+    "stage_1_security_hook": 0,
+    "stage_2_query_hook": 5,
+    "stage_3_custom_hook": 0,
+    "claude_md_quality": 5
+  },
+  "feedback": "Security Hook 테스트 실패. .env 파일 차단 미구현.",
+  "strengths": ["settings.json 구조 이해"],
+  "improvements": [".env 차단 로직 구현 필수"]
 }
 ```
 
