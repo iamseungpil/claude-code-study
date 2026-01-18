@@ -23,7 +23,7 @@
     // Backend API URL (Cloudflare Tunnel or cloud backend)
     // Example: 'https://your-tunnel-id.trycloudflare.com'
     // Leave empty for local development (auto-detected)
-    const CONFIGURED_API_BASE = 'https://mysimon-effort-further-cursor.trycloudflare.com';
+    const CONFIGURED_API_BASE = '';  // Empty for local development
 
     // ============================================================
     // API Base URL Detection Logic
