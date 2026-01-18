@@ -1074,6 +1074,11 @@ if SERVE_STATIC:
         """Serve main page."""
         return FileResponse(FRONTEND_DIR / "index.html")
 
+    @app.get("/index.html")
+    async def serve_index_html():
+        """Serve main page (explicit path)."""
+        return FileResponse(FRONTEND_DIR / "index.html")
+
     @app.get("/leaderboard.html")
     async def serve_leaderboard():
         """Serve leaderboard page."""
