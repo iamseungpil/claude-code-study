@@ -567,8 +567,7 @@ async def submit_solution(
 
     if not user_personal:
         raise HTTPException(400, "You must start your timer first before submitting.")
-    if user_personal.get("status") == "submitted":
-        raise HTTPException(400, "You have already submitted for this week.")
+    # Allow resubmission - no longer block on "submitted" status
 
     # Calculate elapsed time
     submission_time = datetime.now(timezone.utc)
@@ -591,18 +590,24 @@ async def submit_solution(
         "status": "submitted"
     }
 
-    db.save_submission_metadata(data.week, participant_id, metadata)
+    # save_submission_metadata returns the submission number
+    submission_number = db.save_submission_metadata(data.week, participant_id, metadata)
     db.update_personal_status(data.week, participant_id, "submitted")
 
     # Trigger evaluation in background
     background_tasks.add_task(trigger_evaluation, data.week, participant_id, data.github_url)
 
+    is_resubmission = submission_number > 1
+    message = f"Resubmission #{submission_number} received. Evaluation will start shortly." if is_resubmission else "Evaluation will start shortly"
+
     return {
         "status": "submitted",
-        "message": "Evaluation will start shortly",
+        "message": message,
         "participant_id": participant_id,
         "week": data.week,
-        "elapsed_minutes": round(elapsed_minutes, 1)
+        "elapsed_minutes": round(elapsed_minutes, 1),
+        "submission_number": submission_number,
+        "is_resubmission": is_resubmission
     }
 
 

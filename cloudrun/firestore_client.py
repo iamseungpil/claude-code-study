@@ -216,11 +216,71 @@ def restart_challenge(week: int) -> dict:
 # ============== Submissions ==============
 
 def save_submission_metadata(week: int, participant_id: str, metadata: dict):
-    """Save submission metadata."""
+    """
+    Save submission metadata with history tracking.
+    Supports multiple submissions per user per week.
+    """
     doc_id = f"week{week}_{participant_id}"
+    doc_ref = db.collection(SUBMISSIONS_COLLECTION).document(doc_id)
+    doc = doc_ref.get()
+
     metadata["week"] = week
     metadata["participant_id"] = participant_id
-    db.collection(SUBMISSIONS_COLLECTION).document(doc_id).set(metadata)
+
+    if doc.exists:
+        # Existing submission - append to history
+        existing = doc.to_dict()
+        submission_history = existing.get("submission_history", [])
+
+        # Move current submission to history if exists
+        if "current_submission" in existing:
+            prev = existing["current_submission"].copy()
+            prev["status"] = "superseded"
+            submission_history.append(prev)
+
+        submission_number = existing.get("total_submissions", len(submission_history)) + 1
+
+        # Create new document structure
+        new_data = {
+            "week": week,
+            "participant_id": participant_id,
+            "total_submissions": submission_number,
+            "first_submitted_at": existing.get("first_submitted_at") or existing.get("submitted_at"),
+            "latest_submitted_at": metadata.get("submitted_at"),
+            "current_submission": {
+                "submission_number": submission_number,
+                "github_url": metadata.get("github_url"),
+                "submitted_at": metadata.get("submitted_at"),
+                "personal_start_time": metadata.get("personal_start_time"),
+                "elapsed_seconds": metadata.get("elapsed_seconds"),
+                "elapsed_minutes": metadata.get("elapsed_minutes"),
+                "status": "submitted"
+            },
+            "submission_history": submission_history
+        }
+        doc_ref.set(new_data)
+        return submission_number
+    else:
+        # First submission
+        new_data = {
+            "week": week,
+            "participant_id": participant_id,
+            "total_submissions": 1,
+            "first_submitted_at": metadata.get("submitted_at"),
+            "latest_submitted_at": metadata.get("submitted_at"),
+            "current_submission": {
+                "submission_number": 1,
+                "github_url": metadata.get("github_url"),
+                "submitted_at": metadata.get("submitted_at"),
+                "personal_start_time": metadata.get("personal_start_time"),
+                "elapsed_seconds": metadata.get("elapsed_seconds"),
+                "elapsed_minutes": metadata.get("elapsed_minutes"),
+                "status": "submitted"
+            },
+            "submission_history": []
+        }
+        doc_ref.set(new_data)
+        return 1
 
 
 def get_submission_metadata(week: int, participant_id: str) -> Optional[dict]:
@@ -239,11 +299,14 @@ def list_submissions(week: int) -> List[dict]:
 
 
 def get_submission_rank(week: int, participant_id: str) -> int:
-    """Get submission rank based on submission time."""
+    """
+    Get submission rank based on LATEST submission time.
+    Recalculates rank based on each user's most recent submission.
+    """
     submissions = list_submissions(week)
 
-    # Sort by submission time
-    submissions.sort(key=lambda x: x.get("submitted_at", "9999"))
+    # Sort by latest submission time
+    submissions.sort(key=lambda x: x.get("latest_submitted_at") or x.get("submitted_at", "9999"))
 
     for rank, sub in enumerate(submissions, start=1):
         if sub.get("participant_id") == participant_id:
@@ -255,11 +318,96 @@ def get_submission_rank(week: int, participant_id: str) -> int:
 # ============== Evaluations ==============
 
 def save_evaluation(week: int, participant_id: str, result: dict):
-    """Save evaluation result."""
+    """
+    Save evaluation result with history tracking.
+    Tracks best rubric score across all submissions.
+    Time rank bonus is recalculated based on latest submission order.
+    """
     doc_id = f"week{week}_{participant_id}"
+    doc_ref = db.collection(EVALUATIONS_COLLECTION).document(doc_id)
+    doc = doc_ref.get()
+
     result["week"] = week
     result["participant_id"] = participant_id
-    db.collection(EVALUATIONS_COLLECTION).document(doc_id).set(result)
+
+    # Get submission number from submission metadata
+    submission_meta = get_submission_metadata(week, participant_id)
+    submission_number = 1
+    if submission_meta:
+        current_sub = submission_meta.get("current_submission", {})
+        submission_number = current_sub.get("submission_number", submission_meta.get("total_submissions", 1))
+
+    result["submission_number"] = submission_number
+
+    if doc.exists and result.get("status") == "completed":
+        # Existing evaluation - track history and best score
+        existing = doc.to_dict()
+        evaluation_history = existing.get("evaluation_history", [])
+
+        # Move current evaluation to history if exists and was completed
+        if "current_evaluation" in existing:
+            prev = existing["current_evaluation"].copy()
+            evaluation_history.append(prev)
+        elif existing.get("status") == "completed":
+            # Legacy format - save to history
+            evaluation_history.append({
+                "submission_number": existing.get("submission_number", 1),
+                "scores": existing.get("scores", {}),
+                "evaluated_at": existing.get("evaluated_at"),
+                "status": "completed"
+            })
+
+        # Determine best rubric score (excluding time bonus)
+        current_rubric = result.get("scores", {}).get("rubric", 0)
+        best_rubric = existing.get("best_rubric_score", 0)
+
+        # Check history for best rubric score
+        for hist in evaluation_history:
+            hist_rubric = hist.get("scores", {}).get("rubric", 0)
+            if hist_rubric > best_rubric:
+                best_rubric = hist_rubric
+
+        if current_rubric > best_rubric:
+            best_rubric = current_rubric
+
+        new_data = {
+            "week": week,
+            "participant_id": participant_id,
+            "status": "completed",
+            "total_evaluations": len(evaluation_history) + 1,
+            "best_rubric_score": best_rubric,
+            "current_evaluation": {
+                "submission_number": submission_number,
+                "scores": result.get("scores", {}),
+                "feedback": result.get("feedback", {}),
+                "build_status": result.get("build_status"),
+                "evaluated_at": result.get("evaluated_at"),
+                "status": "completed"
+            },
+            "evaluation_history": evaluation_history,
+            # Keep top-level fields for backward compatibility with leaderboard
+            "scores": result.get("scores", {}),
+            "feedback": result.get("feedback", {}),
+            "build_status": result.get("build_status"),
+            "evaluated_at": result.get("evaluated_at"),
+            "submission_number": submission_number
+        }
+        doc_ref.set(new_data)
+    else:
+        # First evaluation or error result
+        if result.get("status") == "completed":
+            result["best_rubric_score"] = result.get("scores", {}).get("rubric", 0)
+            result["total_evaluations"] = 1
+            result["current_evaluation"] = {
+                "submission_number": submission_number,
+                "scores": result.get("scores", {}),
+                "feedback": result.get("feedback", {}),
+                "build_status": result.get("build_status"),
+                "evaluated_at": result.get("evaluated_at"),
+                "status": "completed"
+            }
+            result["evaluation_history"] = []
+        db.collection(EVALUATIONS_COLLECTION).document(doc_id).set(result)
 
 
 def get_evaluation(week: int, participant_id: str) -> Optional[dict]:
@@ -277,21 +425,72 @@ def list_evaluations(week: int) -> List[dict]:
     return [doc.to_dict() for doc in docs]
 
 
+def _calculate_time_rank_bonus(rank: int) -> int:
+    """Calculate time rank bonus based on submission order."""
+    if rank == 1:
+        return 20
+    elif rank == 2:
+        return 17
+    elif rank == 3:
+        return 14
+    elif rank == 4:
+        return 11
+    elif rank == 5:
+        return 8
+    else:
+        return 5
+
+
 def get_week_leaderboard(week: int) -> List[dict]:
-    """Get leaderboard for a specific week."""
+    """
+    Get leaderboard for a specific week.
+    Recalculates time rank bonus based on latest submission order.
+    Uses best rubric score for each participant.
+    """
     evaluations = list_evaluations(week)
+    submissions = list_submissions(week)
+
+    # Build submission order map based on LATEST submission time
+    submission_order = []
+    for sub in submissions:
+        latest_time = sub.get("latest_submitted_at") or sub.get("submitted_at")
+        if latest_time:
+            submission_order.append({
+                "participant_id": sub.get("participant_id"),
+                "submitted_at": latest_time
+            })
+
+    # Sort by submission time to get time rank
+    submission_order.sort(key=lambda x: x.get("submitted_at", "9999"))
+
+    # Create time rank map
+    time_rank_map = {}
+    for rank, sub in enumerate(submission_order, start=1):
+        time_rank_map[sub["participant_id"]] = rank
 
     results = []
     for data in evaluations:
         if data.get("status") == "completed":
-            scores = data.get("scores", {})
+            participant_id = data.get("participant_id") or data.get("participant")
+
+            # Use best rubric score if available
+            rubric_score = data.get("best_rubric_score") or data.get("scores", {}).get("rubric", 0)
+
+            # Recalculate time rank and bonus based on current submission order
+            time_rank = time_rank_map.get(participant_id, 999)
+            time_rank_bonus = _calculate_time_rank_bonus(time_rank)
+
+            # Calculate new total
+            total = rubric_score + time_rank_bonus
+
             results.append({
-                "participant_id": data.get("participant_id") or data.get("participant"),
-                "total": scores.get("total", 0),
-                "rubric": scores.get("rubric", 0),
-                "time_rank": scores.get("time_rank", 0),
-                "time_rank_bonus": scores.get("time_rank_bonus", 0),
-                "evaluated_at": data.get("evaluated_at")
+                "participant_id": participant_id,
+                "total": total,
+                "rubric": rubric_score,
+                "time_rank": time_rank,
+                "time_rank_bonus": time_rank_bonus,
+                "evaluated_at": data.get("evaluated_at"),
+                "submission_count": data.get("total_evaluations", 1)
             })
 
     # Sort by total score descending

@@ -851,10 +851,11 @@ useEffect(() =&gt; {
                         showChallengeForm();
 
                         if (data.personal_status === 'submitted') {
-                            document.getElementById('submitBtn').disabled = true;
-                            document.getElementById('submitBtn').classList.add('opacity-50', 'cursor-not-allowed');
-                            document.getElementById('submitBtn').innerHTML = 'Submitted';
-                            showStatus('Already submitted for this week', 'text-green-400');
+                            // Allow resubmission - keep button enabled
+                            document.getElementById('submitBtn').innerHTML = '🔄 Resubmit';
+                            showStatus('You have already submitted. You can resubmit to improve your score (time rank will be recalculated).', 'text-blue-400');
+                            // Check for existing evaluation results
+                            await checkExistingEvaluation();
                         }
                     }
                 }
@@ -978,10 +979,19 @@ useEffect(() =&gt; {
 
                 if (response.ok) {
                     const data = await response.json();
-                    showStatus(`Submission complete! Elapsed time: ${data.elapsed_minutes?.toFixed(1) || '-'} minutes. Checking evaluation...`, 'text-green-400');
+                    const submissionNum = data.submission_number || 1;
+                    const isResubmission = data.is_resubmission || submissionNum > 1;
+
+                    if (isResubmission) {
+                        showStatus(`Resubmission #${submissionNum} complete! Elapsed time: ${data.elapsed_minutes?.toFixed(1) || '-'} minutes. Checking evaluation...`, 'text-green-400');
+                    } else {
+                        showStatus(`Submission complete! Elapsed time: ${data.elapsed_minutes?.toFixed(1) || '-'} minutes. Checking evaluation...`, 'text-green-400');
+                    }
+
+                    // Temporarily disable button during evaluation
                     document.getElementById('submitBtn').disabled = true;
                     document.getElementById('submitBtn').classList.add('opacity-50', 'cursor-not-allowed');
-                    document.getElementById('submitBtn').innerHTML = 'Submitted';
+                    document.getElementById('submitBtn').innerHTML = 'Evaluating...';
 
                     // Start polling for evaluation results
                     pollEvaluation(1, currentUser.user_id);
@@ -1121,6 +1131,14 @@ useEffect(() =&gt; {
             const feedbackContainer = document.createElement('div');
             feedbackContainer.innerHTML = feedbackHtml;
             statusEl.parentNode.appendChild(feedbackContainer);
+
+            // Re-enable submit button for resubmission
+            const submitBtn = document.getElementById('submitBtn');
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                submitBtn.innerHTML = '🔄 Resubmit';
+            }
         }
 
         // Check for existing evaluation on page load (for already submitted users)
