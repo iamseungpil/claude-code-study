@@ -309,19 +309,12 @@
 
         async function checkLoginStatus() {
             const token = localStorage.getItem('auth_token');
-            const loginWarning = document.getElementById('login-warning');
-            const startBtn = document.getElementById('startBtn');
-            const submitBtn = document.getElementById('submitBtn');
 
+            // No token - redirect to main page
             if (!token) {
-                if (loginWarning) loginWarning.classList.remove('hidden');
-                startBtn.disabled = true;
-                startBtn.classList.add('opacity-50', 'cursor-not-allowed');
-                submitBtn.disabled = true;
-                submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
-                const hint = document.getElementById('timerNotStartedHint');
-                if (hint) hint.classList.add('hidden');
-                return;
+                alert('Please login to access the challenge page.');
+                window.location.href = 'index.html';
+                return false;
             }
 
             try {
@@ -331,24 +324,31 @@
 
                 if (response.ok) {
                     currentUser = await response.json();
+                    const loginWarning = document.getElementById('login-warning');
+                    const startBtn = document.getElementById('startBtn');
+                    const submitBtn = document.getElementById('submitBtn');
                     if (loginWarning) loginWarning.classList.add('hidden');
-                    startBtn.disabled = false;
-                    startBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-                    submitBtn.disabled = false;
-                    submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    if (startBtn) {
+                        startBtn.disabled = false;
+                        startBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    }
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    }
+                    return true;
                 } else {
+                    // Invalid token - redirect to main page
                     localStorage.removeItem('auth_token');
-                    if (loginWarning) loginWarning.classList.remove('hidden');
-                    startBtn.disabled = true;
-                    startBtn.classList.add('opacity-50', 'cursor-not-allowed');
-                    submitBtn.disabled = true;
-                    submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
-                    const hint = document.getElementById('timerNotStartedHint');
-                    if (hint) hint.classList.add('hidden');
+                    alert('Your session has expired. Please login again.');
+                    window.location.href = 'index.html';
+                    return false;
                 }
             } catch (e) {
                 console.error('Auth check failed:', e);
-                if (loginWarning) loginWarning.classList.remove('hidden');
+                alert('Authentication failed. Please login again.');
+                window.location.href = 'index.html';
+                return false;
             }
         }
 
@@ -413,7 +413,11 @@
         }
 
         document.addEventListener('DOMContentLoaded', async () => {
-            await checkLoginStatus();
+            // Check login first - will redirect if not logged in
+            const isLoggedIn = await checkLoginStatus();
+            if (!isLoggedIn) return;
+
+            // Check challenge status - will redirect if not started
             await loadChallengeStatus();
             await loadPersonalStatus();
         });
