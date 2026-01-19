@@ -987,11 +987,27 @@ main().catch(err => {
                     const submissionNum = data.submission_number || 1;
                     const isResubmission = data.is_resubmission || submissionNum > 1;
 
-                    if (isResubmission) {
-                        showStatus(`Resubmission #${submissionNum} complete! Elapsed time: ${data.elapsed_minutes?.toFixed(1) || '-'} minutes. Evaluation will start shortly.`, 'text-green-400');
-                    } else {
-                        showStatus(`Submission complete! Elapsed time: ${data.elapsed_minutes?.toFixed(1) || '-'} minutes. Evaluation will start shortly.`, 'text-green-400');
-                    }
+                    // Show success message with leaderboard link
+                    const statusEl = document.getElementById('statusMessage');
+                    statusEl.innerHTML = `
+                        <div class="text-green-400 font-medium mb-2">
+                            ${isResubmission ? `Resubmission #${submissionNum} complete!` : 'Submission complete!'}
+                        </div>
+                        <div class="text-gray-300 mb-3">
+                            Elapsed time: <span class="font-bold">${data.elapsed_minutes?.toFixed(1) || '-'}</span> minutes
+                        </div>
+                        <div class="bg-purple-500/10 border border-purple-500/30 rounded-xl p-4 inline-block">
+                            <div class="text-purple-400 mb-2">Your entry is now on the leaderboard!</div>
+                            <a href="leaderboard.html" class="inline-flex items-center gap-2 bg-purple-500 hover:bg-purple-500/80 text-white font-medium px-4 py-2 rounded-lg transition-all">
+                                <span>🏆</span> View Leaderboard
+                            </a>
+                        </div>
+                        <div class="text-gray-500 text-sm mt-3">
+                            Evaluation in progress... Results will appear shortly.
+                        </div>
+                    `;
+                    statusEl.className = 'mt-6 text-center';
+                    statusEl.classList.remove('hidden');
 
                     // Keep button enabled for resubmission
                     document.getElementById('submitBtn').innerHTML = '🔄 Resubmit';

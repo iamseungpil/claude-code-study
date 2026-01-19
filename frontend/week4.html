@@ -521,10 +521,32 @@
 
                 if (response.ok) {
                     const data = await response.json();
-                    showStatus(`Submission complete! Elapsed time: ${data.elapsed_minutes?.toFixed(1) || '-'} minutes. Evaluation will start shortly.`, 'text-green-400');
-                    document.getElementById('submitBtn').disabled = true;
-                    document.getElementById('submitBtn').classList.add('opacity-50', 'cursor-not-allowed');
-                    document.getElementById('submitBtn').innerHTML = 'Submitted';
+                    const submissionNum = data.submission_number || 1;
+                    const isResubmission = data.is_resubmission || submissionNum > 1;
+
+                    // Show success message with leaderboard link
+                    const statusEl = document.getElementById('statusMessage');
+                    statusEl.innerHTML = `
+                        <div class="text-green-400 font-medium mb-2">
+                            ${isResubmission ? `Resubmission #${submissionNum} complete!` : 'Submission complete!'}
+                        </div>
+                        <div class="text-gray-300 mb-3">
+                            Elapsed time: <span class="font-bold">${data.elapsed_minutes?.toFixed(1) || '-'}</span> minutes
+                        </div>
+                        <div class="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 inline-block">
+                            <div class="text-emerald-400 mb-2">Your entry is now on the leaderboard!</div>
+                            <a href="leaderboard.html" class="inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-500/80 text-dark-900 font-medium px-4 py-2 rounded-lg transition-all">
+                                <span>🏆</span> View Leaderboard
+                            </a>
+                        </div>
+                        <div class="text-gray-500 text-sm mt-3">
+                            Evaluation in progress... Results will appear shortly.
+                        </div>
+                    `;
+                    statusEl.className = 'mt-6 text-center';
+                    statusEl.classList.remove('hidden');
+
+                    document.getElementById('submitBtn').innerHTML = '🔄 Resubmit';
                 } else {
                     const error = await response.json();
                     showStatus('Submission failed: ' + (error.detail || 'Unknown error'), 'text-red-400');

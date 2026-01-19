@@ -444,6 +444,7 @@ def _calculate_time_rank_bonus(rank: int) -> int:
 def get_week_leaderboard(week: int) -> List[dict]:
     """
     Get leaderboard for a specific week.
+    Includes both completed evaluations and pending submissions.
     Recalculates time rank bonus based on latest submission order.
     Uses best rubric score for each participant.
     """
@@ -452,13 +453,16 @@ def get_week_leaderboard(week: int) -> List[dict]:
 
     # Build submission order map based on LATEST submission time
     submission_order = []
+    submission_map = {}  # participant_id -> submission data
     for sub in submissions:
         latest_time = sub.get("latest_submitted_at") or sub.get("submitted_at")
-        if latest_time:
+        participant_id = sub.get("participant_id")
+        if latest_time and participant_id:
             submission_order.append({
-                "participant_id": sub.get("participant_id"),
+                "participant_id": participant_id,
                 "submitted_at": latest_time
             })
+            submission_map[participant_id] = sub
 
     # Sort by submission time to get time rank
     submission_order.sort(key=lambda x: x.get("submitted_at", "9999"))
@@ -468,10 +472,14 @@ def get_week_leaderboard(week: int) -> List[dict]:
     for rank, sub in enumerate(submission_order, start=1):
         time_rank_map[sub["participant_id"]] = rank
 
+    # Track which participants have completed evaluations
+    evaluated_ids = set()
     results = []
+
     for data in evaluations:
         if data.get("status") == "completed":
             participant_id = data.get("participant_id") or data.get("participant")
+            evaluated_ids.add(participant_id)
 
             # Use best rubric score if available
             rubric_score = data.get("best_rubric_score") or data.get("scores", {}).get("rubric", 0)
@@ -485,6 +493,7 @@ def get_week_leaderboard(week: int) -> List[dict]:
 
             results.append({
                 "participant_id": participant_id,
+                "status": "completed",
                 "total": total,
                 "rubric": rubric_score,
                 "time_rank": time_rank,
@@ -493,19 +502,42 @@ def get_week_leaderboard(week: int) -> List[dict]:
                 "submission_count": data.get("total_evaluations", 1)
             })
 
-    # Sort by total score descending
-    results.sort(key=lambda x: x["total"], reverse=True)
+    # Add pending submissions (submissions without completed evaluations)
+    for participant_id, sub in submission_map.items():
+        if participant_id not in evaluated_ids:
+            current_sub = sub.get("current_submission", {})
+            results.append({
+                "participant_id": participant_id,
+                "status": "pending",
+                "submitted_at": sub.get("latest_submitted_at") or sub.get("submitted_at"),
+                "github_url": current_sub.get("github_url") or sub.get("github_url"),
+                "elapsed_minutes": current_sub.get("elapsed_minutes") or sub.get("elapsed_minutes"),
+                "time_rank": time_rank_map.get(participant_id, 999)
+            })
 
-    # Add rank and medals
-    for i, r in enumerate(results):
-        r["rank"] = i + 1
-        if i == 0:
-            r["medal"] = "🥇"
-        elif i == 1:
-            r["medal"] = "🥈"
-        elif i == 2:
-            r["medal"] = "🥉"
+    # Sort: completed first (by total score descending), then pending (by submission time ascending)
+    results.sort(key=lambda x: (
+        0 if x.get("status") == "completed" else 1,  # completed first
+        -x.get("total", 0),  # higher score first for completed
+        x.get("submitted_at", "9999")  # earlier submission first for pending
+    ))
+
+    # Add rank and medals (only for completed entries)
+    completed_rank = 0
+    for r in results:
+        if r.get("status") == "completed":
+            completed_rank += 1
+            r["rank"] = completed_rank
+            if completed_rank == 1:
+                r["medal"] = "🥇"
+            elif completed_rank == 2:
+                r["medal"] = "🥈"
+            elif completed_rank == 3:
+                r["medal"] = "🥉"
+            else:
+                r["medal"] = ""
         else:
+            r["rank"] = "-"
             r["medal"] = ""
 
     return results
