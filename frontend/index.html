@@ -878,43 +878,31 @@
 
                 if (!badge) continue;
 
+                // Helper to safely update button text
+                const updateBtnText = (btn, className, text) => {
+                    if (!btn) return;
+                    btn.className = className;
+                    const textEl = btn.querySelector('.btn-text');
+                    if (textEl) textEl.textContent = text;
+                };
+
                 // Update badge and buttons based on status
-                if (challenge && challenge.status === 'started') {
+                const status = challenge?.status;
+                if (status === 'started') {
                     badge.textContent = 'In Progress';
                     badge.className = 'text-emerald-400 text-xs font-bold px-2 py-1 rounded-full bg-emerald-900/30 border border-emerald-700/30';
-
-                    if (learnBtn) {
-                        learnBtn.className = styles.learnActive;
-                        learnBtn.querySelector('.btn-text').textContent = 'Learn First';
-                    }
-                    if (challengeBtn) {
-                        challengeBtn.className = styles.challengeActive;
-                        challengeBtn.querySelector('.btn-text').textContent = 'Start Challenge';
-                    }
-                } else if (challenge && challenge.status === 'ended') {
+                    updateBtnText(learnBtn, styles.learnActive, 'Learn First');
+                    updateBtnText(challengeBtn, styles.challengeActive, 'Start Challenge');
+                } else if (status === 'ended') {
                     badge.textContent = 'Ended';
                     badge.className = 'text-blue-400 text-xs font-bold px-2 py-1 rounded-full bg-blue-900/30 border border-blue-700/30';
-
-                    if (learnBtn) {
-                        learnBtn.className = styles.learnInactive;
-                        learnBtn.querySelector('.btn-text').textContent = 'Learn';
-                    }
-                    if (challengeBtn) {
-                        challengeBtn.className = styles.challengeInactive;
-                        challengeBtn.querySelector('.btn-text').textContent = 'Ended';
-                    }
+                    updateBtnText(learnBtn, styles.learnInactive, 'Learn');
+                    updateBtnText(challengeBtn, styles.challengeInactive, 'Ended');
                 } else {
                     badge.textContent = 'Not Started';
                     badge.className = 'text-gray-400 text-xs font-bold px-2 py-1 rounded-full bg-gray-800 border border-gray-700/30';
-
-                    if (learnBtn) {
-                        learnBtn.className = styles.learnInactive;
-                        learnBtn.querySelector('.btn-text').textContent = 'Learn';
-                    }
-                    if (challengeBtn) {
-                        challengeBtn.className = styles.challengeInactive;
-                        challengeBtn.querySelector('.btn-text').textContent = 'Coming Soon';
-                    }
+                    updateBtnText(learnBtn, styles.learnInactive, 'Learn');
+                    updateBtnText(challengeBtn, styles.challengeInactive, 'Coming Soon');
                 }
             }
         }
