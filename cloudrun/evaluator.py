@@ -20,6 +20,8 @@ import os
 import signal
 import time
 import logging
+import re
+import urllib.error
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional, Dict, List
@@ -51,8 +53,28 @@ def calculate_time_rank_bonus(rank: int) -> int:
     return TIME_RANK_POINTS.get(rank, DEFAULT_TIME_RANK_POINTS)
 
 
+def validate_github_url(url: str) -> bool:
+    """
+    Validate GitHub URL format to prevent command injection.
+
+    Only allows standard GitHub HTTPS URLs:
+    - https://github.com/username/repo
+    - https://github.com/username/repo.git
+    """
+    if not url:
+        return False
+    # GitHub HTTPS URL pattern - strict validation
+    pattern = r'^https://github\.com/[\w\-\.]+/[\w\-\.]+(?:\.git)?$'
+    return bool(re.match(pattern, url))
+
+
 def clone_github_repo(github_url: str, target_dir: Path) -> bool:
     """Clone a GitHub repository to target directory."""
+    # SECURITY: Validate URL format before execution to prevent command injection
+    if not validate_github_url(github_url):
+        logger.error(f"Invalid GitHub URL format: {github_url}")
+        return False
+
     try:
         if target_dir.exists():
             shutil.rmtree(target_dir)
@@ -63,7 +85,7 @@ def clone_github_repo(github_url: str, target_dir: Path) -> bool:
             ["git", "clone", "--depth", "1", github_url, str(target_dir)],
             capture_output=True,
             text=True,
-            timeout=120
+            timeout=60  # Reduced from 120
         )
 
         if result.returncode != 0:
@@ -71,6 +93,9 @@ def clone_github_repo(github_url: str, target_dir: Path) -> bool:
             return False
 
         return True
+    except subprocess.TimeoutExpired:
+        logger.error("Git clone timed out")
+        return False
     except Exception as e:
         logger.error(f"Clone error: {e}")
         return False
@@ -140,14 +165,15 @@ def start_dev_server(code_dir: Path, port: int = 3000) -> Optional[subprocess.Po
         )
 
         # Wait for server to be ready (max 30 seconds)
+        import urllib.request
         for _ in range(30):
             time.sleep(1)
             try:
-                import urllib.request
                 urllib.request.urlopen(f"http://localhost:{port}", timeout=2)
                 logger.info(f"Dev server started on port {port}")
                 return process
-            except:
+            except (urllib.error.URLError, TimeoutError, OSError) as e:
+                logger.debug(f"Server not ready yet: {e}")
                 continue
 
         logger.warning("Dev server did not respond in time")
@@ -159,16 +185,32 @@ def start_dev_server(code_dir: Path, port: int = 3000) -> Optional[subprocess.Po
 
 
 def stop_dev_server(process: subprocess.Popen):
-    """Stop the development server."""
-    if process:
+    """Safely stop the development server with proper cleanup."""
+    if process is None:
+        return
+
+    # Check if process is still running
+    if process.poll() is not None:
+        logger.debug("Dev server already terminated")
+        return
+
+    try:
+        pgid = os.getpgid(process.pid)
+        os.killpg(pgid, signal.SIGTERM)
+
+        # Wait for graceful shutdown
         try:
-            os.killpg(os.getpgid(process.pid), signal.SIGTERM)
             process.wait(timeout=5)
-        except:
-            try:
-                os.killpg(os.getpgid(process.pid), signal.SIGKILL)
-            except:
-                pass
+            logger.debug("Dev server terminated gracefully")
+        except subprocess.TimeoutExpired:
+            logger.warning("Dev server did not terminate, sending SIGKILL")
+            os.killpg(pgid, signal.SIGKILL)
+            process.wait(timeout=2)
+
+    except ProcessLookupError:
+        logger.debug("Process group already gone")
+    except OSError as e:
+        logger.warning(f"Error stopping dev server: {e}")
 
 
 def run_e2e_tests(code_dir: Path, week: int, port: int = 3000) -> dict:
@@ -272,6 +314,244 @@ module.exports = {{
         logger.error(f"E2E test error: {e}")
 
     return result
+
+
+def run_e2e_tests_with_mcp(code_dir: Path, week: int, port: int = 3000) -> dict:
+    """
+    Run E2E tests using Claude Code CLI with Playwright MCP tools.
+
+    This function uses Claude's MCP integration to perform browser-based testing
+    through natural language instructions, providing more flexible and intelligent
+    test execution compared to static Playwright test scripts.
+
+    Args:
+        code_dir: Path to the submission code directory
+        week: Week number for the challenge
+        port: Port where the dev server is running
+
+    Returns:
+        dict with test results including:
+        - ran: bool indicating if tests executed
+        - passed: number of passed test criteria
+        - failed: number of failed test criteria
+        - total: total number of test criteria
+        - test_results: list of individual test outcomes
+        - errors: list of any errors encountered
+        - method: 'mcp' to indicate this method was used
+    """
+    result = {
+        "ran": False,
+        "passed": 0,
+        "failed": 0,
+        "total": 0,
+        "test_results": [],
+        "errors": [],
+        "method": "mcp"
+    }
+
+    # Load test criteria from rubric or predefined test cases
+    test_criteria = _get_mcp_test_criteria(week, port)
+    if not test_criteria:
+        result["errors"].append(f"No MCP test criteria defined for week {week}")
+        return result
+
+    # Build the MCP test prompt
+    prompt = f"""You have access to Playwright MCP tools for browser automation.
+
+Test the application running at http://localhost:{port}
+
+## Test Criteria
+{test_criteria}
+
+## Instructions
+1. Use the playwright tools to navigate to the page
+2. Execute each test criterion using appropriate MCP tools
+3. For each criterion, determine if it PASSED or FAILED
+4. Return your findings as a JSON object
+
+## Required Output Format
+Return ONLY a valid JSON object with this exact structure:
+{{
+    "test_results": [
+        {{"name": "test criterion name", "passed": true/false, "details": "what happened"}}
+    ],
+    "summary": "brief overall summary"
+}}
+"""
+
+    try:
+        api_key = os.environ.get("ANTHROPIC_API_KEY", "")
+        if not api_key:
+            result["errors"].append("ANTHROPIC_API_KEY not set")
+            return result
+
+        logger.info("Running E2E tests with Playwright MCP")
+
+        # Run Claude Code CLI with MCP tools enabled
+        # --allowedTools permits all playwright MCP tools
+        cli_result = subprocess.run(
+            [
+                "claude", "-p", prompt,
+                "--output-format", "json",
+                "--allowedTools", "mcp__playwright__*"
+            ],
+            cwd=str(code_dir),
+            capture_output=True,
+            text=True,
+            timeout=180,  # 3 minutes for MCP tests
+            env={
+                **os.environ,
+                "ANTHROPIC_API_KEY": api_key,
+                "CI": "true",
+                "TERM": "dumb"
+            }
+        )
+
+        if cli_result.returncode != 0:
+            logger.warning(f"MCP test CLI returned non-zero: {cli_result.returncode}")
+            logger.warning(f"stderr: {cli_result.stderr[:500]}")
+            result["errors"].append(f"Claude CLI error: {cli_result.stderr[:300]}")
+            return result
+
+        # Parse the response
+        output = cli_result.stdout.strip()
+        json_start = output.find('{')
+        json_end = output.rfind('}') + 1
+
+        if json_start >= 0 and json_end > json_start:
+            test_output = json.loads(output[json_start:json_end])
+            result["ran"] = True
+
+            # Process test results
+            for test in test_output.get("test_results", []):
+                test_name = test.get("name", "Unknown")
+                test_passed = test.get("passed", False)
+
+                result["total"] += 1
+                if test_passed:
+                    result["passed"] += 1
+                else:
+                    result["failed"] += 1
+
+                result["test_results"].append({
+                    "name": test_name,
+                    "passed": test_passed,
+                    "details": test.get("details", "")
+                })
+
+            logger.info(f"MCP tests completed: {result['passed']}/{result['total']} passed")
+        else:
+            result["errors"].append("No valid JSON in MCP test output")
+            logger.warning(f"No JSON found in output: {output[:500]}")
+
+    except subprocess.TimeoutExpired:
+        result["errors"].append("MCP E2E tests timed out (180s)")
+        logger.error("MCP E2E tests timed out")
+    except json.JSONDecodeError as e:
+        result["errors"].append(f"Failed to parse MCP test results: {e}")
+        logger.error(f"JSON parse error in MCP results: {e}")
+    except Exception as e:
+        result["errors"].append(f"MCP test error: {str(e)}")
+        logger.error(f"MCP test exception: {e}")
+
+    return result
+
+
+def _get_mcp_test_criteria(week: int, port: int) -> Optional[str]:
+    """
+    Get MCP test criteria for a specific week.
+
+    This function returns natural language test criteria that Claude
+    can execute using Playwright MCP tools.
+
+    Args:
+        week: Week number
+        port: Port where the app is running
+
+    Returns:
+        String with test criteria or None if not defined
+    """
+    # Week-specific test criteria for MCP-based testing
+    # These are written as natural language instructions for Claude
+    criteria_map = {
+        1: """
+1. Page Load Test
+   - Navigate to http://localhost:{port}
+   - Verify the page loads successfully
+   - Check for a main heading or title element
+
+2. Todo Input Test
+   - Look for an input field for adding todos
+   - Type "Test todo item" into the input
+   - Submit the todo (press Enter or click Add button)
+   - Verify the todo appears in the list
+
+3. Todo Completion Test
+   - Find a todo item in the list
+   - Click to mark it as complete
+   - Verify visual indication of completion (strikethrough, checkbox, etc.)
+
+4. Todo Delete Test
+   - Find a todo item with a delete button
+   - Click the delete button
+   - Verify the item is removed from the list
+""",
+        2: """
+1. Page Load Test
+   - Navigate to http://localhost:{port}
+   - Verify the page loads successfully
+   - Check for main application elements
+
+2. Clear All Button Test
+   - Look for a "Clear All" or similar button
+   - Click the button
+   - Verify a confirmation dialog or action occurs
+
+3. Filter Functionality Test
+   - Look for filter options (All, Active, Completed)
+   - Click on different filter options
+   - Verify the list updates accordingly
+
+4. Persistence Test
+   - Add a todo item
+   - Refresh the page
+   - Verify the todo item persists
+""",
+        3: """
+1. Page Load Test
+   - Navigate to http://localhost:{port}
+   - Verify the page loads successfully
+
+2. Data Display Test
+   - Look for data visualization or list components
+   - Verify data is rendered on the page
+
+3. Interactive Element Test
+   - Find interactive elements (buttons, links)
+   - Click on them and verify response
+
+4. Error Handling Test
+   - Try invalid inputs if input fields exist
+   - Verify appropriate error handling
+""",
+    }
+
+    criteria = criteria_map.get(week)
+    if criteria:
+        return criteria.format(port=port)
+
+    # Default criteria for undefined weeks
+    return f"""
+1. Page Load Test
+   - Navigate to http://localhost:{port}
+   - Verify the page loads successfully
+   - Check for main content elements
+
+2. Basic Interaction Test
+   - Find interactive elements on the page
+   - Test basic interactions
+   - Verify responses
+""".format(port=port)
 
 
 def run_claude_evaluation(code_dir: Path, week: int, participant_id: str,
@@ -415,15 +695,25 @@ def evaluate_submission(week: int, participant_id: str, github_url: str) -> dict
         build_result = run_build_verification(code_dir)
 
         # 3. Run E2E tests (only if build succeeded)
-        e2e_result = {"ran": False, "passed": 0, "failed": 0, "total": 0, "test_results": []}
+        # Strategy: Try MCP-based tests first, fallback to traditional Playwright tests
+        e2e_result = {"ran": False, "passed": 0, "failed": 0, "total": 0, "test_results": [], "method": "none"}
 
         if build_result["success"]:
             logger.info("Starting dev server for E2E tests")
             dev_server = start_dev_server(code_dir, port=3000)
 
             if dev_server:
-                logger.info("Running E2E tests")
-                e2e_result = run_e2e_tests(code_dir, week, port=3000)
+                # Try MCP-based E2E tests first (more intelligent, flexible testing)
+                logger.info("Attempting E2E tests with Playwright MCP")
+                e2e_result = run_e2e_tests_with_mcp(code_dir, week, port=3000)
+
+                # Fallback to traditional Playwright tests if MCP failed
+                if not e2e_result.get("ran") or e2e_result.get("errors"):
+                    logger.warning(f"MCP tests failed, falling back to traditional Playwright: {e2e_result.get('errors', [])}")
+                    e2e_result = run_e2e_tests(code_dir, week, port=3000)
+                    e2e_result["method"] = "playwright"
+                else:
+                    logger.info(f"MCP tests succeeded: {e2e_result['passed']}/{e2e_result['total']} passed")
             else:
                 e2e_result["errors"] = ["Failed to start dev server"]
 
@@ -475,7 +765,8 @@ def evaluate_submission(week: int, participant_id: str, github_url: str) -> dict
                 "passed": e2e_result.get("passed", 0),
                 "failed": e2e_result.get("failed", 0),
                 "total": e2e_result.get("total", 0),
-                "test_results": e2e_result.get("test_results", [])
+                "test_results": e2e_result.get("test_results", []),
+                "method": e2e_result.get("method", "unknown")  # 'mcp' or 'playwright'
             },
             "breakdown": claude_result.get("breakdown", {}),
             "feedback": claude_result.get("feedback", ""),

@@ -39,7 +39,7 @@ jobs:
             --source . \
             --region ${{ env.REGION }} \
             --allow-unauthenticated \
-            --memory 1Gi \
+            --memory 2Gi \
             --timeout 900 \
             --set-env-vars "ENVIRONMENT=production,ALLOW_ALL_ORIGINS=true" \
             --set-secrets "JWT_SECRET=jwt-secret:latest,ANTHROPIC_API_KEY=anthropic-api-key:latest"

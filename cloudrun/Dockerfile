@@ -30,10 +30,23 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Claude Code CLI and Playwright globally
+# Install Claude Code CLI, Playwright, and Playwright MCP globally
 # Note: @playwright/test is the test runner, playwright is the library
-RUN npm install -g @anthropic-ai/claude-code @playwright/test playwright
+# @playwright/mcp enables MCP-based browser automation for Claude
+RUN npm install -g @anthropic-ai/claude-code @playwright/test playwright @playwright/mcp
 RUN npx playwright install chromium
+
+# Create Claude MCP configuration for Playwright
+# This enables Claude Code CLI to use Playwright MCP tools for E2E testing
+RUN mkdir -p /root && echo '{\
+  "mcpServers": {\
+    "playwright": {\
+      "type": "stdio",\
+      "command": "npx",\
+      "args": ["@playwright/mcp", "--headless", "--browser", "chromium", "--no-sandbox"]\
+    }\
+  }\
+}' > /root/.claude.json
 
 # Set working directory
 WORKDIR /app
@@ -42,8 +55,8 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Install Python Playwright
-RUN pip install playwright && playwright install chromium
+# Note: Python Playwright shares browsers with Node.js Playwright via PLAYWRIGHT_BROWSERS_PATH
+# No need to install Chromium again - it's already installed by npx playwright install
 
 # Copy application code
 COPY . .
