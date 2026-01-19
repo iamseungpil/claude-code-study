@@ -58,6 +58,12 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Note: Python Playwright shares browsers with Node.js Playwright via PLAYWRIGHT_BROWSERS_PATH
 # No need to install Chromium again - it's already installed by npx playwright install
 
+# Pre-install uigen dependencies for faster evaluation
+# All week1 submissions use the same base uigen project
+COPY uigen-base/package.json uigen-base/package-lock.json /app/uigen-base/
+RUN cd /app/uigen-base && npm install --cache /tmp/npm-cache && \
+    echo "UIgen base dependencies pre-installed"
+
 # Copy application code
 COPY . .
 
