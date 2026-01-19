@@ -95,6 +95,9 @@
             <button class="lesson-btn px-4 py-2 rounded-xl border border-white/10 text-sm font-medium transition-all hover:bg-white/5" data-lesson="4">
                 4. Demo Preparation
             </button>
+            <button class="lesson-btn px-4 py-2 rounded-xl border border-white/10 text-sm font-medium transition-all hover:bg-white/5" data-lesson="5">
+                5. Pro Tips (Boris Cherny)
+            </button>
         </div>
 
         <!-- Lesson 1: Skills Integration -->
@@ -667,10 +670,269 @@ Output as JSON with: { file, line, issue, suggestion, severity }"</code></pre>
                     <button onclick="showLesson(3)" class="bg-white/10 hover:bg-white/20 px-6 py-3 rounded-xl font-semibold transition-all">
                         Previous
                     </button>
+                    <button onclick="showLesson(5)" class="bg-accent hover:bg-rose-400 text-dark-900 px-6 py-3 rounded-xl font-semibold transition-all">
+                        Next: Pro Tips
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Lesson 5: Pro Tips (Boris Cherny) -->
+        <section id="lesson5" class="lesson-content mb-12">
+            <div class="card rounded-2xl p-8">
+                <div class="flex items-center gap-4 mb-6">
+                    <span class="bg-accent/20 text-accent w-12 h-12 rounded-xl flex items-center justify-center text-xl font-bold">5</span>
+                    <h2 class="text-2xl font-bold">Pro Tips (Boris Cherny)</h2>
+                </div>
+
+                <div class="space-y-6 text-gray-300">
+                    <div class="bg-rose-500/10 border border-rose-500/30 rounded-xl p-4">
+                        <p class="text-rose-200 font-medium">Boris Cherny's Advanced Tips</p>
+                        <p class="text-sm mt-1">Anthropic Developer Relations의 Boris Cherny가 공유한 고급 팁들입니다. 이 팁들은 Claude Code를 전문가 수준으로 활용하는 데 핵심입니다.</p>
+                    </div>
+
+                    <h3 class="text-xl font-semibold text-white">Tip 1: 병렬 실행 환경 구성</h3>
+                    <p>
+                        여러 터미널에서 Claude를 동시에 실행하여 <strong class="text-accent">작업 처리량을 극대화</strong>하세요.
+                        각 터미널에서 다른 서브태스크를 진행하면 전체 작업 시간을 크게 단축할 수 있습니다.
+                    </p>
+                    <pre><code class="text-green-400"># 터미널 1: 백엔드 API 개발
+cd backend && claude "API 엔드포인트 구현"
+
+# 터미널 2: 프론트엔드 개발
+cd frontend && claude "React 컴포넌트 개발"
+
+# 터미널 3: 테스트 작성
+cd tests && claude "유닛 테스트 작성"
+
+# 터미널 4: 문서화
+cd docs && claude "API 문서 생성"</code></pre>
+
+                    <h3 class="text-xl font-semibold text-white mt-8">Tip 2: 웹과 로컬 병렬 운영</h3>
+                    <p>
+                        Claude.ai (웹)와 Claude Code (터미널)를 <strong class="text-accent">동시에 활용</strong>하세요.
+                        웹에서 리서치/설계를 하면서 터미널에서 구현을 진행합니다.
+                    </p>
+                    <div class="grid md:grid-cols-2 gap-4 mt-4">
+                        <div class="bg-dark-700 rounded-xl p-4">
+                            <h4 class="font-semibold text-accent mb-2">Claude.ai (웹)</h4>
+                            <ul class="text-sm space-y-1">
+                                <li>- 아키텍처 설계 논의</li>
+                                <li>- API 문서 분석</li>
+                                <li>- 복잡한 알고리즘 설명</li>
+                                <li>- 장기 컨텍스트 유지</li>
+                            </ul>
+                        </div>
+                        <div class="bg-dark-700 rounded-xl p-4">
+                            <h4 class="font-semibold text-accent mb-2">Claude Code (터미널)</h4>
+                            <ul class="text-sm space-y-1">
+                                <li>- 실제 코드 구현</li>
+                                <li>- 파일 시스템 접근</li>
+                                <li>- Git 작업</li>
+                                <li>- 빌드 및 테스트</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <h3 class="text-xl font-semibold text-white mt-8">Tip 3: 모델 선택 전략</h3>
+                    <p>
+                        작업 복잡도에 따라 <strong class="text-accent">적절한 모델을 선택</strong>하세요.
+                        기본적으로 Sonnet을 사용하고, 복잡한 추론이 필요할 때만 Opus with thinking을 사용합니다.
+                    </p>
+                    <div class="overflow-x-auto">
+                        <table class="w-full mt-4 text-sm">
+                            <thead>
+                                <tr class="border-b border-white/10">
+                                    <th class="text-left py-3 px-4 text-accent">모델</th>
+                                    <th class="text-left py-3 px-4">사용 케이스</th>
+                                    <th class="text-left py-3 px-4">비용</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-b border-white/5">
+                                    <td class="py-3 px-4 font-semibold text-green-400">Haiku</td>
+                                    <td class="py-3 px-4">간단한 수정, 포매팅, 리네이밍</td>
+                                    <td class="py-3 px-4">$</td>
+                                </tr>
+                                <tr class="border-b border-white/5">
+                                    <td class="py-3 px-4 font-semibold text-blue-400">Sonnet (기본)</td>
+                                    <td class="py-3 px-4">일반적인 개발 작업, 버그 수정</td>
+                                    <td class="py-3 px-4">$$</td>
+                                </tr>
+                                <tr class="border-b border-white/5">
+                                    <td class="py-3 px-4 font-semibold text-amber-400">Opus 4.5</td>
+                                    <td class="py-3 px-4">복잡한 아키텍처, 어려운 버그</td>
+                                    <td class="py-3 px-4">$$$</td>
+                                </tr>
+                                <tr class="border-b border-white/5">
+                                    <td class="py-3 px-4 font-semibold text-rose-400">Opus + ultrathink</td>
+                                    <td class="py-3 px-4">매우 복잡한 추론, 설계 결정</td>
+                                    <td class="py-3 px-4">$$$$</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <pre class="mt-4"><code class="text-green-400"># 모델 지정 방법
+claude --model opus-4-5 "복잡한 아키텍처 설계"
+
+# ultrathink 모드 (Opus에서만)
+> ultrathink about the best approach for this problem</code></pre>
+
+                    <h3 class="text-xl font-semibold text-white mt-8">Tip 6: Plan 모드와 자동 수락 워크플로우</h3>
+                    <p>
+                        복잡한 작업은 <strong class="text-accent">Plan 모드로 시작</strong>하고, 검증된 패턴은 <code class="inline-code">--yes</code>로 자동 수락합니다.
+                    </p>
+                    <div class="bg-dark-700 rounded-xl p-4 mt-4">
+                        <h4 class="font-semibold text-accent mb-2">추천 워크플로우</h4>
+                        <ol class="text-sm space-y-2">
+                            <li>1. <strong>Plan 모드 진입</strong>: Shift+Tab x2</li>
+                            <li>2. <strong>계획 검토</strong>: Claude의 실행 계획 확인</li>
+                            <li>3. <strong>계획 승인 후 실행</strong>: 한 단계씩 확인</li>
+                            <li>4. <strong>반복 작업은 자동화</strong>: 검증 후 --yes 사용</li>
+                        </ol>
+                    </div>
+
+                    <h3 class="text-xl font-semibold text-white mt-8">Tip 8: 서브에이전트 전략적 활용</h3>
+                    <p>
+                        서브에이전트를 <strong class="text-accent">병렬로 실행</strong>하여 작업 속도를 높이세요.
+                        각 에이전트에게 독립적인 작업을 할당합니다.
+                    </p>
+                    <pre><code class="text-green-400"># 메인 Claude에서 서브에이전트 생성
+> "4개의 병렬 에이전트로 다음을 동시에 진행해줘:
+   1. 보안 취약점 스캔
+   2. 성능 프로파일링
+   3. 코드 품질 분석
+   4. 테스트 커버리지 확인"
+
+# Claude가 자동으로:
+# - Task 도구로 4개 서브에이전트 생성
+# - run_in_background: true로 병렬 실행
+# - 결과를 수집하여 통합 리포트 생성</code></pre>
+
+                    <h3 class="text-xl font-semibold text-white mt-8">Tip 13: 검증 피드백 루프 (가장 중요)</h3>
+                    <div class="bg-rose-500/10 border border-rose-500/30 rounded-xl p-4">
+                        <p class="text-rose-200 font-medium">핵심 원칙</p>
+                        <p class="text-sm mt-1">
+                            Claude가 코드를 작성한 후 <strong>반드시 검증</strong>하세요.
+                            빌드, 테스트, 타입 체크를 통해 오류를 즉시 발견하고 수정합니다.
+                        </p>
+                    </div>
+                    <pre class="mt-4"><code class="text-green-400"># 검증 피드백 루프 패턴
+1. Claude가 코드 작성
+2. 즉시 검증 실행: npm run build && npm test
+3. 오류 발생 시 Claude에게 피드백
+4. 수정 후 다시 검증
+5. 모든 검증 통과할 때까지 반복
+
+# Hook으로 자동화
+{
+  "hooks": {
+    "PostToolUse": [{
+      "matcher": "Write|Edit",
+      "hooks": [{
+        "type": "command",
+        "command": "npm run typecheck 2>&1 || true"
+      }]
+    }]
+  }
+}</code></pre>
+
+                    <h3 class="text-xl font-semibold text-white mt-8">Official Plugin: code-simplifier</h3>
+                    <div class="card rounded-xl p-4 mt-4">
+                        <div class="flex items-center gap-3 mb-2">
+                            <span class="text-2xl">✨</span>
+                            <h5 class="font-bold text-accent">code-simplifier</h5>
+                        </div>
+                        <p class="text-sm text-gray-400 mb-3">
+                            복잡한 코드를 자동으로 단순화하는 플러그인입니다. 중복 제거, 리팩토링 제안, 가독성 개선을 수행합니다.
+                        </p>
+                        <pre class="text-xs"><code class="text-green-400"># 설치
+claude plugins add github:anthropics/code-simplifier
+
+# 사용
+/simplify src/complex-module.ts    # 특정 파일 단순화
+/simplify --all                    # 전체 프로젝트 분석</code></pre>
+                    </div>
+                </div>
+
+                <div class="mt-8 pt-6 border-t border-white/10 flex justify-between">
+                    <button onclick="showLesson(4)" class="bg-white/10 hover:bg-white/20 px-6 py-3 rounded-xl font-semibold transition-all">
+                        Previous
+                    </button>
                     <button onclick="startQuiz()" class="bg-accent hover:bg-rose-400 text-dark-900 px-6 py-3 rounded-xl font-semibold transition-all">
                         Take the Quiz
                     </button>
                 </div>
+            </div>
+        </section>
+
+        <!-- Terminology Section -->
+        <section class="mb-12">
+            <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-4">용어 설명</h2>
+            <div class="space-y-3">
+                <details class="card rounded-xl p-4 cursor-pointer">
+                    <summary class="font-bold text-white flex items-center justify-between">
+                        병렬 실행 (Parallel Execution)
+                        <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </summary>
+                    <p class="text-gray-400 text-sm mt-3">
+                        여러 Claude 인스턴스나 서브에이전트를 동시에 실행하여 작업을 분산 처리하는 방식입니다.
+                        독립적인 작업들을 병렬로 진행하면 전체 완료 시간을 크게 단축할 수 있습니다.
+                    </p>
+                </details>
+                <details class="card rounded-xl p-4 cursor-pointer">
+                    <summary class="font-bold text-white flex items-center justify-between">
+                        ultrathink (Extended Thinking)
+                        <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </summary>
+                    <p class="text-gray-400 text-sm mt-3">
+                        Opus 모델에서 활성화되는 확장 사고 모드입니다. Claude가 응답 전에 더 오래, 깊이 생각합니다.
+                        복잡한 아키텍처 설계나 어려운 디버깅에 유용합니다.
+                        <code class="bg-dark-800 px-1 rounded text-xs">ultrathink about...</code>으로 활성화합니다.
+                    </p>
+                </details>
+                <details class="card rounded-xl p-4 cursor-pointer">
+                    <summary class="font-bold text-white flex items-center justify-between">
+                        검증 피드백 루프
+                        <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </summary>
+                    <p class="text-gray-400 text-sm mt-3">
+                        코드 작성 → 검증(빌드/테스트) → 피드백 → 수정의 반복 과정입니다.
+                        PostToolUse 훅으로 자동화하면 Claude가 작성한 코드의 품질을 실시간으로 보장할 수 있습니다.
+                    </p>
+                </details>
+                <details class="card rounded-xl p-4 cursor-pointer">
+                    <summary class="font-bold text-white flex items-center justify-between">
+                        Claude Code SDK
+                        <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </summary>
+                    <p class="text-gray-400 text-sm mt-3">
+                        <code class="bg-dark-800 px-1 rounded text-xs">@anthropic-ai/claude-agent-sdk</code> 패키지입니다.
+                        JavaScript/TypeScript에서 Claude Code를 프로그래밍 방식으로 호출할 수 있습니다.
+                        자동화 스크립트, CI/CD 파이프라인, 커스텀 도구 개발에 사용됩니다.
+                    </p>
+                </details>
+                <details class="card rounded-xl p-4 cursor-pointer">
+                    <summary class="font-bold text-white flex items-center justify-between">
+                        Plan 모드
+                        <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </summary>
+                    <p class="text-gray-400 text-sm mt-3">
+                        <code class="bg-dark-800 px-1 rounded text-xs">Shift+Tab x2</code>로 진입하는 계획 모드입니다.
+                        Claude가 먼저 실행 계획을 세우고 승인을 받은 후에 작업을 진행합니다.
+                        복잡한 작업에서 의도치 않은 변경을 방지합니다.
+                    </p>
+                </details>
             </div>
         </section>
 
