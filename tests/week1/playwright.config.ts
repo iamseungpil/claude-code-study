@@ -9,10 +9,10 @@ import { defineConfig, devices } from '@playwright/test';
  */
 export default defineConfig({
   testDir: '.',
-  fullyParallel: true,
+  fullyParallel: false,  // Run tests serially to share testResults state
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
+  workers: 1,  // Force single worker to ensure testResults state is shared
   reporter: [
     ['html'],
     ['json', { outputFile: 'test-results/results.json' }]

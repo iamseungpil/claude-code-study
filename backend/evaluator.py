@@ -251,13 +251,16 @@ def evaluate_submission(week: int, participant_id: str, use_playwright: bool = T
     claude_result = run_claude_evaluation(week, participant_id)
 
     if "error" in claude_result:
-        return {
+        error_result = {
             "participant": participant_id,
             "week": week,
             "status": "error",
             "error": claude_result["error"],
             "evaluated_at": datetime.now().isoformat()
         }
+        # Save error result so it's visible in the frontend
+        save_evaluation(week, participant_id, error_result)
+        return error_result
 
     # Combine scores
     rubric_score = claude_result.get("rubric_score", 0)

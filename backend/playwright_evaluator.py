@@ -19,6 +19,8 @@ import os
 import sys
 import time
 import signal
+import urllib.request
+import urllib.error
 from datetime import datetime
 from pathlib import Path
 from typing import Optional, Dict, Any
@@ -83,6 +85,15 @@ def clone_or_update_submission(
             "error": f"Submission directory not found: {submission_dir}"
         }
 
+    # Check if project is in 'code' subdirectory (server.py clones to code/)
+    code_subdir = submission_dir / "code"
+    if code_subdir.exists() and (code_subdir / "package.json").exists():
+        return {
+            "success": True,
+            "path": str(code_subdir)
+        }
+
+    # Otherwise, project is at root (direct clone or github_url provided)
     return {
         "success": True,
         "path": str(submission_dir)
@@ -99,12 +110,31 @@ def install_dependencies(project_path: str) -> Dict[str, Any]:
         Dict with status information
     """
     try:
+        project_dir = Path(project_path)
+
+        # Copy pre-installed uigen node_modules if available (speeds up npm install significantly)
+        # Check both cloudrun path (Docker) and local path
+        uigen_base_paths = [
+            Path("/app/uigen-base/node_modules"),  # Docker/Cloud Run
+            BASE_DIR / "cloudrun" / "uigen-base" / "node_modules",  # Local development
+        ]
+
+        target_modules = project_dir / "node_modules"
+        if not target_modules.exists():
+            for uigen_base in uigen_base_paths:
+                if uigen_base.exists():
+                    print("Copying pre-installed uigen node_modules...")
+                    shutil.copytree(uigen_base, target_modules, symlinks=True)
+                    print("Pre-installed node_modules copied successfully")
+                    break
+
+        # npm install (will be much faster with pre-copied node_modules)
         result = subprocess.run(
             ["npm", "install", "--cache", "/tmp/npm-cache"],
             cwd=project_path,
             capture_output=True,
             text=True,
-            timeout=300
+            timeout=120  # Reduced from 300s since node_modules is pre-copied
         )
 
         if result.returncode != 0:
@@ -131,6 +161,33 @@ def run_build(project_path: str) -> Dict[str, Any]:
         Dict with status information
     """
     try:
+        # Run prisma generate and migrate if prisma folder exists
+        prisma_dir = Path(project_path) / "prisma"
+        if prisma_dir.exists():
+            print("Running prisma generate...")
+            prisma_result = subprocess.run(
+                ["npx", "prisma", "generate"],
+                cwd=project_path,
+                capture_output=True,
+                text=True,
+                timeout=60
+            )
+            if prisma_result.returncode != 0:
+                print(f"Prisma generate warning: {prisma_result.stderr}")
+
+            # Run prisma migrate to create database tables (needed for auth)
+            print("Running prisma migrate...")
+            migrate_result = subprocess.run(
+                ["npx", "prisma", "migrate", "dev", "--skip-generate"],
+                cwd=project_path,
+                capture_output=True,
+                text=True,
+                timeout=120,
+                env={**os.environ, "SKIP_ENV_VALIDATION": "1"}
+            )
+            if migrate_result.returncode != 0:
+                print(f"Prisma migrate warning: {migrate_result.stderr}")
+
         result = subprocess.run(
             ["npm", "run", "build"],
             cwd=project_path,
@@ -151,7 +208,27 @@ def run_build(project_path: str) -> Dict[str, Any]:
         return {"success": False, "error": str(e)}
 
 
-def start_dev_server(project_path: str, port: int = DEV_SERVER_PORT) -> Optional[subprocess.Popen]:
+def find_available_port(start_port: int = DEV_SERVER_PORT) -> int:
+    """Find an available port starting from start_port.
+
+    Args:
+        start_port: Port number to start searching from
+
+    Returns:
+        An available port number
+    """
+    import socket
+    for port in range(start_port, start_port + 100):
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                s.bind(('localhost', port))
+                return port
+        except OSError:
+            continue
+    return start_port  # Fallback
+
+
+def start_dev_server(project_path: str, port: int = DEV_SERVER_PORT) -> tuple[Optional[subprocess.Popen], int]:
     """Start the development server.
 
     Args:
@@ -159,12 +236,22 @@ def start_dev_server(project_path: str, port: int = DEV_SERVER_PORT) -> Optional
         port: Port number for the dev server
 
     Returns:
-        Popen object if successful, None otherwise
+        Tuple of (Popen object if successful, actual port used)
     """
     try:
+        # Clean up stale .next build artifacts to avoid turbopack errors
+        next_dir = Path(project_path) / ".next"
+        if next_dir.exists():
+            print("Cleaning up .next directory...")
+            shutil.rmtree(next_dir)
+
+        # Find an available port
+        actual_port = find_available_port(port)
+        print(f"Using port {actual_port}")
+
         # Start dev server in background
         env = os.environ.copy()
-        env["PORT"] = str(port)
+        env["PORT"] = str(actual_port)
 
         process = subprocess.Popen(
             ["npm", "run", "dev"],
@@ -178,21 +265,35 @@ def start_dev_server(project_path: str, port: int = DEV_SERVER_PORT) -> Optional
         # Wait for server to be ready
         start_time = time.time()
         while time.time() - start_time < DEV_SERVER_TIMEOUT:
+            # Check if process is still running
+            if process.poll() is not None:
+                # Process died
+                stdout, stderr = process.communicate()
+                print(f"Dev server exited early. stderr: {stderr.decode()[:500]}")
+                return None, actual_port
+
             try:
-                import urllib.request
-                response = urllib.request.urlopen(f"http://localhost:{port}", timeout=2)
+                response = urllib.request.urlopen(f"http://localhost:{actual_port}", timeout=2)
                 if response.status == 200:
-                    return process
+                    return process, actual_port
+            except urllib.error.HTTPError as e:
+                # Server is running but returned an error (OK for now)
+                if e.code in [500, 404]:
+                    # Server is up, just has an error page
+                    return process, actual_port
             except:
                 time.sleep(1)
 
-        # Timeout - kill the process
-        os.killpg(os.getpgid(process.pid), signal.SIGTERM)
-        return None
+        # Timeout - try to kill the process
+        try:
+            os.killpg(os.getpgid(process.pid), signal.SIGTERM)
+        except:
+            pass
+        return None, actual_port
 
     except Exception as e:
         print(f"Error starting dev server: {e}")
-        return None
+        return None, port
 
 
 def stop_dev_server(process: subprocess.Popen):
@@ -429,7 +530,7 @@ def evaluate_submission_playwright(
 
     # Step 4: Start dev server
     print(f"Step 4: Starting dev server...")
-    dev_server = start_dev_server(project_path)
+    dev_server, actual_port = start_dev_server(project_path)
 
     if not dev_server:
         result["status"] = "error"
@@ -437,12 +538,12 @@ def evaluate_submission_playwright(
         result["steps"].append({"step": "dev_server", "result": {"success": False}})
         return result
 
-    result["steps"].append({"step": "dev_server", "result": {"success": True}})
+    result["steps"].append({"step": "dev_server", "result": {"success": True, "port": actual_port}})
 
     try:
         # Step 5: Run Playwright tests
         print(f"Step 5: Running Playwright tests...")
-        test_results = run_playwright_tests(week)
+        test_results = run_playwright_tests(week, actual_port)
         result["steps"].append({"step": "playwright_tests", "result": {
             "success": test_results.get("success"),
             "error": test_results.get("error")

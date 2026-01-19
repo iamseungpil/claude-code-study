@@ -911,8 +911,7 @@ async def submit_solution(
     if not user_personal:
         raise HTTPException(400, "You must start your timer first before submitting.")
 
-    if user_personal.get("status") == "submitted":
-        raise HTTPException(400, "You have already submitted for this week.")
+    # Allow resubmission - no longer block on "submitted" status
 
     # Calculate elapsed time from PERSONAL start (not global) - UTC 기준
     submission_time = datetime.now(timezone.utc)
