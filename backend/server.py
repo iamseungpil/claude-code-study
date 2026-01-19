@@ -1114,6 +1114,32 @@ if SERVE_STATIC:
         """Serve week 5 page."""
         return FileResponse(FRONTEND_DIR / "week5.html")
 
+    @app.get("/config.js")
+    async def serve_config_js():
+        """Serve config.js."""
+        return FileResponse(FRONTEND_DIR / "config.js", media_type="application/javascript")
+
+    # Serve week-learn pages
+    @app.get("/week1-learn.html")
+    async def serve_week1_learn():
+        return FileResponse(FRONTEND_DIR / "week1-learn.html")
+
+    @app.get("/week2-learn.html")
+    async def serve_week2_learn():
+        return FileResponse(FRONTEND_DIR / "week2-learn.html")
+
+    @app.get("/week3-learn.html")
+    async def serve_week3_learn():
+        return FileResponse(FRONTEND_DIR / "week3-learn.html")
+
+    @app.get("/week4-learn.html")
+    async def serve_week4_learn():
+        return FileResponse(FRONTEND_DIR / "week4-learn.html")
+
+    @app.get("/week5-learn.html")
+    async def serve_week5_learn():
+        return FileResponse(FRONTEND_DIR / "week5-learn.html")
+
 
 # ============== Health Check ==============
 
