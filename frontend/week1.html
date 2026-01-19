@@ -859,6 +859,10 @@ useEffect(() =&gt; {
         document.addEventListener('DOMContentLoaded', async () => {
             await checkLoginStatus();
             await loadPersonalStatus();
+            // Check for existing evaluation results
+            if (currentUser) {
+                await checkExistingEvaluation();
+            }
         });
 
         function updateTimer() {
@@ -962,10 +966,13 @@ useEffect(() =&gt; {
 
                 if (response.ok) {
                     const data = await response.json();
-                    showStatus(`Submission complete! Elapsed time: ${data.elapsed_minutes?.toFixed(1) || '-'} minutes. Evaluation will start shortly.`, 'text-green-400');
+                    showStatus(`Submission complete! Elapsed time: ${data.elapsed_minutes?.toFixed(1) || '-'} minutes. Checking evaluation...`, 'text-green-400');
                     document.getElementById('submitBtn').disabled = true;
                     document.getElementById('submitBtn').classList.add('opacity-50', 'cursor-not-allowed');
                     document.getElementById('submitBtn').innerHTML = 'Submitted';
+
+                    // Start polling for evaluation results
+                    pollEvaluation(1, currentUser.user_id);
                 } else {
                     const error = await response.json();
                     showStatus('Submission failed: ' + (error.detail || 'Unknown error'), 'text-red-400');
@@ -981,6 +988,135 @@ useEffect(() =&gt; {
             el.textContent = message;
             el.className = `mt-6 text-center text-lg font-medium ${colorClass}`;
             el.classList.remove('hidden');
+        }
+
+        // Poll for evaluation results
+        async function pollEvaluation(week, participantId, attempts = 0) {
+            const maxAttempts = 30; // 5 minutes max (10s interval)
+
+            if (attempts >= maxAttempts) {
+                showStatus('Evaluation is taking longer than expected. Check back later on the leaderboard.', 'text-amber-400');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/api/evaluations/${week}/${participantId}`);
+
+                if (response.ok) {
+                    const evalData = await response.json();
+                    displayEvaluationFeedback(evalData);
+                } else if (response.status === 404) {
+                    // Not yet evaluated, poll again
+                    showStatus(`Evaluation in progress... (${attempts + 1}/${maxAttempts})`, 'text-blue-400');
+                    setTimeout(() => pollEvaluation(week, participantId, attempts + 1), 10000);
+                } else {
+                    showStatus('Error checking evaluation status', 'text-red-400');
+                }
+            } catch (error) {
+                console.error('Evaluation poll error:', error);
+                setTimeout(() => pollEvaluation(week, participantId, attempts + 1), 10000);
+            }
+        }
+
+        // Display evaluation feedback
+        function displayEvaluationFeedback(evalData) {
+            const feedbackHtml = `
+                <div class="mt-8 p-6 bg-dark-800/50 rounded-2xl border border-accent/30">
+                    <h3 class="text-xl font-bold text-accent mb-4">Evaluation Complete!</h3>
+
+                    <!-- Score Summary -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                        <div class="text-center p-4 bg-dark-900/50 rounded-xl">
+                            <div class="text-3xl font-bold text-white">${evalData.scores?.total || evalData.rubric_score || '-'}</div>
+                            <div class="text-sm text-gray-400">Total Score</div>
+                        </div>
+                        <div class="text-center p-4 bg-dark-900/50 rounded-xl">
+                            <div class="text-2xl font-bold ${evalData.build_status?.npm_build === 'pass' ? 'text-green-400' : 'text-red-400'}">
+                                ${evalData.build_status?.npm_build === 'pass' ? 'PASS' : 'FAIL'}
+                            </div>
+                            <div class="text-sm text-gray-400">Build Status</div>
+                        </div>
+                        <div class="text-center p-4 bg-dark-900/50 rounded-xl">
+                            <div class="text-2xl font-bold text-white">${evalData.scores?.rubric || '-'}</div>
+                            <div class="text-sm text-gray-400">Rubric Score</div>
+                        </div>
+                        <div class="text-center p-4 bg-dark-900/50 rounded-xl">
+                            <div class="text-2xl font-bold text-purple-400">+${evalData.scores?.time_rank_bonus || 0}</div>
+                            <div class="text-sm text-gray-400">Time Bonus</div>
+                        </div>
+                    </div>
+
+                    <!-- Breakdown -->
+                    <div class="mb-6">
+                        <h4 class="font-semibold text-white mb-3">Score Breakdown</h4>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                            <div class="flex justify-between p-2 bg-dark-900/30 rounded">
+                                <span class="text-gray-400">Stage 1</span>
+                                <span class="text-white">${evalData.breakdown?.stage_1_clear_all || 0}/20</span>
+                            </div>
+                            <div class="flex justify-between p-2 bg-dark-900/30 rounded">
+                                <span class="text-gray-400">Stage 2</span>
+                                <span class="text-white">${evalData.breakdown?.stage_2_download_zip || 0}/25</span>
+                            </div>
+                            <div class="flex justify-between p-2 bg-dark-900/30 rounded">
+                                <span class="text-gray-400">Stage 3</span>
+                                <span class="text-white">${evalData.breakdown?.stage_3_keyboard || 0}/20</span>
+                            </div>
+                            <div class="flex justify-between p-2 bg-dark-900/30 rounded">
+                                <span class="text-gray-400">CLAUDE.md</span>
+                                <span class="text-white">${evalData.breakdown?.claude_md_quality || 0}/15</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Feedback -->
+                    <div class="mb-6">
+                        <h4 class="font-semibold text-white mb-2">Feedback</h4>
+                        <p class="text-gray-300">${evalData.feedback || 'No feedback available'}</p>
+                    </div>
+
+                    <!-- Strengths & Improvements -->
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div>
+                            <h4 class="font-semibold text-green-400 mb-2">Strengths</h4>
+                            <ul class="text-sm text-gray-300 space-y-1">
+                                ${(evalData.strengths || []).map(s => `<li>• ${s}</li>`).join('')}
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-amber-400 mb-2">Areas for Improvement</h4>
+                            <ul class="text-sm text-gray-300 space-y-1">
+                                ${(evalData.improvements || []).map(i => `<li>• ${i}</li>`).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Insert feedback after status message
+            const statusEl = document.getElementById('statusMessage');
+            statusEl.innerHTML = 'Evaluation Complete!';
+            statusEl.className = 'mt-6 text-center text-lg font-medium text-green-400';
+
+            // Add feedback section
+            const feedbackContainer = document.createElement('div');
+            feedbackContainer.innerHTML = feedbackHtml;
+            statusEl.parentNode.appendChild(feedbackContainer);
+        }
+
+        // Check for existing evaluation on page load (for already submitted users)
+        async function checkExistingEvaluation() {
+            if (!currentUser) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/api/evaluations/1/${currentUser.user_id}`);
+                if (response.ok) {
+                    const evalData = await response.json();
+                    displayEvaluationFeedback(evalData);
+                }
+            } catch (error) {
+                // No evaluation yet, that's fine
+            }
         }
     </script>
 </body>
