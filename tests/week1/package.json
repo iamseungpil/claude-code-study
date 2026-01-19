@@ -1,0 +1,16 @@
+{
+  "name": "week1-playwright-tests",
+  "version": "1.0.0",
+  "description": "Playwright E2E tests for Week 1 UIGen Challenge",
+  "scripts": {
+    "test": "npx playwright test",
+    "test:ui": "npx playwright test --ui",
+    "test:debug": "npx playwright test --debug",
+    "test:report": "npx playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.40.0",
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.0"
+  }
+}

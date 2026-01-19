@@ -1,7 +1,7 @@
-# Week 4 Rubric: Bot/App MVP
+# Week 4 Rubric: MVP Development with MCP
 
 ## Challenge Summary
-Discord 봇 또는 웹 대시보드 MVP를 팀으로 개발하고, CLAUDE.md로 팀 컨텍스트를 공유하는 챌린지
+2개 이상의 MCP 서버를 활용하여 Discord 봇 또는 웹 대시보드 MVP를 개발하고, Skills를 사용하여 개발 워크플로우를 자동화하는 챌린지
 
 ## Time Limit: 60 minutes
 
@@ -15,13 +15,17 @@ Discord 봇 또는 웹 대시보드 MVP를 팀으로 개발하고, CLAUDE.md로 
 ```bash
 cd submissions/week4/{participant_id}
 
+# MCP 설정 확인
+cat .claude/settings.local.json
+# 기대: 2+ MCP 서버 설정
+
 # Option A: Discord Bot
-npm install
+npm install --cache /tmp/npm-cache
 node bot.js  # 또는 npm start
 # 기대: 봇이 온라인 상태로 전환
 
 # Option B: Web Dashboard
-npm install
+npm install --cache /tmp/npm-cache
 npm run dev  # 또는 npm start
 # 기대: http://localhost:3000 접속 가능
 
@@ -39,12 +43,43 @@ cat CLAUDE.md
 
 ## Rubric Breakdown (90 points)
 
-### MVP Validation (필수 조건)
-| Test | Expected | Impact |
+### Deliverables Check (필수 조건)
+| Item | Expected | Impact |
 |------|----------|--------|
+| MCP Settings | 2+ 서버 | MCP Integration 점수 영향 |
 | npm install | 성공 | 실패 시 평가 중단 |
 | npm start/dev | 성공 | 실패 시 50% 감점 |
-| CLAUDE.md | 존재 | CLAUDE.md Quality 영향 |
+| CLAUDE.md | 존재 | Code Quality 점수 영향 |
+
+### MCP Integration (25 points)
+| Item | Points | Criteria |
+|------|--------|----------|
+| Server Count | 10 | 2개 이상 MCP 서버 설정 |
+| Integration | 10 | MCP 도구 실제 사용 |
+| Configuration | 5 | 올바른 설정 구조 |
+
+**체크리스트:**
+- [ ] .claude/settings.local.json에 2+ MCP 서버
+- [ ] MCP 도구 활용한 기능 구현
+- [ ] API 키 환경 변수 처리
+
+**기대 설정 패턴:**
+```json
+{
+  "mcpServers": {
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": { "GITHUB_TOKEN": "${GITHUB_TOKEN}" }
+    },
+    "notion": {
+      "command": "npx",
+      "args": ["-y", "@anthropic-ai/mcp-server-notion"],
+      "env": { "NOTION_API_KEY": "${NOTION_API_KEY}" }
+    }
+  }
+}
+```
 
 ### MVP Functionality (30 points)
 | Item | Points | Criteria |
@@ -56,82 +91,58 @@ cat CLAUDE.md
 **Discord Bot 체크리스트:**
 - [ ] 봇이 온라인 상태로 연결
 - [ ] 최소 3개 명령어 동작 (예: /search, /summary, /notify)
-- [ ] 응답 속도 적절함
+- [ ] MCP 연동 기능 포함
 
 **Web Dashboard 체크리스트:**
 - [ ] 메인 페이지 렌더링
-- [ ] 데이터 표시 기능
+- [ ] MCP로 데이터 가져오기
 - [ ] 인터랙션 기능 (버튼, 폼 등)
 
-### CLAUDE.md Quality (20 points)
+### Skills Usage (15 points)
 | Item | Points | Criteria |
 |------|--------|----------|
-| Project Overview | 5 | 프로젝트 목적 및 구조 설명 |
-| Coding Conventions | 5 | 코딩 스타일 가이드 |
-| Team Context | 5 | 팀원 역할, 작업 분담 |
-| Known Issues | 5 | 알려진 이슈 및 해결 방법 |
+| Built-in Skills | 8 | /commit, /review-pr 등 사용 |
+| Custom Skills | 4 | SKILL.md 작성 (선택) |
+| Workflow | 3 | Skills 기반 개발 워크플로우 |
 
 **체크리스트:**
-- [ ] 프로젝트 목적 명시
-- [ ] 폴더 구조 설명
-- [ ] 사용 기술 스택 명시
-- [ ] 팀원별 담당 영역 기록
+- [ ] /commit 또는 /review-pr 사용 흔적
+- [ ] Git 커밋 메시지 품질 (Conventional Commits)
+- [ ] 선택: 커스텀 SKILL.md 존재
+
+### Code Quality (20 points)
+| Item | Points | Criteria |
+|------|--------|----------|
+| Error Handling | 8 | 적절한 에러 처리 |
+| Documentation | 7 | CLAUDE.md, README |
+| Code Structure | 5 | 깔끔한 코드 구조 |
+
+**체크리스트:**
+- [ ] try-catch 에러 핸들링
+- [ ] CLAUDE.md 프로젝트 컨텍스트
+- [ ] README.md 설치/실행 가이드
+- [ ] 코드 모듈화
 
 **기대 CLAUDE.md 구조:**
 ```markdown
 # Project: [Name]
 
-## Team Members
-- Alice: Backend API
-- Bob: Frontend UI
+## Purpose
+Brief description of the MVP
 
 ## Tech Stack
 - Discord.js / Next.js
-- TypeScript
+- MCP: Notion, GitHub
 
-## Conventions
-- Commit: Conventional Commits
-- Branch: feature/*, fix/*
+## How to Run
+1. Set environment variables
+2. npm install
+3. npm start
 
-## Known Issues
-- API rate limit 주의
+## MCP Configuration
+- Notion: For project tracking
+- GitHub: For issue management
 ```
-
-### Automation - Headless Mode (20 points)
-| Item | Points | Criteria |
-|------|--------|----------|
-| Headless Usage | 10 | -p 플래그로 자동화 실행 |
-| Script Integration | 5 | package.json scripts 활용 |
-| Workflow | 5 | 반복 작업 자동화 |
-
-**체크리스트:**
-- [ ] claude -p "task" 사용 흔적
-- [ ] 자동화된 개발 스크립트
-- [ ] README에 자동화 방법 설명
-
-**기대 패턴:**
-```json
-// package.json
-{
-  "scripts": {
-    "dev": "next dev",
-    "claude:feature": "claude -p 'Implement feature X'",
-    "claude:test": "claude -p 'Write tests for Y'"
-  }
-}
-```
-
-### Teamwork - Git (20 points)
-| Item | Points | Criteria |
-|------|--------|----------|
-| Branch Strategy | 8 | feature/fix 브랜치 사용 |
-| Commit Quality | 6 | 의미 있는 커밋 메시지 |
-| PR/Merge | 6 | PR 또는 merge 기록 |
-
-**체크리스트:**
-- [ ] main/develop 외 feature 브랜치 존재
-- [ ] Conventional Commits 형식 (feat:, fix:, docs:)
-- [ ] 여러 커밋 기록 (팀 협업 증거)
 
 ---
 
@@ -146,44 +157,45 @@ cat CLAUDE.md
 ---
 
 ## Passing Criteria
-- **Minimum Pass**: MVP 실행 + 2개 이상 기능 (45+ points)
-- **Excellence**: 모든 기능 + CLAUDE.md 충실 + Git 활용 (75+ points)
+- **Minimum Pass**: 2 MCP + MVP 실행 + 2개 이상 기능 (45+ points)
+- **Excellence**: 2+ MCP 활용 + 3개 기능 + Skills 사용 (75+ points)
 
 ---
 
 ## Evaluation Notes
-1. **팀 프로젝트** - 개인 작업도 허용하지만 Git 기록 필요
-2. **CLAUDE.md 중요** - 팀 컨텍스트 공유 여부 확인
-3. **Headless Mode** - -p 플래그 사용 여부 확인
-4. **데모 영상** - 제출 시 데모 영상 포함 권장
+1. **MCP 중요** - 2개 이상 MCP 서버 활용 필수
+2. **Skills 사용** - /commit, /review-pr 등 활용 확인
+3. **MVP 집중** - 복잡한 기능보다 핵심 기능 동작 중시
+4. **문서화** - CLAUDE.md, README 존재 여부 확인
 
 ---
 
 ## Output JSON Format
 ```json
 {
-  "rubric_score": 72,
+  "rubric_score": 75,
   "project_type": "discord_bot",
   "validation": {
     "npm_install": "pass",
     "npm_start": "pass",
+    "mcp_servers": 2,
     "claude_md_exists": true
   },
   "breakdown": {
-    "mvp_functionality": 25,
-    "claude_md_quality": 17,
-    "automation_headless": 15,
-    "teamwork_git": 15
+    "mcp_integration": 22,
+    "mvp_functionality": 27,
+    "skills_usage": 12,
+    "code_quality": 14
   },
-  "feedback": "Discord 봇 3개 기능 구현. CLAUDE.md 충실. Headless 모드 활용.",
+  "feedback": "2개 MCP 서버 활용. 3개 핵심 기능 동작. Skills 활용 확인.",
   "strengths": [
+    "GitHub + Notion MCP 연동",
     "모든 핵심 기능 동작",
-    "팀 컨텍스트 잘 문서화",
-    "Conventional Commits 사용"
+    "/commit 사용으로 일관된 커밋"
   ],
   "improvements": [
-    "PR 워크플로우 추가 권장",
-    "에러 핸들링 보강"
+    "에러 핸들링 강화 필요",
+    "CLAUDE.md 내용 보강"
   ]
 }
 ```
@@ -191,22 +203,23 @@ cat CLAUDE.md
 ## Failure Example
 ```json
 {
-  "rubric_score": 28,
+  "rubric_score": 32,
   "project_type": "web_dashboard",
   "validation": {
     "npm_install": "pass",
     "npm_start": "fail",
     "error": "Error: Cannot find module 'react'",
+    "mcp_servers": 1,
     "claude_md_exists": false
   },
   "breakdown": {
+    "mcp_integration": 8,
     "mvp_functionality": 12,
-    "claude_md_quality": 0,
-    "automation_headless": 6,
-    "teamwork_git": 10
+    "skills_usage": 5,
+    "code_quality": 7
   },
-  "feedback": "빌드 실패로 기능 테스트 불가. CLAUDE.md 누락.",
-  "strengths": ["Git 커밋 기록 존재"],
-  "improvements": ["의존성 설치 문제 해결", "CLAUDE.md 작성 필수"]
+  "feedback": "MCP 1개만 사용, 빌드 실패. CLAUDE.md 누락.",
+  "strengths": ["MCP 설정 시도"],
+  "improvements": ["2개 이상 MCP 필수", "빌드 오류 수정", "CLAUDE.md 작성"]
 }
 ```

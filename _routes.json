@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "description": "Route configuration for Cloudflare Pages",
+  "include": [],
+  "exclude": [
+    "/frontend/*",
+    "/*.html",
+    "/*.js",
+    "/*.css",
+    "/*.json"
+  ]
+}
