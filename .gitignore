@@ -36,3 +36,5 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.temp
+node_modules
+workers/node_modules

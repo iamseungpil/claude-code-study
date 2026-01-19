@@ -20,10 +20,10 @@
     // Production Settings
     // ============================================================
 
-    // Backend API URL (Cloudflare Tunnel or cloud backend)
-    // Example: 'https://your-tunnel-id.trycloudflare.com'
+    // Backend API URL (Google Cloud Run)
+    // Production: https://claude-code-study-api-240377751675.asia-northeast3.run.app
     // Leave empty for local development (auto-detected)
-    const CONFIGURED_API_BASE = '';  // Empty for local development
+    const CONFIGURED_API_BASE = 'https://claude-code-study-api-240377751675.asia-northeast3.run.app';
 
     // ============================================================
     // API Base URL Detection Logic
