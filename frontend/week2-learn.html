@@ -175,7 +175,7 @@
                 <span>Back</span>
             </a>
             <div class="flex items-center gap-4">
-                <a href="week2.html" class="text-accent hover:text-purple-300 transition-colors text-sm font-medium">
+                <a id="challengeNavBtn" href="week2.html" class="text-accent hover:text-purple-300 transition-colors text-sm font-medium">
                     Go to Challenge
                 </a>
             </div>
@@ -831,7 +831,7 @@ claude plugins add github:anthropics/ralph-loop
                         <button onclick="retakeQuiz()" class="btn-secondary px-6 py-3 rounded-xl text-sm font-medium">
                             Retake Quiz
                         </button>
-                        <a href="week2.html" class="btn-primary px-6 py-3 rounded-xl text-sm font-medium inline-flex items-center gap-2">
+                        <a id="challengeQuizBtn" href="week2.html" class="btn-primary px-6 py-3 rounded-xl text-sm font-medium inline-flex items-center gap-2">
                             Go to Challenge
                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
@@ -850,7 +850,7 @@ claude plugins add github:anthropics/ralph-loop
                         <h3 class="text-2xl font-bold mb-2">Ready for the Challenge?</h3>
                         <p class="text-gray-400">Build automated workflows with hooks in a real project.</p>
                     </div>
-                    <a href="week2.html" class="btn-primary px-8 py-4 rounded-xl font-bold text-lg flex items-center gap-3 whitespace-nowrap">
+                    <a id="challengeBtn" href="week2.html" class="btn-primary px-8 py-4 rounded-xl font-bold text-lg flex items-center gap-3 whitespace-nowrap">
                         Start Challenge
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
@@ -870,7 +870,50 @@ claude plugins add github:anthropics/ralph-loop
         </div>
     </footer>
 
+    <script src="config.js"></script>
     <script>
+        // Challenge Status Check
+        const API_BASE = window.API_BASE || '';
+        const WEEK = 2;
+
+        async function checkChallengeStatus() {
+            try {
+                const response = await fetch(`${API_BASE}/api/challenge/${WEEK}/status`);
+                if (response.ok) {
+                    const data = await response.json();
+
+                    if (data.status !== 'started') {
+                        // Disable all challenge buttons
+                        const challengeButtons = [
+                            document.getElementById('challengeNavBtn'),
+                            document.getElementById('challengeQuizBtn'),
+                            document.getElementById('challengeBtn')
+                        ];
+
+                        challengeButtons.forEach(btn => {
+                            if (btn) {
+                                btn.classList.add('opacity-50', 'cursor-not-allowed', 'pointer-events-none');
+                            }
+                        });
+
+                        // Add warning message after main CTA button
+                        const mainBtn = document.getElementById('challengeBtn');
+                        if (mainBtn && mainBtn.parentElement) {
+                            const existingMsg = mainBtn.parentElement.querySelector('.challenge-warning');
+                            if (!existingMsg) {
+                                const msg = document.createElement('p');
+                                msg.className = 'challenge-warning text-sm text-amber-400 mt-2 text-center w-full';
+                                msg.textContent = 'Challenge not started by admin yet';
+                                mainBtn.parentElement.appendChild(msg);
+                            }
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error('Failed to check challenge status:', e);
+            }
+        }
+
         // Quiz Data
         const quizQuestions = [
             {
@@ -1142,6 +1185,8 @@ claude plugins add github:anthropics/ralph-loop
                     break;
                 }
             }
+            // Check challenge status
+            checkChallengeStatus();
         });
     </script>
 </body>

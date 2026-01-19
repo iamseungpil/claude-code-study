@@ -15,7 +15,7 @@
                     fontFamily: { outfit: ['Outfit', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] },
                     colors: {
                         dark: { 900: '#0a0a0f', 800: '#12121a', 700: '#1a1a25', 600: '#252530' },
-                        accent: '#fbbf24'
+                        accent: '#f472b6'
                     }
                 }
             }
@@ -25,24 +25,143 @@
         * { font-family: 'Outfit', sans-serif; }
         code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
         html { scroll-behavior: smooth; }
+
         .hero-gradient {
-            background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(251, 191, 36, 0.2) 0%, transparent 50%),
+            background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(244, 114, 182, 0.2) 0%, transparent 50%),
                         linear-gradient(180deg, #0f172a 0%, #0a0a0f 100%);
         }
+
         .nav-blur {
             background: rgba(10, 10, 15, 0.85);
             backdrop-filter: blur(20px);
         }
+
         .card {
             background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
             border: 1px solid rgba(255,255,255,0.06);
         }
-        .lesson-content { display: none; }
-        .lesson-content.active { display: block; }
-        .lesson-btn.active { background: rgba(251, 191, 36, 0.2); border-color: rgba(251, 191, 36, 0.5); }
-        pre { background: #1a1a2e; border-radius: 8px; padding: 16px; overflow-x: auto; }
-        code { font-size: 0.875rem; }
-        .inline-code { background: rgba(251, 191, 36, 0.2); padding: 2px 6px; border-radius: 4px; font-size: 0.875rem; }
+
+        .lesson-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
+            border: 1px solid rgba(255,255,255,0.06);
+            transition: all 0.3s ease;
+        }
+        .lesson-card:hover {
+            border-color: rgba(244, 114, 182, 0.3);
+        }
+        .lesson-card.open {
+            border-color: rgba(244, 114, 182, 0.5);
+        }
+
+        .lesson-header { cursor: pointer; }
+
+        .lesson-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease;
+        }
+        .lesson-content.open {
+            max-height: 5000px;
+        }
+
+        .chevron {
+            transition: transform 0.3s ease;
+        }
+        .chevron.open {
+            transform: rotate(180deg);
+        }
+
+        .code-block {
+            background: #0d1117;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .code-block-header {
+            background: rgba(255,255,255,0.03);
+            padding: 10px 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 0.75rem;
+            color: #8b949e;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .code-block pre {
+            padding: 16px;
+            font-size: 0.875rem;
+            line-height: 1.6;
+            color: #c9d1d9;
+            overflow-x: auto;
+        }
+        .code-comment { color: #6e7681; }
+        .code-keyword { color: #ff7b72; }
+        .code-string { color: #a5d6ff; }
+        .code-function { color: #d2a8ff; }
+
+        .tip-box {
+            background: rgba(244, 114, 182, 0.1);
+            border: 1px solid rgba(244, 114, 182, 0.3);
+            border-radius: 12px;
+            padding: 16px;
+        }
+
+        .warning-box {
+            background: rgba(251, 191, 36, 0.1);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            border-radius: 12px;
+            padding: 16px;
+        }
+
+        .quiz-option {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .quiz-option:hover {
+            border-color: rgba(244, 114, 182, 0.5);
+            background: rgba(244, 114, 182, 0.05);
+        }
+        .quiz-option.selected {
+            border-color: rgba(244, 114, 182, 0.8);
+            background: rgba(244, 114, 182, 0.1);
+        }
+        .quiz-option.correct {
+            border-color: rgba(52, 211, 153, 0.8);
+            background: rgba(52, 211, 153, 0.1);
+        }
+        .quiz-option.incorrect {
+            border-color: rgba(248, 113, 113, 0.8);
+            background: rgba(248, 113, 113, 0.1);
+        }
+
+        .progress-bar {
+            background: rgba(255,255,255,0.1);
+            border-radius: 9999px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            background: linear-gradient(90deg, #f472b6 0%, #db2777 100%);
+            height: 100%;
+            border-radius: 9999px;
+            transition: width 0.5s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #f472b6 0%, #db2777 100%);
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px -10px rgba(244, 114, 182, 0.5);
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s ease;
+        }
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.1);
+        }
     </style>
 </head>
 <body class="bg-dark-900 text-white min-h-screen">
@@ -56,8 +175,7 @@
                 <span>Back</span>
             </a>
             <div class="flex items-center gap-4">
-                <span class="text-sm text-gray-500">Quiz Score: <span id="quizScore" class="text-accent font-bold">0</span>/10</span>
-                <a href="week3.html" class="text-accent hover:text-amber-300 transition-colors text-sm font-medium">
+                <a id="challengeNavBtn" href="week3.html" class="text-accent hover:text-pink-300 transition-colors text-sm font-medium">
                     Go to Challenge
                 </a>
             </div>
@@ -69,657 +187,534 @@
         <div class="max-w-5xl mx-auto">
             <div class="flex flex-wrap items-center gap-3 mb-6">
                 <span class="bg-accent text-dark-900 px-4 py-1.5 rounded-full text-sm font-bold">WEEK 3</span>
-                <span class="bg-gray-500/20 text-gray-400 px-3 py-1 rounded-full text-xs font-bold border border-gray-500/30">LEARN</span>
+                <span class="bg-purple-500/20 text-purple-400 px-3 py-1 rounded-full text-xs font-bold border border-purple-500/30">LEARN</span>
             </div>
+
             <h1 class="text-4xl md:text-5xl font-bold mb-4 tracking-tight">
-                MCP & Subagents
+                Skills + MCP Basics
             </h1>
             <p class="text-xl text-gray-400 mb-8 max-w-2xl">
-                Connect Claude Code to external tools and spawn specialized agents for parallel tasks.
+                Learn to create custom Skills for workflow automation and connect Claude to external tools via MCP.
             </p>
+
+            <!-- Progress Tracker -->
+            <div class="card rounded-2xl p-6 max-w-md">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-sm font-medium text-gray-400">Learning Progress</span>
+                    <span id="progressText" class="text-sm font-bold text-accent">0/5 Lessons</span>
+                </div>
+                <div class="progress-bar h-2">
+                    <div id="progressFill" class="progress-fill" style="width: 0%"></div>
+                </div>
+                <div class="mt-3 flex items-center justify-between text-xs text-gray-500">
+                    <span>Quiz Score: <span id="quizScoreDisplay" class="text-accent font-bold">0</span>/10</span>
+                    <span id="completionStatus" class="hidden text-green-400">Ready for Challenge!</span>
+                </div>
+            </div>
         </div>
     </header>
 
     <main class="max-w-5xl mx-auto px-6 py-12">
-        <!-- Lesson Navigation -->
-        <div class="flex flex-wrap gap-3 mb-8">
-            <button class="lesson-btn active px-4 py-2 rounded-xl border border-white/10 text-sm font-medium transition-all hover:bg-white/5" data-lesson="1">
-                1. What is MCP?
-            </button>
-            <button class="lesson-btn px-4 py-2 rounded-xl border border-white/10 text-sm font-medium transition-all hover:bg-white/5" data-lesson="2">
-                2. Using MCP Servers
-            </button>
-            <button class="lesson-btn px-4 py-2 rounded-xl border border-white/10 text-sm font-medium transition-all hover:bg-white/5" data-lesson="3">
-                3. Subagents & Task Tool
-            </button>
-            <button class="lesson-btn px-4 py-2 rounded-xl border border-white/10 text-sm font-medium transition-all hover:bg-white/5" data-lesson="4">
-                4. Model Selection
-            </button>
-        </div>
+        <!-- Lessons Section -->
+        <section class="mb-16">
+            <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-6">LESSONS</h2>
 
-        <!-- Lesson 1: What is MCP? -->
-        <section id="lesson1" class="lesson-content active mb-12">
-            <div class="card rounded-2xl p-8">
-                <div class="flex items-center gap-4 mb-6">
-                    <span class="bg-accent/20 text-accent w-12 h-12 rounded-xl flex items-center justify-center text-xl font-bold">1</span>
-                    <h2 class="text-2xl font-bold">What is MCP?</h2>
-                </div>
-
-                <div class="space-y-6 text-gray-300">
-                    <div class="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4">
-                        <p class="text-amber-200 font-medium">Model Context Protocol (MCP)</p>
-                        <p class="text-sm mt-1">MCP is an open protocol that standardizes how AI assistants connect to external data sources and tools. Think of it as a "USB for AI" - a universal way to plug in capabilities.</p>
-                    </div>
-
-                    <h3 class="text-xl font-semibold text-white">Why MCP Matters</h3>
-                    <p>Before MCP, every AI integration required custom code. MCP provides a standard interface for:</p>
-                    <ul class="list-disc list-inside space-y-2 ml-4">
-                        <li><span class="text-accent">Tools</span> - Functions the AI can call (search, database queries, API calls)</li>
-                        <li><span class="text-accent">Resources</span> - Data the AI can read (files, databases, web content)</li>
-                        <li><span class="text-accent">Prompts</span> - Pre-defined prompt templates for specific tasks</li>
-                    </ul>
-
-                    <h3 class="text-xl font-semibold text-white mt-8">MCP Architecture</h3>
-                    <pre><code class="text-green-400">┌─────────────────────────────────────────────────────────────┐
-│                      Claude Code (Host)                      │
-│                                                              │
-│   ┌─────────────┐    ┌─────────────┐    ┌─────────────┐    │
-│   │ MCP Client  │    │ MCP Client  │    │ MCP Client  │    │
-│   └──────┬──────┘    └──────┬──────┘    └──────┬──────┘    │
-└──────────┼──────────────────┼──────────────────┼────────────┘
-           │                  │                  │
-           ▼                  ▼                  ▼
-    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
-    │ Filesystem  │    │  Database   │    │   Custom    │
-    │   Server    │    │   Server    │    │   Server    │
-    └─────────────┘    └─────────────┘    └─────────────┘</code></pre>
-                    <p class="text-sm text-gray-400 mt-2">Claude Code acts as a host that connects to multiple MCP servers, each providing different capabilities.</p>
-
-                    <h3 class="text-xl font-semibold text-white mt-8">Built-in MCP Support</h3>
-                    <p>Claude Code comes with several MCP capabilities out of the box:</p>
-
-                    <div class="grid md:grid-cols-2 gap-4 mt-4">
-                        <div class="bg-dark-700 rounded-xl p-4">
-                            <h4 class="font-semibold text-accent mb-2">File System Access</h4>
-                            <p class="text-sm">Read, write, and navigate files in your project without manual configuration.</p>
+            <div class="space-y-4">
+                <!-- Lesson 1: Skills Basics -->
+                <div id="lesson1" class="lesson-card rounded-2xl overflow-hidden">
+                    <div class="lesson-header p-6 flex items-center justify-between" onclick="toggleLesson(1)">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-accent/20 flex items-center justify-center text-2xl">1</div>
+                            <div>
+                                <h3 class="font-bold text-xl">Skills Basics</h3>
+                                <p class="text-gray-400 text-sm">SKILL.md structure and slash commands</p>
+                            </div>
                         </div>
-                        <div class="bg-dark-700 rounded-xl p-4">
-                            <h4 class="font-semibold text-accent mb-2">Web Fetch</h4>
-                            <p class="text-sm">Retrieve and process content from URLs for research and documentation.</p>
-                        </div>
-                        <div class="bg-dark-700 rounded-xl p-4">
-                            <h4 class="font-semibold text-accent mb-2">Bash Execution</h4>
-                            <p class="text-sm">Run shell commands, manage git, install packages, and run tests.</p>
-                        </div>
-                        <div class="bg-dark-700 rounded-xl p-4">
-                            <h4 class="font-semibold text-accent mb-2">Code Search</h4>
-                            <p class="text-sm">Glob and Grep tools for finding files and searching content.</p>
+                        <div class="flex items-center gap-3">
+                            <span id="lesson1-status" class="text-xs px-3 py-1 rounded-full bg-gray-700 text-gray-400">Not Started</span>
+                            <svg class="chevron w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
                         </div>
                     </div>
+                    <div class="lesson-content">
+                        <div class="px-6 pb-6 space-y-6">
+                            <div class="tip-box">
+                                <p class="text-pink-200 font-medium">What are Skills?</p>
+                                <p class="text-sm mt-1 text-gray-300">Skills teach Claude how to perform specific tasks. They can be automatically discovered based on context or invoked directly with slash commands like <code class="bg-dark-800 px-2 py-1 rounded text-xs">/skill-name</code>.</p>
+                            </div>
 
-                    <h3 class="text-xl font-semibold text-white mt-8">Checking Available MCP Tools</h3>
-                    <p>Use the <code class="inline-code">/mcp</code> command to see what MCP servers are connected:</p>
-                    <pre><code class="text-green-400"># In Claude Code
-> /mcp
+                            <h4 class="font-bold text-lg text-accent">SKILL.md Structure</h4>
+                            <p class="text-gray-300">Skills are defined as <code class="bg-dark-800 px-2 py-1 rounded text-xs">SKILL.md</code> files with YAML frontmatter:</p>
 
-Connected MCP Servers:
-- filesystem (built-in)
-- Fetch (built-in)
-- postgres (custom) - 5 tools available
-- slack (custom) - 3 tools available</code></pre>
+                            <div class="code-block">
+                                <div class="code-block-header">.claude/skills/my-skill/SKILL.md</div>
+                                <pre><code class="text-green-400 text-sm">---
+name: my-skill
+description: What this skill does (used by Claude for discovery)
+allowed-tools: [Bash, Read, Write]  <span class="code-comment"># optional</span>
+model: sonnet                        <span class="code-comment"># optional</span>
+user-invocable: true                 <span class="code-comment"># enables /skill-name</span>
+---
+
+<span class="code-comment"># Skill Instructions</span>
+Explain how Claude should perform this task.
+
+<span class="code-comment">## How it works</span>
+1. First step...
+2. Second step...
+3. Output results...</code></pre>
+                            </div>
+
+                            <h4 class="font-bold text-lg mt-6 text-accent">Built-in Slash Commands</h4>
+                            <div class="grid md:grid-cols-2 gap-4 mt-4">
+                                <div class="card rounded-xl p-4">
+                                    <h5 class="font-semibold text-accent mb-2">/commit</h5>
+                                    <p class="text-sm text-gray-400">Auto-generate commit message from staged changes and commit.</p>
+                                </div>
+                                <div class="card rounded-xl p-4">
+                                    <h5 class="font-semibold text-accent mb-2">/review-pr</h5>
+                                    <p class="text-sm text-gray-400">Review a pull request and provide feedback.</p>
+                                </div>
+                                <div class="card rounded-xl p-4">
+                                    <h5 class="font-semibold text-accent mb-2">/init</h5>
+                                    <p class="text-sm text-gray-400">Initialize CLAUDE.md with project context.</p>
+                                </div>
+                                <div class="card rounded-xl p-4">
+                                    <h5 class="font-semibold text-accent mb-2">/compact</h5>
+                                    <p class="text-sm text-gray-400">Summarize conversation to save context window.</p>
+                                </div>
+                            </div>
+
+                            <button onclick="completeLesson(1)" class="btn-secondary px-6 py-3 rounded-xl text-sm font-medium">
+                                Mark as Complete
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="mt-8 pt-6 border-t border-white/10">
-                    <button onclick="showLesson(2)" class="bg-accent hover:bg-amber-400 text-dark-900 px-6 py-3 rounded-xl font-semibold transition-all">
-                        Next: Using MCP Servers
-                    </button>
+                <!-- Lesson 2: Custom Skills Creation -->
+                <div id="lesson2" class="lesson-card rounded-2xl overflow-hidden">
+                    <div class="lesson-header p-6 flex items-center justify-between" onclick="toggleLesson(2)">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center text-2xl">2</div>
+                            <div>
+                                <h3 class="font-bold text-xl">Custom Skills Creation</h3>
+                                <p class="text-gray-400 text-sm">Create your own skills and skill discovery</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span id="lesson2-status" class="text-xs px-3 py-1 rounded-full bg-gray-700 text-gray-400">Not Started</span>
+                            <svg class="chevron w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="lesson-content">
+                        <div class="px-6 pb-6 space-y-6">
+                            <h4 class="font-bold text-lg text-accent">Creating a Custom Skill</h4>
+                            <p class="text-gray-300">Example: Create a skill for writing survey documents.</p>
+
+                            <div class="code-block">
+                                <div class="code-block-header">.claude/skills/survey-writer/SKILL.md</div>
+                                <pre><code class="text-green-400 text-sm">---
+name: survey-writer
+description: Write academic survey documents from paper summaries
+allowed-tools: [Read, Write, WebFetch]
+user-invocable: true
+---
+
+<span class="code-comment"># Survey Writer Skill</span>
+
+You are an expert at writing academic survey documents.
+
+<span class="code-comment">## Process</span>
+1. Read the provided paper summaries
+2. Identify common themes and categorize papers
+3. Write an introduction explaining the research area
+4. Create sections for each category
+5. Write a conclusion with insights and future directions
+
+<span class="code-comment">## Output Format</span>
+- Use markdown format
+- Include proper citations
+- Create a clear table of contents</code></pre>
+                            </div>
+
+                            <h4 class="font-bold text-lg mt-6 text-accent">Skill Locations & Priority</h4>
+                            <div class="card rounded-xl p-4 mt-4">
+                                <ol class="space-y-2 text-sm text-gray-300">
+                                    <li><span class="text-accent font-bold">1.</span> Project: <code class="bg-dark-800 px-2 py-1 rounded text-xs">.claude/skills/&lt;name&gt;/SKILL.md</code> (highest priority)</li>
+                                    <li><span class="text-accent font-bold">2.</span> User: <code class="bg-dark-800 px-2 py-1 rounded text-xs">~/.claude/skills/&lt;name&gt;/SKILL.md</code></li>
+                                    <li><span class="text-accent font-bold">3.</span> Global: Skills from installed plugins</li>
+                                </ol>
+                            </div>
+
+                            <h4 class="font-bold text-lg mt-6 text-accent">Skill Discovery</h4>
+                            <p class="text-gray-300">Claude automatically discovers skills based on the <code class="bg-dark-800 px-2 py-1 rounded text-xs">description</code> field. When you ask Claude to do something matching a skill's description, it will use that skill.</p>
+
+                            <div class="code-block">
+                                <div class="code-block-header">Example</div>
+                                <pre><code class="text-green-400 text-sm"><span class="code-comment"># If you have a skill with description: "Write academic survey documents"</span>
+<span class="code-comment"># Claude will automatically use it when you say:</span>
+
+User: "Write a survey document from these paper summaries"
+<span class="code-comment"># Claude: [Uses survey-writer skill automatically]</span>
+
+<span class="code-comment"># Or invoke directly:</span>
+User: "/survey-writer"</code></pre>
+                            </div>
+
+                            <button onclick="completeLesson(2)" class="btn-secondary px-6 py-3 rounded-xl text-sm font-medium">
+                                Mark as Complete
+                            </button>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </section>
 
-        <!-- Lesson 2: Using MCP Servers -->
-        <section id="lesson2" class="lesson-content mb-12">
-            <div class="card rounded-2xl p-8">
-                <div class="flex items-center gap-4 mb-6">
-                    <span class="bg-accent/20 text-accent w-12 h-12 rounded-xl flex items-center justify-center text-xl font-bold">2</span>
-                    <h2 class="text-2xl font-bold">Using MCP Servers</h2>
+                <!-- Lesson 3: MCP Basics -->
+                <div id="lesson3" class="lesson-card rounded-2xl overflow-hidden">
+                    <div class="lesson-header p-6 flex items-center justify-between" onclick="toggleLesson(3)">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-amber-500/20 flex items-center justify-center text-2xl">3</div>
+                            <div>
+                                <h3 class="font-bold text-xl">MCP Basics</h3>
+                                <p class="text-gray-400 text-sm">Model Context Protocol concept and server connection</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span id="lesson3-status" class="text-xs px-3 py-1 rounded-full bg-gray-700 text-gray-400">Not Started</span>
+                            <svg class="chevron w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="lesson-content">
+                        <div class="px-6 pb-6 space-y-6">
+                            <div class="tip-box">
+                                <p class="text-pink-200 font-medium">Model Context Protocol (MCP)</p>
+                                <p class="text-sm mt-1 text-gray-300">MCP is an open protocol that standardizes how AI assistants connect to external data sources and tools. Think of it as a "USB for AI" - a universal way to plug in capabilities.</p>
+                            </div>
+
+                            <h4 class="font-bold text-lg text-accent">Why MCP Matters</h4>
+                            <p class="text-gray-300">Before MCP, every AI integration required custom code. MCP provides a standard interface for:</p>
+                            <ul class="list-disc list-inside space-y-2 ml-4 text-gray-300">
+                                <li><span class="text-accent">Tools</span> - Functions the AI can call (search, database queries, API calls)</li>
+                                <li><span class="text-accent">Resources</span> - Data the AI can read (files, databases, web content)</li>
+                                <li><span class="text-accent">Prompts</span> - Pre-defined prompt templates for specific tasks</li>
+                            </ul>
+
+                            <h4 class="font-bold text-lg mt-6 text-accent">Adding an MCP Server</h4>
+                            <div class="code-block">
+                                <div class="code-block-header">Terminal</div>
+                                <pre><code class="text-green-400 text-sm"><span class="code-comment"># Add MCP server using claude mcp add command</span>
+claude mcp add semantic-scholar
+
+<span class="code-comment"># Or add with specific package</span>
+claude mcp add semantic-scholar -- npx -y @anthropic-ai/mcp-server-semantic-scholar
+
+<span class="code-comment"># View connected MCP servers</span>
+/mcp</code></pre>
+                            </div>
+
+                            <h4 class="font-bold text-lg mt-6 text-accent">MCP Architecture</h4>
+                            <div class="code-block">
+                                <div class="code-block-header">Architecture Diagram</div>
+                                <pre><code class="text-green-400 text-sm">+-------------------------------------------------------------+
+|                      Claude Code (Host)                      |
+|                                                              |
+|   +--------------+    +--------------+    +--------------+   |
+|   | MCP Client   |    | MCP Client   |    | MCP Client   |   |
+|   +------+-------+    +------+-------+    +------+-------+   |
++----------+-----------------+-----------------+---------------+
+           |                 |                 |
+           v                 v                 v
+    +--------------+  +--------------+  +--------------+
+    | Semantic     |  |   GitHub     |  |   Custom     |
+    | Scholar      |  |   Server     |  |   Server     |
+    +--------------+  +--------------+  +--------------+</code></pre>
+                            </div>
+
+                            <button onclick="completeLesson(3)" class="btn-secondary px-6 py-3 rounded-xl text-sm font-medium">
+                                Mark as Complete
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="space-y-6 text-gray-300">
-                    <h3 class="text-xl font-semibold text-white">Configuring MCP Servers</h3>
-                    <p>MCP servers are configured in your Claude Code settings. You can add them at project, local, or global level:</p>
-
-                    <pre><code class="text-green-400">// .claude/settings.local.json
-{
-  "mcpServers": {
-    "postgres": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-postgres"],
-      "env": {
-        "DATABASE_URL": "postgresql://user:pass@localhost/mydb"
-      }
-    },
-    "slack": {
-      "command": "npx",
-      "args": ["-y", "@anthropic-ai/mcp-server-slack"],
-      "env": {
-        "SLACK_TOKEN": "${SLACK_TOKEN}"
+                <!-- Lesson 4: Semantic Scholar MCP -->
+                <div id="lesson4" class="lesson-card rounded-2xl overflow-hidden">
+                    <div class="lesson-header p-6 flex items-center justify-between" onclick="toggleLesson(4)">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center text-2xl">4</div>
+                            <div>
+                                <h3 class="font-bold text-xl">Semantic Scholar MCP</h3>
+                                <p class="text-gray-400 text-sm">Academic paper search and retrieval</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span id="lesson4-status" class="text-xs px-3 py-1 rounded-full bg-gray-700 text-gray-400">Not Started</span>
+                            <svg class="chevron w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="lesson-content">
+                        <div class="px-6 pb-6 space-y-6">
+                            <h4 class="font-bold text-lg text-accent">Setting Up Semantic Scholar MCP</h4>
+                            <div class="code-block">
+                                <div class="code-block-header">.claude/settings.local.json</div>
+                                <pre><code class="text-green-400 text-sm">{
+  <span class="code-string">"mcpServers"</span>: {
+    <span class="code-string">"semantic-scholar"</span>: {
+      <span class="code-string">"command"</span>: <span class="code-string">"npx"</span>,
+      <span class="code-string">"args"</span>: [<span class="code-string">"-y"</span>, <span class="code-string">"@anthropic-ai/mcp-server-semantic-scholar"</span>],
+      <span class="code-string">"env"</span>: {
+        <span class="code-string">"SEMANTIC_SCHOLAR_API_KEY"</span>: <span class="code-string">"${SEMANTIC_SCHOLAR_API_KEY}"</span>
       }
     }
   }
 }</code></pre>
-
-                    <h3 class="text-xl font-semibold text-white mt-8">Popular MCP Servers</h3>
-                    <div class="space-y-4">
-                        <div class="bg-dark-700 rounded-xl p-4">
-                            <div class="flex items-center gap-3 mb-2">
-                                <span class="text-2xl">🗄️</span>
-                                <h4 class="font-semibold text-accent">@modelcontextprotocol/server-postgres</h4>
                             </div>
-                            <p class="text-sm">Query PostgreSQL databases, run SQL, explore schema. Claude can write and execute queries safely.</p>
-                            <pre class="mt-3"><code class="text-xs text-gray-400"># Install
-npx -y @modelcontextprotocol/server-postgres
 
-# Tools: query, list_tables, describe_table</code></pre>
-                        </div>
-
-                        <div class="bg-dark-700 rounded-xl p-4">
-                            <div class="flex items-center gap-3 mb-2">
-                                <span class="text-2xl">💬</span>
-                                <h4 class="font-semibold text-accent">@anthropic-ai/mcp-server-slack</h4>
+                            <h4 class="font-bold text-lg mt-6 text-accent">Available Tools</h4>
+                            <div class="grid md:grid-cols-2 gap-4 mt-4">
+                                <div class="card rounded-xl p-4">
+                                    <h5 class="font-semibold text-accent mb-2">search_papers</h5>
+                                    <p class="text-sm text-gray-400">Search for papers by keywords, get titles, abstracts, and citations.</p>
+                                </div>
+                                <div class="card rounded-xl p-4">
+                                    <h5 class="font-semibold text-accent mb-2">get_paper_details</h5>
+                                    <p class="text-sm text-gray-400">Get full details of a specific paper by ID.</p>
+                                </div>
+                                <div class="card rounded-xl p-4">
+                                    <h5 class="font-semibold text-accent mb-2">get_citations</h5>
+                                    <p class="text-sm text-gray-400">Get papers that cite a specific paper.</p>
+                                </div>
+                                <div class="card rounded-xl p-4">
+                                    <h5 class="font-semibold text-accent mb-2">get_references</h5>
+                                    <p class="text-sm text-gray-400">Get papers referenced by a specific paper.</p>
+                                </div>
                             </div>
-                            <p class="text-sm">Send messages, read channels, search Slack history. Great for team automation.</p>
-                            <pre class="mt-3"><code class="text-xs text-gray-400"># Tools: send_message, list_channels, search_messages</code></pre>
-                        </div>
 
-                        <div class="bg-dark-700 rounded-xl p-4">
-                            <div class="flex items-center gap-3 mb-2">
-                                <span class="text-2xl">🐙</span>
-                                <h4 class="font-semibold text-accent">@modelcontextprotocol/server-github</h4>
+                            <h4 class="font-bold text-lg mt-6 text-accent">Usage Example</h4>
+                            <div class="code-block">
+                                <div class="code-block-header">Claude Conversation</div>
+                                <pre><code class="text-green-400 text-sm">User: "Search for papers about large language model alignment"
+
+Claude: [Uses semantic-scholar.search_papers tool]
+<span class="code-comment"># Returns: List of papers with titles, authors, abstracts</span>
+
+User: "Get details and citations for the first paper"
+
+Claude: [Uses semantic-scholar.get_paper_details]
+Claude: [Uses semantic-scholar.get_citations]
+<span class="code-comment"># Returns: Full paper details and citing papers</span></code></pre>
                             </div>
-                            <p class="text-sm">Create PRs, manage issues, review code, search repositories.</p>
-                            <pre class="mt-3"><code class="text-xs text-gray-400"># Tools: create_pr, list_issues, search_code, get_file</code></pre>
-                        </div>
 
-                        <div class="bg-dark-700 rounded-xl p-4">
-                            <div class="flex items-center gap-3 mb-2">
-                                <span class="text-2xl">🌐</span>
-                                <h4 class="font-semibold text-accent">@anthropic-ai/mcp-server-fetch</h4>
+                            <div class="warning-box">
+                                <div class="flex items-start gap-3">
+                                    <span class="text-xl">Warning</span>
+                                    <div>
+                                        <p class="text-amber-200 font-medium">API Key Security</p>
+                                        <p class="text-sm mt-1 text-gray-300">Store your API key as an environment variable. Never commit <code class="bg-dark-800 px-2 py-1 rounded text-xs">settings.local.json</code> to git.</p>
+                                    </div>
+                                </div>
                             </div>
-                            <p class="text-sm">Enhanced web fetching with better parsing, caching, and content extraction.</p>
-                            <pre class="mt-3"><code class="text-xs text-gray-400"># Tools: fetch_url, extract_content, parse_html</code></pre>
-                        </div>
-                    </div>
 
-                    <h3 class="text-xl font-semibold text-white mt-8">Using MCP Tools in Conversation</h3>
-                    <p>Once configured, Claude can use MCP tools naturally in conversation:</p>
-
-                    <div class="bg-dark-700 rounded-xl p-4 mt-4">
-                        <p class="text-sm text-gray-400 mb-2">Example conversation:</p>
-                        <pre><code class="text-green-400">User: "Find all users who signed up last week and send a summary to #growth channel"
-
-Claude: I'll query the database and send the summary to Slack.
-
-[Uses postgres.query to get signup data]
-[Uses slack.send_message to post summary]
-
-Done! Found 47 new users. Summary posted to #growth.</code></pre>
-                    </div>
-
-                    <h3 class="text-xl font-semibold text-white mt-8">Environment Variables</h3>
-                    <p>MCP servers often need credentials. Use environment variables for security:</p>
-                    <pre><code class="text-green-400"># In your shell profile (.zshrc, .bashrc)
-export SLACK_TOKEN="xoxb-your-token"
-export DATABASE_URL="postgresql://..."
-export GITHUB_TOKEN="ghp_..."
-
-# In settings, reference with ${VAR_NAME}
-"env": {
-  "SLACK_TOKEN": "${SLACK_TOKEN}"
-}</code></pre>
-
-                    <div class="bg-red-500/10 border border-red-500/30 rounded-xl p-4 mt-6">
-                        <p class="text-red-200 font-medium">Security Warning</p>
-                        <p class="text-sm mt-1">Never commit tokens or credentials to git. Use environment variables or a secrets manager. Add <code class="inline-code">.claude/settings.local.json</code> to your <code class="inline-code">.gitignore</code>.</p>
-                    </div>
-
-                    <div class="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 mt-6">
-                        <p class="text-amber-200 font-medium">Boris Cherny's Tip 11: MCP 서버 통합</p>
-                        <p class="text-sm mt-2 text-gray-300">
-                            Anthropic Developer Relations의 Boris Cherny가 추천하는 실전 MCP 활용법입니다.
-                            여러 MCP 서버를 동시에 연결하여 강력한 워크플로우를 구축하세요.
-                        </p>
-                    </div>
-
-                    <h3 class="text-xl font-semibold text-white mt-8">Tip 11: 실전 MCP 통합 워크플로우</h3>
-                    <div class="space-y-4 mt-4">
-                        <div class="bg-dark-700 rounded-xl p-4">
-                            <div class="flex items-center gap-3 mb-2">
-                                <span class="text-2xl">💬</span>
-                                <h4 class="font-semibold text-accent">Slack + BigQuery + Sentry</h4>
-                            </div>
-                            <p class="text-sm text-gray-400 mb-3">
-                                세 가지 MCP 서버를 조합한 DevOps 자동화 워크플로우입니다.
-                            </p>
-                            <pre class="text-xs"><code class="text-green-400"># 설정 예시
-{
-  "mcpServers": {
-    "slack": {
-      "command": "npx",
-      "args": ["-y", "@anthropic-ai/mcp-server-slack"],
-      "env": { "SLACK_TOKEN": "${SLACK_TOKEN}" }
-    },
-    "bigquery": {
-      "command": "npx",
-      "args": ["-y", "@anthropic-ai/mcp-server-bigquery"],
-      "env": { "GOOGLE_PROJECT_ID": "${GCP_PROJECT}" }
-    },
-    "sentry": {
-      "command": "npx",
-      "args": ["-y", "@anthropic-ai/mcp-server-sentry"],
-      "env": { "SENTRY_AUTH_TOKEN": "${SENTRY_TOKEN}" }
-    }
-  }
-}
-
-# 사용 예: "Sentry 에러를 분석하고 Slack에 요약 전송"</code></pre>
-                        </div>
-                        <div class="bg-dark-700 rounded-xl p-4">
-                            <div class="flex items-center gap-3 mb-2">
-                                <span class="text-2xl">📊</span>
-                                <h4 class="font-semibold text-accent">데이터 분석 파이프라인</h4>
-                            </div>
-                            <p class="text-sm text-gray-400 mb-3">
-                                BigQuery에서 데이터를 가져와 분석하고 결과를 Slack에 공유합니다.
-                            </p>
-                            <pre class="text-xs"><code class="text-green-400"># Claude에게 요청
-"BigQuery에서 지난 주 사용자 이탈률을 조회하고,
-트렌드를 분석한 후 #analytics 채널에 보고서를 공유해줘"
-
-# Claude는 자동으로:
-# 1. bigquery.query로 데이터 조회
-# 2. 데이터 분석 및 시각화
-# 3. slack.send_message로 보고서 전송</code></pre>
+                            <button onclick="completeLesson(4)" class="btn-secondary px-6 py-3 rounded-xl text-sm font-medium">
+                                Mark as Complete
+                            </button>
                         </div>
                     </div>
                 </div>
 
-                <div class="mt-8 pt-6 border-t border-white/10 flex justify-between">
-                    <button onclick="showLesson(1)" class="bg-white/10 hover:bg-white/20 px-6 py-3 rounded-xl font-semibold transition-all">
-                        Previous
-                    </button>
-                    <button onclick="showLesson(3)" class="bg-accent hover:bg-amber-400 text-dark-900 px-6 py-3 rounded-xl font-semibold transition-all">
-                        Next: Subagents & Task Tool
-                    </button>
-                </div>
-            </div>
-        </section>
-
-        <!-- Lesson 3: Subagents & Task Tool -->
-        <section id="lesson3" class="lesson-content mb-12">
-            <div class="card rounded-2xl p-8">
-                <div class="flex items-center gap-4 mb-6">
-                    <span class="bg-accent/20 text-accent w-12 h-12 rounded-xl flex items-center justify-center text-xl font-bold">3</span>
-                    <h2 class="text-2xl font-bold">Subagents & Task Tool</h2>
-                </div>
-
-                <div class="space-y-6 text-gray-300">
-                    <div class="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4">
-                        <p class="text-amber-200 font-medium">What are Subagents?</p>
-                        <p class="text-sm mt-1">Subagents are specialized Claude instances that can be spawned to handle specific tasks autonomously. They work in parallel, allowing Claude to tackle complex multi-part problems efficiently.</p>
-                    </div>
-
-                    <h3 class="text-xl font-semibold text-white">The Task Tool</h3>
-                    <p>Claude Code uses the <code class="inline-code">Task</code> tool to spawn subagents. Each subagent type is optimized for different work:</p>
-
-                    <div class="grid md:grid-cols-2 gap-4 mt-4">
-                        <div class="bg-dark-700 rounded-xl p-4">
-                            <h4 class="font-semibold text-accent mb-2">Explore Agent</h4>
-                            <p class="text-sm">Fast codebase exploration. Searches files, finds patterns, answers questions about code structure.</p>
-                            <pre class="mt-2"><code class="text-xs text-gray-400">subagent_type: "Explore"
-# Uses: Glob, Grep, Read</code></pre>
-                        </div>
-                        <div class="bg-dark-700 rounded-xl p-4">
-                            <h4 class="font-semibold text-accent mb-2">Bash Agent</h4>
-                            <p class="text-sm">Command execution specialist. Git operations, running tests, package management.</p>
-                            <pre class="mt-2"><code class="text-xs text-gray-400">subagent_type: "Bash"
-# Uses: Bash tool only</code></pre>
-                        </div>
-                        <div class="bg-dark-700 rounded-xl p-4">
-                            <h4 class="font-semibold text-accent mb-2">Plan Agent</h4>
-                            <p class="text-sm">Software architect. Designs implementation plans, identifies files, considers trade-offs.</p>
-                            <pre class="mt-2"><code class="text-xs text-gray-400">subagent_type: "Plan"
-# Uses: All tools</code></pre>
-                        </div>
-                        <div class="bg-dark-700 rounded-xl p-4">
-                            <h4 class="font-semibold text-accent mb-2">General-Purpose</h4>
-                            <p class="text-sm">Multi-step task handler. Research, code search, complex operations.</p>
-                            <pre class="mt-2"><code class="text-xs text-gray-400">subagent_type: "general-purpose"
-# Uses: All tools</code></pre>
-                        </div>
-                    </div>
-
-                    <h3 class="text-xl font-semibold text-white mt-8">Spawning Subagents</h3>
-                    <p>Claude automatically spawns subagents when appropriate, but you can request it explicitly:</p>
-
-                    <pre><code class="text-green-400"># Example: Ask Claude to use subagents
-"Search the codebase for all API endpoints and list them"
-
-# Claude might spawn an Explore agent:
-Task tool:
-  subagent_type: "Explore"
-  prompt: "Find all API endpoint definitions in the codebase.
-           Search for patterns like router.get, app.post,
-           @app.route, etc. Return a list of endpoints
-           with their file locations."</code></pre>
-
-                    <h3 class="text-xl font-semibold text-white mt-8">Parallel Subagents</h3>
-                    <p>Multiple subagents can run simultaneously for faster results:</p>
-
-                    <pre><code class="text-green-400"># Claude can spawn multiple agents in parallel
-User: "Analyze this React app - check component structure,
-       find unused imports, and list all API calls"
-
-# Claude spawns 3 agents simultaneously:
-Agent 1 (Explore): Search for component definitions
-Agent 2 (Explore): Find unused imports with grep
-Agent 3 (Explore): Locate all fetch/axios calls
-
-# Results combined into unified response</code></pre>
-
-                    <h3 class="text-xl font-semibold text-white mt-8">Background Agents</h3>
-                    <p>For long-running tasks, agents can run in the background:</p>
-
-                    <pre><code class="text-green-400">Task tool:
-  subagent_type: "general-purpose"
-  run_in_background: true
-  prompt: "Run the full test suite and report failures"
-
-# You can continue working while the agent runs
-# Check status with /tasks command
-# Read output file when complete</code></pre>
-
-                    <h3 class="text-xl font-semibold text-white mt-8">When to Use Subagents</h3>
-                    <div class="grid md:grid-cols-2 gap-4 mt-4">
-                        <div class="bg-green-500/10 border border-green-500/30 rounded-xl p-4">
-                            <h4 class="font-semibold text-green-400 mb-2">Good Use Cases</h4>
-                            <ul class="text-sm space-y-1">
-                                <li>- Large codebase exploration</li>
-                                <li>- Parallel search operations</li>
-                                <li>- Long-running tests</li>
-                                <li>- Multi-file analysis</li>
-                                <li>- Complex git operations</li>
-                            </ul>
-                        </div>
-                        <div class="bg-red-500/10 border border-red-500/30 rounded-xl p-4">
-                            <h4 class="font-semibold text-red-400 mb-2">Avoid When</h4>
-                            <ul class="text-sm space-y-1">
-                                <li>- Simple file reads (use Read directly)</li>
-                                <li>- Known file paths (use Glob)</li>
-                                <li>- Single command execution</li>
-                                <li>- Quick edits to 1-2 files</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="mt-8 pt-6 border-t border-white/10 flex justify-between">
-                    <button onclick="showLesson(2)" class="bg-white/10 hover:bg-white/20 px-6 py-3 rounded-xl font-semibold transition-all">
-                        Previous
-                    </button>
-                    <button onclick="showLesson(4)" class="bg-accent hover:bg-amber-400 text-dark-900 px-6 py-3 rounded-xl font-semibold transition-all">
-                        Next: Model Selection
-                    </button>
-                </div>
-            </div>
-        </section>
-
-        <!-- Lesson 4: Model Selection -->
-        <section id="lesson4" class="lesson-content mb-12">
-            <div class="card rounded-2xl p-8">
-                <div class="flex items-center gap-4 mb-6">
-                    <span class="bg-accent/20 text-accent w-12 h-12 rounded-xl flex items-center justify-center text-xl font-bold">4</span>
-                    <h2 class="text-2xl font-bold">Model Selection</h2>
-                </div>
-
-                <div class="space-y-6 text-gray-300">
-                    <h3 class="text-xl font-semibold text-white">The --model Flag</h3>
-                    <p>Claude Code can use different Claude models for different tasks. Choose based on speed vs capability trade-offs:</p>
-
-                    <pre><code class="text-green-400"># Start Claude Code with a specific model
-claude --model claude-sonnet-4-20250514
-
-# Or use model aliases
-claude --model opus    # Most capable, slower
-claude --model sonnet  # Balanced (default)
-claude --model haiku   # Fastest, simpler tasks</code></pre>
-
-                    <h3 class="text-xl font-semibold text-white mt-8">Model Comparison</h3>
-                    <div class="overflow-x-auto">
-                        <table class="w-full mt-4 text-sm">
-                            <thead>
-                                <tr class="border-b border-white/10">
-                                    <th class="text-left py-3 px-4 text-accent">Model</th>
-                                    <th class="text-left py-3 px-4">Best For</th>
-                                    <th class="text-left py-3 px-4">Speed</th>
-                                    <th class="text-left py-3 px-4">Cost</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr class="border-b border-white/5">
-                                    <td class="py-3 px-4 font-semibold">Opus 4</td>
-                                    <td class="py-3 px-4">Complex reasoning, architecture, difficult bugs</td>
-                                    <td class="py-3 px-4">Slower</td>
-                                    <td class="py-3 px-4">Highest</td>
-                                </tr>
-                                <tr class="border-b border-white/5">
-                                    <td class="py-3 px-4 font-semibold">Sonnet 4</td>
-                                    <td class="py-3 px-4">General development, balanced tasks</td>
-                                    <td class="py-3 px-4">Medium</td>
-                                    <td class="py-3 px-4">Medium</td>
-                                </tr>
-                                <tr class="border-b border-white/5">
-                                    <td class="py-3 px-4 font-semibold">Haiku 3.5</td>
-                                    <td class="py-3 px-4">Quick edits, simple tasks, exploration</td>
-                                    <td class="py-3 px-4">Fastest</td>
-                                    <td class="py-3 px-4">Lowest</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <h3 class="text-xl font-semibold text-white mt-8">Subagent Model Selection</h3>
-                    <p>When spawning subagents, you can specify which model they should use:</p>
-
-                    <pre><code class="text-green-400"># Use haiku for quick exploration tasks
-Task tool:
-  subagent_type: "Explore"
-  model: "haiku"  # Faster, cheaper for simple searches
-  prompt: "Find all files with 'TODO' comments"
-
-# Use opus for complex analysis
-Task tool:
-  subagent_type: "Plan"
-  model: "opus"  # Better reasoning for architecture decisions
-  prompt: "Design the authentication system for this app"</code></pre>
-
-                    <h3 class="text-xl font-semibold text-white mt-8">Thinking Modes</h3>
-                    <p>For complex tasks, you can request extended thinking:</p>
-
-                    <div class="grid md:grid-cols-2 gap-4 mt-4">
-                        <div class="bg-dark-700 rounded-xl p-4">
-                            <h4 class="font-semibold text-accent mb-2">"think more"</h4>
-                            <p class="text-sm">Request extended reasoning for medium-complexity problems.</p>
-                            <pre class="mt-2"><code class="text-xs text-gray-400">User: "think more about how to
-optimize this database query"</code></pre>
-                        </div>
-                        <div class="bg-dark-700 rounded-xl p-4">
-                            <h4 class="font-semibold text-accent mb-2">"ultrathink"</h4>
-                            <p class="text-sm">Maximum reasoning capacity for the most complex challenges.</p>
-                            <pre class="mt-2"><code class="text-xs text-gray-400">User: "ultrathink about the
-architecture for this system"</code></pre>
-                        </div>
-                    </div>
-
-                    <h3 class="text-xl font-semibold text-white mt-8">Practical Guidelines</h3>
-                    <div class="space-y-4 mt-4">
-                        <div class="flex items-start gap-3">
-                            <span class="text-accent text-xl">1.</span>
+                <!-- Lesson 5: Skills + MCP Workflow -->
+                <div id="lesson5" class="lesson-card rounded-2xl overflow-hidden">
+                    <div class="lesson-header p-6 flex items-center justify-between" onclick="toggleLesson(5)">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-pink-500/20 flex items-center justify-center text-2xl">5</div>
                             <div>
-                                <p class="font-semibold text-white">Start with Sonnet</p>
-                                <p class="text-sm">Default model handles most tasks well. Switch only when needed.</p>
+                                <h3 class="font-bold text-xl">Skills + MCP Workflow</h3>
+                                <p class="text-gray-400 text-sm">Combining skills and MCP for powerful automation</p>
                             </div>
                         </div>
-                        <div class="flex items-start gap-3">
-                            <span class="text-accent text-xl">2.</span>
-                            <div>
-                                <p class="font-semibold text-white">Use Haiku for Exploration</p>
-                                <p class="text-sm">When spawning multiple search agents, haiku is cost-effective.</p>
-                            </div>
-                        </div>
-                        <div class="flex items-start gap-3">
-                            <span class="text-accent text-xl">3.</span>
-                            <div>
-                                <p class="font-semibold text-white">Escalate to Opus for Hard Problems</p>
-                                <p class="text-sm">Complex debugging, architecture design, or when Sonnet struggles.</p>
-                            </div>
-                        </div>
-                        <div class="flex items-start gap-3">
-                            <span class="text-accent text-xl">4.</span>
-                            <div>
-                                <p class="font-semibold text-white">Combine with Thinking Modes</p>
-                                <p class="text-sm">"ultrathink" + Opus for maximum capability on critical decisions.</p>
-                            </div>
+                        <div class="flex items-center gap-3">
+                            <span id="lesson5-status" class="text-xs px-3 py-1 rounded-full bg-gray-700 text-gray-400">Not Started</span>
+                            <svg class="chevron w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
                         </div>
                     </div>
+                    <div class="lesson-content">
+                        <div class="px-6 pb-6 space-y-6">
+                            <div class="tip-box">
+                                <p class="text-pink-200 font-medium">Power of Combination</p>
+                                <p class="text-sm mt-1 text-gray-300">Skills define HOW to do tasks, MCP provides WHAT tools to use. Combined, they create powerful automated workflows.</p>
+                            </div>
 
-                    <div class="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 mt-6">
-                        <p class="text-amber-200 font-medium">Pro Tip</p>
-                        <p class="text-sm mt-1">You can check which model is being used with <code class="inline-code">/model</code> command. To switch mid-session, use <code class="inline-code">/model sonnet</code> or similar.</p>
+                            <h4 class="font-bold text-lg text-accent">Paper Survey Workflow Example</h4>
+                            <div class="code-block">
+                                <div class="code-block-header">Workflow</div>
+                                <pre><code class="text-green-400 text-sm"><span class="code-comment"># 1. MCP: Search papers</span>
+Claude uses semantic-scholar.search_papers("LLM alignment")
+  -> Returns 50 papers
+
+<span class="code-comment"># 2. MCP: Get details for top 10</span>
+Claude uses semantic-scholar.get_paper_details for each
+  -> Returns abstracts, citations, authors
+
+<span class="code-comment"># 3. Skill: Summarize papers</span>
+/survey-writer skill processes the data
+  -> Creates structured summaries
+
+<span class="code-comment"># 4. Skill: Write survey document</span>
+Skill creates survey.md with:
+  - Introduction
+  - Categorized papers
+  - Analysis and insights
+  - References (BibTeX)</code></pre>
+                            </div>
+
+                            <h4 class="font-bold text-lg mt-6 text-accent">Using Subagents for Parallel Work</h4>
+                            <p class="text-gray-300">Use subagents to parallelize paper analysis:</p>
+                            <div class="code-block">
+                                <div class="code-block-header">Parallel Paper Analysis</div>
+                                <pre><code class="text-green-400 text-sm">User: "Analyze these 10 papers in parallel and summarize each"
+
+<span class="code-comment"># Claude spawns multiple agents:</span>
+Agent 1 (Explore): Analyze paper 1-2
+Agent 2 (Explore): Analyze paper 3-4
+Agent 3 (Explore): Analyze paper 5-6
+Agent 4 (Explore): Analyze paper 7-8
+Agent 5 (Explore): Analyze paper 9-10
+
+<span class="code-comment"># All run simultaneously, then results are combined</span></code></pre>
+                            </div>
+
+                            <h4 class="font-bold text-lg mt-6 text-accent">Complete Survey Project Structure</h4>
+                            <div class="code-block">
+                                <div class="code-block-header">Project Structure</div>
+                                <pre><code class="text-green-400 text-sm">paper-survey/
++-- .claude/
+|   +-- settings.local.json    <span class="code-comment"># MCP: Semantic Scholar</span>
+|   +-- skills/
+|       +-- survey-writer/
+|           +-- SKILL.md       <span class="code-comment"># Custom survey skill</span>
++-- survey.md                  <span class="code-comment"># Output: Survey document</span>
++-- references.bib             <span class="code-comment"># Output: BibTeX references</span>
++-- CLAUDE.md                  <span class="code-comment"># Project context</span></code></pre>
+                            </div>
+
+                            <button onclick="completeLesson(5)" class="btn-secondary px-6 py-3 rounded-xl text-sm font-medium">
+                                Mark as Complete
+                            </button>
+                        </div>
                     </div>
-                </div>
-
-                <div class="mt-8 pt-6 border-t border-white/10 flex justify-between">
-                    <button onclick="showLesson(3)" class="bg-white/10 hover:bg-white/20 px-6 py-3 rounded-xl font-semibold transition-all">
-                        Previous
-                    </button>
-                    <button onclick="startQuiz()" class="bg-accent hover:bg-amber-400 text-dark-900 px-6 py-3 rounded-xl font-semibold transition-all">
-                        Take the Quiz
-                    </button>
                 </div>
             </div>
         </section>
 
         <!-- Terminology Section -->
-        <section class="mb-12">
-            <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-4">용어 설명</h2>
+        <section class="mb-16">
+            <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-4">TERMINOLOGY</h2>
             <div class="space-y-3">
                 <details class="card rounded-xl p-4 cursor-pointer">
                     <summary class="font-bold text-white flex items-center justify-between">
-                        MCP 서버
+                        Skills
                         <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                         </svg>
                     </summary>
                     <p class="text-gray-400 text-sm mt-3">
-                        Model Context Protocol로 외부 도구와 데이터 소스를 Claude에 연결하는 서버입니다.
-                        PostgreSQL, Slack, GitHub 등 다양한 서비스를 Claude가 직접 사용할 수 있게 해줍니다.
-                        "AI를 위한 USB"라고 생각하면 됩니다.
+                        Instructions that teach Claude specific tasks. Defined in SKILL.md files with frontmatter for metadata.
+                        Invoked with <code class="bg-dark-800 px-1 rounded text-xs">/skill-name</code> or discovered automatically.
                     </p>
                 </details>
                 <details class="card rounded-xl p-4 cursor-pointer">
                     <summary class="font-bold text-white flex items-center justify-between">
-                        서브에이전트 (Subagent)
+                        MCP (Model Context Protocol)
                         <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                         </svg>
                     </summary>
                     <p class="text-gray-400 text-sm mt-3">
-                        특정 작업을 위해 독립적으로 실행되는 Claude 인스턴스입니다.
-                        Explore(탐색), Bash(명령어), Plan(설계), general-purpose(범용) 등의 유형이 있으며,
-                        여러 서브에이전트를 병렬로 실행하여 작업 속도를 높일 수 있습니다.
+                        An open protocol for connecting AI assistants to external tools and data sources.
+                        MCP servers provide tools, resources, and prompts that Claude can use.
                     </p>
                 </details>
                 <details class="card rounded-xl p-4 cursor-pointer">
                     <summary class="font-bold text-white flex items-center justify-between">
-                        Task 도구
+                        Slash Commands
                         <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                         </svg>
                     </summary>
                     <p class="text-gray-400 text-sm mt-3">
-                        Claude가 서브에이전트를 생성하고 관리하는 데 사용하는 내부 도구입니다.
-                        <code class="bg-dark-800 px-1 rounded text-xs">subagent_type</code>,
-                        <code class="bg-dark-800 px-1 rounded text-xs">prompt</code>,
-                        <code class="bg-dark-800 px-1 rounded text-xs">run_in_background</code> 등의 파라미터를 지정합니다.
+                        Commands starting with <code class="bg-dark-800 px-1 rounded text-xs">/</code> that invoke specific functionality.
+                        Built-in commands include /commit, /init, /compact. Custom skills can also be invoked this way.
                     </p>
                 </details>
                 <details class="card rounded-xl p-4 cursor-pointer">
                     <summary class="font-bold text-white flex items-center justify-between">
-                        백그라운드 에이전트
+                        Skill Discovery
                         <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                         </svg>
                     </summary>
                     <p class="text-gray-400 text-sm mt-3">
-                        <code class="bg-dark-800 px-1 rounded text-xs">run_in_background: true</code>로 설정된 서브에이전트입니다.
-                        작업이 완료될 때까지 기다리지 않고 다른 작업을 계속할 수 있습니다.
-                        <code class="bg-dark-800 px-1 rounded text-xs">/tasks</code> 명령어로 상태를 확인합니다.
-                    </p>
-                </details>
-                <details class="card rounded-xl p-4 cursor-pointer">
-                    <summary class="font-bold text-white flex items-center justify-between">
-                        모델 선택 (--model)
-                        <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                        </svg>
-                    </summary>
-                    <p class="text-gray-400 text-sm mt-3">
-                        작업 복잡도에 따라 적절한 Claude 모델을 선택합니다.<br>
-                        <span class="text-amber-400">Opus</span>: 가장 강력, 복잡한 추론 (느림, 고비용)<br>
-                        <span class="text-blue-400">Sonnet</span>: 균형잡힌 기본 모델<br>
-                        <span class="text-green-400">Haiku</span>: 가장 빠름, 간단한 작업 (저비용)
+                        Claude automatically finds and uses relevant skills based on their descriptions.
+                        When a request matches a skill's description, Claude applies that skill without explicit invocation.
                     </p>
                 </details>
             </div>
         </section>
 
         <!-- Quiz Section -->
-        <section id="quizSection" class="hidden mb-12">
+        <section class="mb-16">
+            <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-6">KNOWLEDGE CHECK</h2>
             <div class="card rounded-2xl p-8">
                 <div class="flex items-center justify-between mb-6">
-                    <h2 class="text-2xl font-bold">Week 3 Quiz</h2>
-                    <span class="text-sm text-gray-400">Question <span id="currentQ">1</span>/10</span>
+                    <h3 class="font-bold text-2xl">Quiz: Skills + MCP</h3>
+                    <span id="quizProgress" class="text-sm text-gray-400">Question 1/10</span>
                 </div>
 
                 <div id="quizContainer">
-                    <!-- Questions injected by JS -->
+                    <!-- Quiz questions will be rendered here -->
                 </div>
 
-                <div class="mt-8 pt-6 border-t border-white/10 flex justify-between">
-                    <button id="prevQ" onclick="prevQuestion()" class="bg-white/10 hover:bg-white/20 px-6 py-3 rounded-xl font-semibold transition-all hidden">
-                        Previous
-                    </button>
-                    <button id="nextQ" onclick="nextQuestion()" class="bg-accent hover:bg-amber-400 text-dark-900 px-6 py-3 rounded-xl font-semibold transition-all ml-auto">
-                        Next
-                    </button>
+                <div id="quizResults" class="hidden text-center py-8">
+                    <div class="text-6xl mb-4" id="resultEmoji">Congrats!</div>
+                    <h4 class="text-2xl font-bold mb-2">Quiz Complete!</h4>
+                    <p class="text-gray-400 mb-6">You scored <span id="finalScore" class="text-accent font-bold">0</span>/10</p>
+                    <div class="flex gap-4 justify-center">
+                        <button onclick="retakeQuiz()" class="btn-secondary px-6 py-3 rounded-xl text-sm font-medium">
+                            Retake Quiz
+                        </button>
+                        <a id="challengeQuizBtn" href="week3.html" class="btn-primary px-6 py-3 rounded-xl text-sm font-medium inline-flex items-center gap-2">
+                            Go to Challenge
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                            </svg>
+                        </a>
+                    </div>
                 </div>
             </div>
         </section>
 
-        <!-- Quiz Complete -->
-        <section id="quizComplete" class="hidden mb-12">
-            <div class="card rounded-2xl p-12 text-center">
-                <div class="text-6xl mb-6">🎉</div>
-                <h2 class="text-3xl font-bold mb-4">Quiz Complete!</h2>
-                <p class="text-gray-400 text-lg mb-2">Your Score</p>
-                <p class="text-5xl font-bold text-accent mb-8"><span id="finalScore">0</span>/10</p>
-                <div class="flex flex-wrap justify-center gap-4">
-                    <button onclick="retakeQuiz()" class="bg-white/10 hover:bg-white/20 border border-white/10 px-6 py-3 rounded-xl transition-all font-medium">
-                        Retake Quiz
-                    </button>
-                    <a href="week3.html" class="bg-accent hover:bg-amber-400 text-dark-900 px-6 py-3 rounded-xl font-semibold transition-all inline-block">
-                        Go to Challenge
+        <!-- Go to Challenge CTA -->
+        <section class="mb-16">
+            <div class="card rounded-3xl p-8 border-accent/30 bg-gradient-to-br from-accent/5 to-transparent">
+                <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div>
+                        <h3 class="text-2xl font-bold mb-2">Ready for the Challenge?</h3>
+                        <p class="text-gray-400">Use Skills and MCP to survey 10+ papers on your research topic.</p>
+                    </div>
+                    <a id="challengeBtn" href="week3.html" class="btn-primary px-8 py-4 rounded-xl font-bold text-lg flex items-center gap-3 whitespace-nowrap">
+                        Start Challenge
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                        </svg>
                     </a>
                 </div>
             </div>
@@ -735,166 +730,294 @@ architecture for this system"</code></pre>
         </div>
     </footer>
 
+    <script src="config.js"></script>
     <script>
-        // Quiz questions
-        const questions = [
+        // Challenge Status Check
+        const API_BASE = window.API_BASE || '';
+        const WEEK = 3;
+
+        async function checkChallengeStatus() {
+            try {
+                const response = await fetch(`${API_BASE}/api/challenge/${WEEK}/status`);
+                if (response.ok) {
+                    const data = await response.json();
+
+                    if (data.status !== 'started') {
+                        // Disable all challenge buttons
+                        const challengeButtons = [
+                            document.getElementById('challengeNavBtn'),
+                            document.getElementById('challengeQuizBtn'),
+                            document.getElementById('challengeBtn')
+                        ];
+
+                        challengeButtons.forEach(btn => {
+                            if (btn) {
+                                btn.classList.add('opacity-50', 'cursor-not-allowed', 'pointer-events-none');
+                            }
+                        });
+
+                        // Add warning message after main CTA button
+                        const mainBtn = document.getElementById('challengeBtn');
+                        if (mainBtn && mainBtn.parentElement) {
+                            const existingMsg = mainBtn.parentElement.querySelector('.challenge-warning');
+                            if (!existingMsg) {
+                                const msg = document.createElement('p');
+                                msg.className = 'challenge-warning text-sm text-amber-400 mt-2 text-center w-full';
+                                msg.textContent = 'Challenge not started by admin yet';
+                                mainBtn.parentElement.appendChild(msg);
+                            }
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error('Failed to check challenge status:', e);
+            }
+        }
+
+        // Quiz Data
+        const quizQuestions = [
             {
-                q: "What does MCP stand for?",
+                question: "What file defines a Claude Code skill?",
+                options: ["skill.json", "SKILL.md", "skill.yaml", "skill.config"],
+                correct: 1
+            },
+            {
+                question: "Which frontmatter field enables slash command invocation?",
+                options: ["invocable: true", "command: true", "user-invocable: true", "slash: true"],
+                correct: 2
+            },
+            {
+                question: "What does MCP stand for?",
                 options: ["Model Context Protocol", "Machine Code Processor", "Multi-Channel Protocol", "Model Compute Platform"],
                 correct: 0
             },
             {
-                q: "Which of the following is NOT a capability provided by MCP?",
-                options: ["Tools (functions)", "Resources (data)", "Training (model fine-tuning)", "Prompts (templates)"],
-                correct: 2
-            },
-            {
-                q: "Where are MCP server configurations stored?",
-                options: ["package.json", ".claude/settings.local.json", "mcp.config.js", ".mcprc"],
+                question: "How do you add an MCP server to Claude Code?",
+                options: ["claude install mcp", "claude mcp add", "claude server add", "mcp install"],
                 correct: 1
             },
             {
-                q: "What command shows connected MCP servers in Claude Code?",
-                options: ["/servers", "/mcp", "/list-tools", "/connections"],
+                question: "Which command shows connected MCP servers?",
+                options: ["/servers", "/mcp", "/list", "/tools"],
                 correct: 1
             },
             {
-                q: "Which subagent type is best for searching a large codebase?",
-                options: ["Bash", "Plan", "Explore", "General-purpose"],
+                question: "What tool searches for academic papers in Semantic Scholar MCP?",
+                options: ["find_papers", "query_papers", "search_papers", "lookup_papers"],
                 correct: 2
             },
             {
-                q: "What parameter allows a subagent to run without blocking?",
-                options: ["async: true", "parallel: true", "run_in_background: true", "detach: true"],
+                question: "Where should you store MCP API keys?",
+                options: ["In the SKILL.md file", "In CLAUDE.md", "As environment variables", "In settings.json directly"],
                 correct: 2
             },
             {
-                q: "Which Claude model is fastest but least capable?",
-                options: ["Opus", "Sonnet", "Haiku", "Claude Pro"],
+                question: "Which skill location has the highest priority?",
+                options: ["Global skills", "User skills (~/.claude)", "Project skills (.claude)", "All equal"],
                 correct: 2
             },
             {
-                q: "What keyword triggers maximum reasoning capacity?",
-                options: ["think hard", "deep think", "ultrathink", "mega think"],
-                correct: 2
+                question: "What enables Claude to automatically use a skill without explicit invocation?",
+                options: ["The name field", "The description field", "The model field", "The priority field"],
+                correct: 1
             },
             {
-                q: "How should you store API tokens for MCP servers?",
-                options: ["Directly in settings.json", "In the code comments", "As environment variables", "In a README file"],
-                correct: 2
-            },
-            {
-                q: "When should you escalate to Opus model?",
-                options: ["For simple file searches", "For quick edits", "For complex architecture decisions", "For running tests"],
-                correct: 2
+                question: "How can you parallelize paper analysis?",
+                options: ["Use multiple terminals", "Use subagents", "Run sequentially", "Use threads"],
+                correct: 1
             }
         ];
 
         let currentQuestion = 0;
-        let answers = new Array(questions.length).fill(null);
         let score = 0;
+        let answeredQuestions = new Array(quizQuestions.length).fill(null);
+        let completedLessons = new Set();
 
-        // Load saved progress
-        function loadProgress() {
-            const saved = sessionStorage.getItem('week3_quiz');
+        // Load saved state from sessionStorage
+        function loadState() {
+            const saved = sessionStorage.getItem('week3_learn_state');
             if (saved) {
-                const data = JSON.parse(saved);
-                answers = data.answers || answers;
-                score = data.score || 0;
-                document.getElementById('quizScore').textContent = score;
+                const state = JSON.parse(saved);
+                completedLessons = new Set(state.completedLessons || []);
+                score = state.quizScore || 0;
+                answeredQuestions = state.answeredQuestions || new Array(quizQuestions.length).fill(null);
+                currentQuestion = state.currentQuestion || 0;
+            }
+            updateProgress();
+            updateLessonStatuses();
+            renderQuiz();
+        }
+
+        // Save state to sessionStorage
+        function saveState() {
+            const state = {
+                completedLessons: Array.from(completedLessons),
+                quizScore: score,
+                answeredQuestions: answeredQuestions,
+                currentQuestion: currentQuestion
+            };
+            sessionStorage.setItem('week3_learn_state', JSON.stringify(state));
+        }
+
+        // Lesson Functions
+        function toggleLesson(num) {
+            const lesson = document.getElementById(`lesson${num}`);
+            const content = lesson.querySelector('.lesson-content');
+            const chevron = lesson.querySelector('.chevron');
+
+            document.querySelectorAll('.lesson-card').forEach(card => {
+                if (card.id !== `lesson${num}`) {
+                    card.classList.remove('open');
+                    card.querySelector('.lesson-content').classList.remove('open');
+                    card.querySelector('.chevron').classList.remove('open');
+                }
+            });
+
+            lesson.classList.toggle('open');
+            content.classList.toggle('open');
+            chevron.classList.toggle('open');
+        }
+
+        function completeLesson(num) {
+            completedLessons.add(num);
+            saveState();
+            updateLessonStatuses();
+            updateProgress();
+
+            if (num < 5) {
+                setTimeout(() => toggleLesson(num + 1), 300);
             }
         }
 
-        function saveProgress() {
-            sessionStorage.setItem('week3_quiz', JSON.stringify({ answers, score }));
-            document.getElementById('quizScore').textContent = score;
+        function updateLessonStatuses() {
+            for (let i = 1; i <= 5; i++) {
+                const status = document.getElementById(`lesson${i}-status`);
+                if (completedLessons.has(i)) {
+                    status.textContent = 'Completed';
+                    status.className = 'text-xs px-3 py-1 rounded-full bg-green-500/20 text-green-400';
+                }
+            }
         }
 
-        // Lesson navigation
-        function showLesson(num) {
-            document.querySelectorAll('.lesson-content').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.lesson-btn').forEach(el => el.classList.remove('active'));
-            document.getElementById(`lesson${num}`).classList.add('active');
-            document.querySelector(`[data-lesson="${num}"]`).classList.add('active');
-            document.getElementById('quizSection').classList.add('hidden');
-            document.getElementById('quizComplete').classList.add('hidden');
+        function updateProgress() {
+            const lessonProgress = completedLessons.size;
+            const progressPercent = (lessonProgress / 5) * 100;
+
+            document.getElementById('progressText').textContent = `${lessonProgress}/5 Lessons`;
+            document.getElementById('progressFill').style.width = `${progressPercent}%`;
+            document.getElementById('quizScoreDisplay').textContent = score;
+
+            if (lessonProgress === 5 && score >= 7) {
+                document.getElementById('completionStatus').classList.remove('hidden');
+            }
         }
 
-        document.querySelectorAll('.lesson-btn').forEach(btn => {
-            btn.addEventListener('click', () => showLesson(parseInt(btn.dataset.lesson)));
-        });
+        // Quiz Functions
+        function renderQuiz() {
+            const container = document.getElementById('quizContainer');
+            const results = document.getElementById('quizResults');
 
-        // Quiz functions
-        function startQuiz() {
-            document.querySelectorAll('.lesson-content').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.lesson-btn').forEach(el => el.classList.remove('active'));
-            document.getElementById('quizSection').classList.remove('hidden');
-            document.getElementById('quizComplete').classList.add('hidden');
-            currentQuestion = 0;
-            renderQuestion();
-        }
+            if (answeredQuestions.every(a => a !== null)) {
+                container.classList.add('hidden');
+                results.classList.remove('hidden');
+                document.getElementById('finalScore').textContent = score;
+                document.getElementById('resultEmoji').textContent = score >= 7 ? 'Excellent!' : score >= 5 ? 'Good job!' : 'Keep learning!';
+                return;
+            }
 
-        function renderQuestion() {
-            const q = questions[currentQuestion];
-            document.getElementById('currentQ').textContent = currentQuestion + 1;
+            container.classList.remove('hidden');
+            results.classList.add('hidden');
 
-            let html = `<p class="text-lg mb-6">${q.q}</p><div class="space-y-3">`;
-            q.options.forEach((opt, i) => {
-                const selected = answers[currentQuestion] === i;
-                const selectedClass = selected ? 'bg-accent/20 border-accent' : 'bg-dark-700 border-white/10';
-                html += `
-                    <button onclick="selectAnswer(${i})" class="w-full text-left p-4 rounded-xl border ${selectedClass} hover:border-accent/50 transition-all">
-                        <span class="inline-block w-6 h-6 rounded-full border border-current text-center text-sm mr-3">${String.fromCharCode(65 + i)}</span>
-                        ${opt}
+            const q = quizQuestions[currentQuestion];
+            document.getElementById('quizProgress').textContent = `Question ${currentQuestion + 1}/10`;
+
+            container.innerHTML = `
+                <div class="mb-6">
+                    <p class="text-lg font-medium mb-6">${q.question}</p>
+                    <div class="space-y-3">
+                        ${q.options.map((opt, i) => `
+                            <div class="quiz-option card rounded-xl p-4 ${answeredQuestions[currentQuestion] === i ? (i === q.correct ? 'correct' : 'incorrect') : ''}"
+                                 onclick="selectAnswer(${i})" ${answeredQuestions[currentQuestion] !== null ? 'style="pointer-events: none;"' : ''}>
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-lg bg-dark-600 flex items-center justify-center text-sm font-bold">
+                                        ${String.fromCharCode(65 + i)}
+                                    </div>
+                                    <span>${opt}</span>
+                                    ${answeredQuestions[currentQuestion] === i ? (i === q.correct ? '<span class="ml-auto text-green-400">Correct</span>' : '<span class="ml-auto text-red-400">Wrong</span>') : ''}
+                                    ${answeredQuestions[currentQuestion] !== null && i === q.correct && answeredQuestions[currentQuestion] !== i ? '<span class="ml-auto text-green-400">Correct Answer</span>' : ''}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                <div class="flex justify-between items-center">
+                    <button onclick="prevQuestion()" class="btn-secondary px-4 py-2 rounded-xl text-sm" ${currentQuestion === 0 ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>
+                        Previous
                     </button>
-                `;
-            });
-            html += '</div>';
-            document.getElementById('quizContainer').innerHTML = html;
-
-            document.getElementById('prevQ').classList.toggle('hidden', currentQuestion === 0);
-            document.getElementById('nextQ').textContent = currentQuestion === questions.length - 1 ? 'Finish' : 'Next';
+                    <div class="flex gap-1">
+                        ${quizQuestions.map((_, i) => `
+                            <div class="w-2 h-2 rounded-full ${i === currentQuestion ? 'bg-accent' : answeredQuestions[i] !== null ? (answeredQuestions[i] === quizQuestions[i].correct ? 'bg-green-500' : 'bg-red-500') : 'bg-gray-600'}"></div>
+                        `).join('')}
+                    </div>
+                    <button onclick="nextQuestion()" class="btn-primary px-4 py-2 rounded-xl text-sm" ${answeredQuestions[currentQuestion] === null ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>
+                        ${currentQuestion === quizQuestions.length - 1 ? 'Finish' : 'Next'}
+                    </button>
+                </div>
+            `;
         }
 
-        function selectAnswer(idx) {
-            answers[currentQuestion] = idx;
-            renderQuestion();
+        function selectAnswer(index) {
+            if (answeredQuestions[currentQuestion] !== null) return;
+
+            answeredQuestions[currentQuestion] = index;
+            if (index === quizQuestions[currentQuestion].correct) {
+                score++;
+            }
+            saveState();
+            updateProgress();
+            renderQuiz();
         }
 
         function nextQuestion() {
-            if (currentQuestion < questions.length - 1) {
+            if (answeredQuestions[currentQuestion] === null) return;
+            if (currentQuestion < quizQuestions.length - 1) {
                 currentQuestion++;
-                renderQuestion();
+                saveState();
+                renderQuiz();
             } else {
-                finishQuiz();
+                renderQuiz();
             }
         }
 
         function prevQuestion() {
             if (currentQuestion > 0) {
                 currentQuestion--;
-                renderQuestion();
+                saveState();
+                renderQuiz();
             }
         }
 
-        function finishQuiz() {
-            score = answers.reduce((acc, ans, i) => acc + (ans === questions[i].correct ? 1 : 0), 0);
-            saveProgress();
-            document.getElementById('quizSection').classList.add('hidden');
-            document.getElementById('quizComplete').classList.remove('hidden');
-            document.getElementById('finalScore').textContent = score;
-        }
-
         function retakeQuiz() {
-            answers = new Array(questions.length).fill(null);
             currentQuestion = 0;
-            document.getElementById('quizComplete').classList.add('hidden');
-            document.getElementById('quizSection').classList.remove('hidden');
-            renderQuestion();
+            score = 0;
+            answeredQuestions = new Array(quizQuestions.length).fill(null);
+            saveState();
+            updateProgress();
+            renderQuiz();
         }
 
-        // Initialize
-        loadProgress();
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadState();
+            for (let i = 1; i <= 5; i++) {
+                if (!completedLessons.has(i)) {
+                    toggleLesson(i);
+                    break;
+                }
+            }
+            // Check challenge status
+            checkChallengeStatus();
+        });
     </script>
 </body>
 </html>

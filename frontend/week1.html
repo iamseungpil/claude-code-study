@@ -680,6 +680,13 @@ useEffect(() =&gt; {
             </div>
         </section>
 
+        <!-- Challenge Not Started Message -->
+        <div id="challengeNotStarted" class="hidden mb-8 p-6 bg-amber-500/10 border border-amber-500/30 rounded-2xl text-center">
+            <span class="text-4xl block mb-4">&#128274;</span>
+            <h3 class="text-xl font-bold text-amber-400 mb-2">Challenge Not Yet Started</h3>
+            <p class="text-gray-400">Admin has not started this week's challenge yet. Please wait.</p>
+        </div>
+
         <!-- Submit -->
         <section class="mb-16" id="submit">
             <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-4">SUBMIT YOUR WORK</h2>
@@ -824,9 +831,29 @@ useEffect(() =&gt; {
                     const data = await response.json();
 
                     if (data.challenge_status !== 'started') {
-                        showStatus('Challenge not started yet. Wait for admin.', 'text-gray-400');
-                        document.getElementById('startBtn').disabled = true;
-                        document.getElementById('startBtn').classList.add('opacity-50', 'cursor-not-allowed');
+                        // Show challenge not started message
+                        const notStartedDiv = document.getElementById('challengeNotStarted');
+                        if (notStartedDiv) notStartedDiv.classList.remove('hidden');
+
+                        // Hide challenge content sections
+                        const stagesSection = document.getElementById('stagesSection');
+                        const claudemdSection = document.getElementById('claudemdSection');
+                        const scoringSection = document.getElementById('scoringSection');
+                        if (stagesSection) stagesSection.classList.add('hidden');
+                        if (claudemdSection) claudemdSection.classList.add('hidden');
+                        if (scoringSection) scoringSection.classList.add('hidden');
+
+                        // Disable start button
+                        const startBtn = document.getElementById('startBtn');
+                        if (startBtn) {
+                            startBtn.disabled = true;
+                            startBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                        }
+
+                        // Hide timer hint
+                        const hint = document.getElementById('timerNotStartedHint');
+                        if (hint) hint.classList.add('hidden');
+
                         return;
                     }
 
@@ -1018,6 +1045,13 @@ useEffect(() =&gt; {
             }
         }
 
+        // Sanitize HTML to prevent XSS
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
         // Display evaluation feedback
         function displayEvaluationFeedback(evalData) {
             const feedbackHtml = `
@@ -1072,7 +1106,7 @@ useEffect(() =&gt; {
                     <!-- Feedback -->
                     <div class="mb-6">
                         <h4 class="font-semibold text-white mb-2">Feedback</h4>
-                        <p class="text-gray-300">${evalData.feedback || 'No feedback available'}</p>
+                        <p class="text-gray-300">${escapeHtml(evalData.feedback || 'No feedback available')}</p>
                     </div>
 
                     <!-- Strengths & Improvements -->
@@ -1080,13 +1114,13 @@ useEffect(() =&gt; {
                         <div>
                             <h4 class="font-semibold text-green-400 mb-2">Strengths</h4>
                             <ul class="text-sm text-gray-300 space-y-1">
-                                ${(evalData.strengths || []).map(s => `<li>• ${s}</li>`).join('')}
+                                ${(evalData.strengths || []).map(s => `<li>• ${escapeHtml(s)}</li>`).join('')}
                             </ul>
                         </div>
                         <div>
                             <h4 class="font-semibold text-amber-400 mb-2">Areas for Improvement</h4>
                             <ul class="text-sm text-gray-300 space-y-1">
-                                ${(evalData.improvements || []).map(i => `<li>• ${i}</li>`).join('')}
+                                ${(evalData.improvements || []).map(i => `<li>• ${escapeHtml(i)}</li>`).join('')}
                             </ul>
                         </div>
                     </div>

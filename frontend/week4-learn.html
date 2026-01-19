@@ -25,24 +25,143 @@
         * { font-family: 'Outfit', sans-serif; }
         code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
         html { scroll-behavior: smooth; }
+
         .hero-gradient {
             background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(52, 211, 153, 0.2) 0%, transparent 50%),
                         linear-gradient(180deg, #0f172a 0%, #0a0a0f 100%);
         }
+
         .nav-blur {
             background: rgba(10, 10, 15, 0.85);
             backdrop-filter: blur(20px);
         }
+
         .card {
             background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
             border: 1px solid rgba(255,255,255,0.06);
         }
-        .lesson-content { display: none; }
-        .lesson-content.active { display: block; }
-        .lesson-btn.active { background: rgba(52, 211, 153, 0.2); border-color: rgba(52, 211, 153, 0.5); }
-        pre { background: #1a1a2e; border-radius: 8px; padding: 16px; overflow-x: auto; }
-        code { font-size: 0.875rem; }
-        .inline-code { background: rgba(52, 211, 153, 0.2); padding: 2px 6px; border-radius: 4px; font-size: 0.875rem; }
+
+        .lesson-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
+            border: 1px solid rgba(255,255,255,0.06);
+            transition: all 0.3s ease;
+        }
+        .lesson-card:hover {
+            border-color: rgba(52, 211, 153, 0.3);
+        }
+        .lesson-card.open {
+            border-color: rgba(52, 211, 153, 0.5);
+        }
+
+        .lesson-header { cursor: pointer; }
+
+        .lesson-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease;
+        }
+        .lesson-content.open {
+            max-height: 5000px;
+        }
+
+        .chevron {
+            transition: transform 0.3s ease;
+        }
+        .chevron.open {
+            transform: rotate(180deg);
+        }
+
+        .code-block {
+            background: #0d1117;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .code-block-header {
+            background: rgba(255,255,255,0.03);
+            padding: 10px 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 0.75rem;
+            color: #8b949e;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .code-block pre {
+            padding: 16px;
+            font-size: 0.875rem;
+            line-height: 1.6;
+            color: #c9d1d9;
+            overflow-x: auto;
+        }
+        .code-comment { color: #6e7681; }
+        .code-keyword { color: #ff7b72; }
+        .code-string { color: #a5d6ff; }
+        .code-function { color: #d2a8ff; }
+
+        .tip-box {
+            background: rgba(52, 211, 153, 0.1);
+            border: 1px solid rgba(52, 211, 153, 0.3);
+            border-radius: 12px;
+            padding: 16px;
+        }
+
+        .warning-box {
+            background: rgba(251, 191, 36, 0.1);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            border-radius: 12px;
+            padding: 16px;
+        }
+
+        .quiz-option {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .quiz-option:hover {
+            border-color: rgba(52, 211, 153, 0.5);
+            background: rgba(52, 211, 153, 0.05);
+        }
+        .quiz-option.selected {
+            border-color: rgba(52, 211, 153, 0.8);
+            background: rgba(52, 211, 153, 0.1);
+        }
+        .quiz-option.correct {
+            border-color: rgba(52, 211, 153, 0.8);
+            background: rgba(52, 211, 153, 0.1);
+        }
+        .quiz-option.incorrect {
+            border-color: rgba(248, 113, 113, 0.8);
+            background: rgba(248, 113, 113, 0.1);
+        }
+
+        .progress-bar {
+            background: rgba(255,255,255,0.1);
+            border-radius: 9999px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            background: linear-gradient(90deg, #34d399 0%, #10b981 100%);
+            height: 100%;
+            border-radius: 9999px;
+            transition: width 0.5s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px -10px rgba(52, 211, 153, 0.5);
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s ease;
+        }
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.1);
+        }
     </style>
 </head>
 <body class="bg-dark-900 text-white min-h-screen">
@@ -56,8 +175,7 @@
                 <span>Back</span>
             </a>
             <div class="flex items-center gap-4">
-                <span class="text-sm text-gray-500">Quiz Score: <span id="quizScore" class="text-accent font-bold">0</span>/10</span>
-                <a href="week4.html" class="text-accent hover:text-emerald-300 transition-colors text-sm font-medium">
+                <a id="challengeNavBtn" href="week4.html" class="text-accent hover:text-emerald-300 transition-colors text-sm font-medium">
                     Go to Challenge
                 </a>
             </div>
@@ -69,888 +187,526 @@
         <div class="max-w-5xl mx-auto">
             <div class="flex flex-wrap items-center gap-3 mb-6">
                 <span class="bg-accent text-dark-900 px-4 py-1.5 rounded-full text-sm font-bold">WEEK 4</span>
-                <span class="bg-gray-500/20 text-gray-400 px-3 py-1 rounded-full text-xs font-bold border border-gray-500/30">LEARN</span>
+                <span class="bg-purple-500/20 text-purple-400 px-3 py-1 rounded-full text-xs font-bold border border-purple-500/30">LEARN</span>
             </div>
+
             <h1 class="text-4xl md:text-5xl font-bold mb-4 tracking-tight">
-                Skills & Plugins
+                MCP Advanced
             </h1>
             <p class="text-xl text-gray-400 mb-8 max-w-2xl">
-                Claude Code의 확장 기능을 개발하고, 스킬과 플러그인을 활용하여 워크플로우를 자동화하세요.
+                Master various MCP servers (Notion, Playwright, GitHub) and build powerful MVP applications.
             </p>
+
+            <!-- Progress Tracker -->
+            <div class="card rounded-2xl p-6 max-w-md">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-sm font-medium text-gray-400">Learning Progress</span>
+                    <span id="progressText" class="text-sm font-bold text-accent">0/5 Lessons</span>
+                </div>
+                <div class="progress-bar h-2">
+                    <div id="progressFill" class="progress-fill" style="width: 0%"></div>
+                </div>
+                <div class="mt-3 flex items-center justify-between text-xs text-gray-500">
+                    <span>Quiz Score: <span id="quizScoreDisplay" class="text-accent font-bold">0</span>/10</span>
+                    <span id="completionStatus" class="hidden text-green-400">Ready for Challenge!</span>
+                </div>
+            </div>
         </div>
     </header>
 
     <main class="max-w-5xl mx-auto px-6 py-12">
-        <!-- Lesson Navigation -->
-        <div class="flex flex-wrap gap-3 mb-8">
-            <button class="lesson-btn active px-4 py-2 rounded-xl border border-white/10 text-sm font-medium transition-all hover:bg-white/5" data-lesson="1">
-                1. Skills 기초
-            </button>
-            <button class="lesson-btn px-4 py-2 rounded-xl border border-white/10 text-sm font-medium transition-all hover:bg-white/5" data-lesson="2">
-                2. Plugins 시스템
-            </button>
-            <button class="lesson-btn px-4 py-2 rounded-xl border border-white/10 text-sm font-medium transition-all hover:bg-white/5" data-lesson="3">
-                3. Skill Discovery
-            </button>
-            <button class="lesson-btn px-4 py-2 rounded-xl border border-white/10 text-sm font-medium transition-all hover:bg-white/5" data-lesson="4">
-                4. 실전 자동화
-            </button>
-            <button class="lesson-btn px-4 py-2 rounded-xl border border-white/10 text-sm font-medium transition-all hover:bg-white/5" data-lesson="5">
-                5. Pro Tips & Plugins
-            </button>
-        </div>
+        <!-- Lessons Section -->
+        <section class="mb-16">
+            <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-6">LESSONS</h2>
 
-        <!-- Lesson 1: Skills 기초 -->
-        <section id="lesson1" class="lesson-content active mb-12">
-            <div class="card rounded-2xl p-8">
-                <div class="flex items-center gap-4 mb-6">
-                    <span class="bg-accent/20 text-accent w-12 h-12 rounded-xl flex items-center justify-center text-xl font-bold">1</span>
-                    <h2 class="text-2xl font-bold">Skills 기초</h2>
-                </div>
-
-                <div class="space-y-6 text-gray-300">
-                    <div class="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4">
-                        <p class="text-emerald-200 font-medium">Skills란?</p>
-                        <p class="text-sm mt-1">Skills는 Claude에게 특정 작업 방법을 가르치는 지침입니다. 작업 맥락에 맞으면 Claude가 자동으로 호출하거나, <code class="inline-code">/skill-name</code>으로 직접 호출할 수 있습니다.</p>
-                    </div>
-
-                    <h3 class="text-xl font-semibold text-white">SKILL.md 구조</h3>
-                    <p>스킬은 <code class="inline-code">SKILL.md</code> 파일로 정의됩니다. YAML frontmatter로 메타데이터를 지정합니다:</p>
-
-                    <pre><code class="text-green-400"># .claude/skills/my-skill/SKILL.md
----
-name: my-skill
-description: 이 스킬이 하는 일 (Claude가 검색에 사용)
-allowed-tools: [Bash, Read, Write]  # 선택
-model: sonnet                        # 선택
-user-invocable: true                 # /skill-name으로 호출 가능
----
-
-# 스킬 지침 내용
-Claude에게 이 작업을 어떻게 수행할지 설명합니다.
-
-## 동작 방식
-1. 첫 번째 단계...
-2. 두 번째 단계...
-3. 결과 출력...</code></pre>
-
-                    <h3 class="text-xl font-semibold text-white mt-8">스킬 위치 및 우선순위</h3>
-                    <p>스킬은 여러 위치에 저장할 수 있으며, 우선순위가 있습니다:</p>
-                    <div class="bg-dark-700 rounded-xl p-4 mt-4">
-                        <ol class="space-y-2 text-sm">
-                            <li><span class="text-accent font-bold">1.</span> 프로젝트 스킬: <code class="inline-code">.claude/skills/&lt;name&gt;/SKILL.md</code> (최우선)</li>
-                            <li><span class="text-accent font-bold">2.</span> 사용자 스킬: <code class="inline-code">~/.claude/skills/&lt;name&gt;/SKILL.md</code></li>
-                            <li><span class="text-accent font-bold">3.</span> 글로벌 스킬: 설치된 플러그인의 스킬</li>
-                        </ol>
-                    </div>
-
-                    <h3 class="text-xl font-semibold text-white mt-8">실습: 첫 번째 스킬 만들기</h3>
-                    <p>커밋 메시지를 자동으로 생성하는 스킬을 만들어 봅시다:</p>
-
-                    <pre><code class="text-green-400"># 디렉토리 생성
-mkdir -p .claude/skills/commit-helper
-
-# SKILL.md 작성
-cat > .claude/skills/commit-helper/SKILL.md << 'EOF'
----
-name: commit-helper
-description: 깔끔한 커밋 메시지를 생성하고 커밋합니다
-user-invocable: true
-allowed-tools: [Bash]
----
-
-# Commit Helper Skill
-
-## 사용법
-/commit-helper 또는 "커밋해줘"라고 말하면 이 스킬이 활성화됩니다.
-
-## 동작
-1. git status로 변경사항 확인
-2. 변경 내용을 분석하여 의미있는 커밋 메시지 생성
-3. Conventional Commits 형식 사용 (feat:, fix:, docs: 등)
-4. git commit 실행
-EOF</code></pre>
-
-                    <h3 class="text-xl font-semibold text-white mt-8">고급 스킬 설정</h3>
-                    <div class="overflow-x-auto">
-                        <table class="w-full mt-4 text-sm">
-                            <thead>
-                                <tr class="border-b border-white/10">
-                                    <th class="text-left py-3 px-4 text-accent">필드</th>
-                                    <th class="text-left py-3 px-4">설명</th>
-                                    <th class="text-left py-3 px-4">예시</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr class="border-b border-white/5">
-                                    <td class="py-3 px-4 font-mono text-sm">name</td>
-                                    <td class="py-3 px-4">스킬 고유 이름 (필수)</td>
-                                    <td class="py-3 px-4">code-review</td>
-                                </tr>
-                                <tr class="border-b border-white/5">
-                                    <td class="py-3 px-4 font-mono text-sm">description</td>
-                                    <td class="py-3 px-4">Claude 검색용 설명 (필수)</td>
-                                    <td class="py-3 px-4">코드 품질을 검토합니다</td>
-                                </tr>
-                                <tr class="border-b border-white/5">
-                                    <td class="py-3 px-4 font-mono text-sm">allowed-tools</td>
-                                    <td class="py-3 px-4">사용 가능한 도구 제한</td>
-                                    <td class="py-3 px-4">[Bash, Read]</td>
-                                </tr>
-                                <tr class="border-b border-white/5">
-                                    <td class="py-3 px-4 font-mono text-sm">model</td>
-                                    <td class="py-3 px-4">사용할 모델</td>
-                                    <td class="py-3 px-4">sonnet, opus</td>
-                                </tr>
-                                <tr class="border-b border-white/5">
-                                    <td class="py-3 px-4 font-mono text-sm">user-invocable</td>
-                                    <td class="py-3 px-4">/명령어 호출 가능</td>
-                                    <td class="py-3 px-4">true</td>
-                                </tr>
-                                <tr class="border-b border-white/5">
-                                    <td class="py-3 px-4 font-mono text-sm">agent</td>
-                                    <td class="py-3 px-4">서브에이전트로 실행</td>
-                                    <td class="py-3 px-4">true</td>
-                                </tr>
-                                <tr class="border-b border-white/5">
-                                    <td class="py-3 px-4 font-mono text-sm">context</td>
-                                    <td class="py-3 px-4">추가 컨텍스트 파일</td>
-                                    <td class="py-3 px-4">["docs/*.md"]</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <h3 class="text-xl font-semibold text-white mt-8">스킬 사용하기</h3>
-                    <div class="grid md:grid-cols-2 gap-4 mt-4">
-                        <div class="bg-dark-700 rounded-xl p-4">
-                            <h4 class="font-semibold text-accent mb-2">수동 호출</h4>
-                            <p class="text-sm">user-invocable: true 설정 시</p>
-                            <pre class="mt-2"><code class="text-xs text-green-400">> /commit-helper
-> /code-review src/</code></pre>
+            <div class="space-y-4">
+                <!-- Lesson 1: Various MCP Servers Overview -->
+                <div id="lesson1" class="lesson-card rounded-2xl overflow-hidden">
+                    <div class="lesson-header p-6 flex items-center justify-between" onclick="toggleLesson(1)">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-accent/20 flex items-center justify-center text-2xl">1</div>
+                            <div>
+                                <h3 class="font-bold text-xl">Various MCP Servers</h3>
+                                <p class="text-gray-400 text-sm">Notion, Playwright, GitHub, PostgreSQL, Slack</p>
+                            </div>
                         </div>
-                        <div class="bg-dark-700 rounded-xl p-4">
-                            <h4 class="font-semibold text-accent mb-2">자동 발견</h4>
-                            <p class="text-sm">description과 맥락이 일치하면</p>
-                            <pre class="mt-2"><code class="text-xs text-green-400">> 커밋해줘
-> 코드 리뷰해줘</code></pre>
+                        <div class="flex items-center gap-3">
+                            <span id="lesson1-status" class="text-xs px-3 py-1 rounded-full bg-gray-700 text-gray-400">Not Started</span>
+                            <svg class="chevron w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
                         </div>
                     </div>
+                    <div class="lesson-content">
+                        <div class="px-6 pb-6 space-y-6">
+                            <div class="tip-box">
+                                <p class="text-emerald-200 font-medium">MCP Server Ecosystem</p>
+                                <p class="text-sm mt-1 text-gray-300">MCP servers connect Claude to external services. Each server exposes tools that Claude can use to interact with that service.</p>
+                            </div>
 
-                    <div class="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 mt-6">
-                        <p class="text-emerald-200 font-medium">Pro Tip</p>
-                        <p class="text-sm mt-1">스킬 파일이 500줄을 초과하면 세부 내용을 별도 파일로 분리하고 SKILL.md에서 참조하세요. Progressive disclosure 패턴을 활용합니다.</p>
+                            <h4 class="font-bold text-lg text-accent">Popular MCP Servers</h4>
+                            <div class="space-y-4 mt-4">
+                                <div class="card rounded-xl p-4">
+                                    <div class="flex items-center gap-3 mb-2">
+                                        <span class="text-xl">Notion</span>
+                                        <h5 class="font-semibold text-accent">Notion MCP</h5>
+                                    </div>
+                                    <p class="text-sm text-gray-400 mb-2">Page/database CRUD, team workspace integration</p>
+                                    <code class="text-xs bg-dark-600 px-2 py-1 rounded">claude mcp add notion</code>
+                                </div>
+                                <div class="card rounded-xl p-4">
+                                    <div class="flex items-center gap-3 mb-2">
+                                        <span class="text-xl">Playwright</span>
+                                        <h5 class="font-semibold text-accent">Playwright MCP</h5>
+                                    </div>
+                                    <p class="text-sm text-gray-400 mb-2">Browser automation, web scraping, E2E testing</p>
+                                    <code class="text-xs bg-dark-600 px-2 py-1 rounded">claude mcp add playwright</code>
+                                </div>
+                                <div class="card rounded-xl p-4">
+                                    <div class="flex items-center gap-3 mb-2">
+                                        <span class="text-xl">GitHub</span>
+                                        <h5 class="font-semibold text-accent">GitHub MCP</h5>
+                                    </div>
+                                    <p class="text-sm text-gray-400 mb-2">PR/Issue management, code review automation</p>
+                                    <code class="text-xs bg-dark-600 px-2 py-1 rounded">claude mcp add github</code>
+                                </div>
+                                <div class="card rounded-xl p-4">
+                                    <div class="flex items-center gap-3 mb-2">
+                                        <span class="text-xl">Database</span>
+                                        <h5 class="font-semibold text-accent">PostgreSQL MCP</h5>
+                                    </div>
+                                    <p class="text-sm text-gray-400 mb-2">Database queries, schema management, migrations</p>
+                                    <code class="text-xs bg-dark-600 px-2 py-1 rounded">claude mcp add postgres</code>
+                                </div>
+                            </div>
+
+                            <button onclick="completeLesson(1)" class="btn-secondary px-6 py-3 rounded-xl text-sm font-medium">
+                                Mark as Complete
+                            </button>
+                        </div>
                     </div>
                 </div>
 
-                <div class="mt-8 pt-6 border-t border-white/10">
-                    <button onclick="showLesson(2)" class="bg-accent hover:bg-emerald-400 text-dark-900 px-6 py-3 rounded-xl font-semibold transition-all">
-                        Next: Plugins 시스템
-                    </button>
-                </div>
-            </div>
-        </section>
-
-        <!-- Lesson 2: Plugins 시스템 -->
-        <section id="lesson2" class="lesson-content mb-12">
-            <div class="card rounded-2xl p-8">
-                <div class="flex items-center gap-4 mb-6">
-                    <span class="bg-accent/20 text-accent w-12 h-12 rounded-xl flex items-center justify-center text-xl font-bold">2</span>
-                    <h2 class="text-2xl font-bold">Plugins 시스템</h2>
-                </div>
-
-                <div class="space-y-6 text-gray-300">
-                    <div class="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4">
-                        <p class="text-emerald-200 font-medium">Plugin vs Skill</p>
-                        <p class="text-sm mt-1">Plugin은 여러 기능(commands, skills, hooks, MCP 서버)을 하나로 묶어 버전 관리하고 공유할 수 있는 확장 패키지입니다. Skill이 단일 기능이라면, Plugin은 기능 모음집입니다.</p>
+                <!-- Lesson 2: Notion MCP Deep Dive -->
+                <div id="lesson2" class="lesson-card rounded-2xl overflow-hidden">
+                    <div class="lesson-header p-6 flex items-center justify-between" onclick="toggleLesson(2)">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center text-2xl">2</div>
+                            <div>
+                                <h3 class="font-bold text-xl">Notion MCP Deep Dive</h3>
+                                <p class="text-gray-400 text-sm">Document and database operations</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span id="lesson2-status" class="text-xs px-3 py-1 rounded-full bg-gray-700 text-gray-400">Not Started</span>
+                            <svg class="chevron w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </div>
                     </div>
-
-                    <h3 class="text-xl font-semibold text-white">Plugin 구조</h3>
-                    <pre><code class="text-green-400">my-plugin/
-├── .claude-plugin/
-│   └── plugin.json      # 매니페스트 (필수)
-├── commands/            # 사용자 명령어
-│   └── deploy.md
-├── skills/              # Claude 스킬
-│   └── code-review/
-│       └── SKILL.md
-├── agents/              # 커스텀 에이전트
-├── hooks/               # 이벤트 훅
-└── mcp-servers/         # MCP 서버</code></pre>
-
-                    <h3 class="text-xl font-semibold text-white mt-8">plugin.json 작성</h3>
-                    <p>플러그인의 모든 구성 요소를 정의하는 매니페스트 파일입니다:</p>
-
-                    <pre><code class="text-green-400">{
-  "name": "deployment-tools",
-  "version": "1.0.0",
-  "description": "배포 자동화 도구 모음",
-  "author": "your-name",
-  "commands": ["commands/deploy.md"],
-  "skills": ["skills/code-review"],
-  "hooks": {
-    "post-tool-use": ["hooks/notify.sh"]
-  },
-  "mcp-servers": {
-    "my-server": {
-      "command": "node",
-      "args": ["mcp-servers/server.js"]
+                    <div class="lesson-content">
+                        <div class="px-6 pb-6 space-y-6">
+                            <h4 class="font-bold text-lg text-accent">Notion MCP Setup</h4>
+                            <div class="code-block">
+                                <div class="code-block-header">.claude/settings.local.json</div>
+                                <pre><code class="text-green-400 text-sm">{
+  <span class="code-string">"mcpServers"</span>: {
+    <span class="code-string">"notion"</span>: {
+      <span class="code-string">"command"</span>: <span class="code-string">"npx"</span>,
+      <span class="code-string">"args"</span>: [<span class="code-string">"-y"</span>, <span class="code-string">"@anthropic-ai/mcp-server-notion"</span>],
+      <span class="code-string">"env"</span>: {
+        <span class="code-string">"NOTION_API_KEY"</span>: <span class="code-string">"${NOTION_API_KEY}"</span>
+      }
     }
   }
 }</code></pre>
-
-                    <h3 class="text-xl font-semibold text-white mt-8">Plugin 설치 방법</h3>
-                    <div class="space-y-4 mt-4">
-                        <div class="bg-dark-700 rounded-xl p-4">
-                            <h4 class="font-semibold text-accent mb-2">로컬 설치</h4>
-                            <pre><code class="text-xs text-green-400"># 로컬 디렉토리에서 설치
-claude plugins add ./my-plugin</code></pre>
-                        </div>
-
-                        <div class="bg-dark-700 rounded-xl p-4">
-                            <h4 class="font-semibold text-accent mb-2">GitHub에서 설치</h4>
-                            <pre><code class="text-xs text-green-400"># GitHub 저장소에서 직접 설치
-claude plugins add github:username/plugin-name</code></pre>
-                        </div>
-
-                        <div class="bg-dark-700 rounded-xl p-4">
-                            <h4 class="font-semibold text-accent mb-2">플러그인 관리</h4>
-                            <pre><code class="text-xs text-green-400"># 설치된 플러그인 목록
-claude plugins list
-
-# 플러그인 업데이트
-claude plugins update plugin-name
-
-# 플러그인 제거
-claude plugins remove plugin-name</code></pre>
-                        </div>
-                    </div>
-
-                    <h3 class="text-xl font-semibold text-white mt-8">Namespacing</h3>
-                    <p>플러그인의 명령어와 스킬은 네임스페이스로 구분됩니다:</p>
-
-                    <pre><code class="text-green-400"># Plugin 명령어 호출
-> /deployment-tools:deploy
-
-# Plugin 스킬 호출
-> /deployment-tools:code-review
-
-# 네임스페이스 덕분에 같은 이름의 명령어가 있어도 충돌 없음</code></pre>
-
-                    <h3 class="text-xl font-semibold text-white mt-8">실습: 첫 번째 플러그인 만들기</h3>
-                    <pre><code class="text-green-400"># 1. 플러그인 디렉토리 생성
-mkdir -p my-plugin/.claude-plugin
-mkdir -p my-plugin/commands
-mkdir -p my-plugin/skills/helper
-
-# 2. manifest 작성
-cat > my-plugin/.claude-plugin/plugin.json << 'EOF'
-{
-  "name": "my-first-plugin",
-  "version": "1.0.0",
-  "description": "나의 첫 번째 플러그인",
-  "commands": ["commands/greet.md"],
-  "skills": ["skills/helper"]
-}
-EOF
-
-# 3. 명령어 파일 생성
-cat > my-plugin/commands/greet.md << 'EOF'
----
-description: 사용자에게 인사합니다
----
-
-$ARGUMENTS
-
-친절하게 인사해주세요!
-EOF
-
-# 4. 설치
-claude plugins add ./my-plugin</code></pre>
-
-                    <div class="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 mt-6">
-                        <p class="text-emerald-200 font-medium">Pro Tip</p>
-                        <p class="text-sm mt-1">플러그인을 GitHub에 올리면 다른 사용자들이 <code class="inline-code">claude plugins add github:your-username/your-plugin</code>으로 쉽게 설치할 수 있습니다.</p>
-                    </div>
-                </div>
-
-                <div class="mt-8 pt-6 border-t border-white/10 flex justify-between">
-                    <button onclick="showLesson(1)" class="bg-white/10 hover:bg-white/20 px-6 py-3 rounded-xl font-semibold transition-all">
-                        Previous
-                    </button>
-                    <button onclick="showLesson(3)" class="bg-accent hover:bg-emerald-400 text-dark-900 px-6 py-3 rounded-xl font-semibold transition-all">
-                        Next: Skill Discovery
-                    </button>
-                </div>
-            </div>
-        </section>
-
-        <!-- Lesson 3: Skill Discovery -->
-        <section id="lesson3" class="lesson-content mb-12">
-            <div class="card rounded-2xl p-8">
-                <div class="flex items-center gap-4 mb-6">
-                    <span class="bg-accent/20 text-accent w-12 h-12 rounded-xl flex items-center justify-center text-xl font-bold">3</span>
-                    <h2 class="text-2xl font-bold">Skill Discovery & Marketplaces</h2>
-                </div>
-
-                <div class="space-y-6 text-gray-300">
-                    <div class="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4">
-                        <p class="text-emerald-200 font-medium">커뮤니티의 힘</p>
-                        <p class="text-sm mt-1">전 세계 개발자들이 만든 스킬과 플러그인을 발견하고 활용하세요. 바퀴를 다시 발명할 필요가 없습니다!</p>
-                    </div>
-
-                    <h3 class="text-xl font-semibold text-white">공식 리소스</h3>
-                    <div class="overflow-x-auto">
-                        <table class="w-full mt-4 text-sm">
-                            <thead>
-                                <tr class="border-b border-white/10">
-                                    <th class="text-left py-3 px-4 text-accent">리소스</th>
-                                    <th class="text-left py-3 px-4">URL</th>
-                                    <th class="text-left py-3 px-4">설명</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr class="border-b border-white/5">
-                                    <td class="py-3 px-4 font-semibold">Anthropic Cookbook</td>
-                                    <td class="py-3 px-4 font-mono text-xs">github.com/anthropics/anthropic-cookbook</td>
-                                    <td class="py-3 px-4">공식 예제 및 레시피</td>
-                                </tr>
-                                <tr class="border-b border-white/5">
-                                    <td class="py-3 px-4 font-semibold">MCP Servers</td>
-                                    <td class="py-3 px-4 font-mono text-xs">github.com/modelcontextprotocol/servers</td>
-                                    <td class="py-3 px-4">공식 MCP 서버 모음</td>
-                                </tr>
-                                <tr class="border-b border-white/5">
-                                    <td class="py-3 px-4 font-semibold">Claude Code Examples</td>
-                                    <td class="py-3 px-4 font-mono text-xs">github.com/anthropics/claude-code</td>
-                                    <td class="py-3 px-4">공식 사용 예제</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <h3 class="text-xl font-semibold text-white mt-8">커뮤니티 리소스</h3>
-                    <div class="grid md:grid-cols-2 gap-4 mt-4">
-                        <a href="https://github.com/topics/claude-code" target="_blank" class="bg-dark-700 rounded-xl p-4 hover:border-accent border border-transparent transition-all">
-                            <h4 class="font-semibold text-accent mb-2">GitHub Topics</h4>
-                            <p class="text-sm">github.com/topics/claude-code</p>
-                            <p class="text-xs text-gray-500 mt-1">Claude Code 관련 저장소 검색</p>
-                        </a>
-                        <a href="https://mcp.so" target="_blank" class="bg-dark-700 rounded-xl p-4 hover:border-accent border border-transparent transition-all">
-                            <h4 class="font-semibold text-accent mb-2">MCP Hub</h4>
-                            <p class="text-sm">mcp.so</p>
-                            <p class="text-xs text-gray-500 mt-1">MCP 서버 허브 & 디렉토리</p>
-                        </a>
-                        <a href="https://reddit.com/r/ClaudeAI" target="_blank" class="bg-dark-700 rounded-xl p-4 hover:border-accent border border-transparent transition-all">
-                            <h4 class="font-semibold text-accent mb-2">Reddit r/ClaudeAI</h4>
-                            <p class="text-sm">reddit.com/r/ClaudeAI</p>
-                            <p class="text-xs text-gray-500 mt-1">커뮤니티 토론 및 공유</p>
-                        </a>
-                        <a href="https://anthropic.com/discord" target="_blank" class="bg-dark-700 rounded-xl p-4 hover:border-accent border border-transparent transition-all">
-                            <h4 class="font-semibold text-accent mb-2">Discord</h4>
-                            <p class="text-sm">anthropic.com/discord</p>
-                            <p class="text-xs text-gray-500 mt-1">공식 디스코드 서버</p>
-                        </a>
-                    </div>
-
-                    <h3 class="text-xl font-semibold text-white mt-8">인기 스킬 카테고리</h3>
-                    <div class="grid md:grid-cols-2 gap-4 mt-4">
-                        <div class="bg-dark-700 rounded-xl p-4">
-                            <h4 class="font-semibold text-accent mb-2">📝 Documentation</h4>
-                            <ul class="text-sm space-y-1">
-                                <li>• readme-generator: README 자동 생성</li>
-                                <li>• api-docs: API 문서 생성</li>
-                                <li>• changelog-writer: 변경 로그 작성</li>
-                            </ul>
-                        </div>
-                        <div class="bg-dark-700 rounded-xl p-4">
-                            <h4 class="font-semibold text-accent mb-2">🧪 Testing</h4>
-                            <ul class="text-sm space-y-1">
-                                <li>• test-writer: 테스트 코드 생성</li>
-                                <li>• coverage-analyzer: 커버리지 분석</li>
-                                <li>• code-review: 코드 리뷰 자동화</li>
-                            </ul>
-                        </div>
-                        <div class="bg-dark-700 rounded-xl p-4">
-                            <h4 class="font-semibold text-accent mb-2">🚀 DevOps</h4>
-                            <ul class="text-sm space-y-1">
-                                <li>• docker-helper: Dockerfile 생성/최적화</li>
-                                <li>• k8s-assistant: Kubernetes 설정 도우미</li>
-                                <li>• ci-cd-generator: CI/CD 파이프라인</li>
-                            </ul>
-                        </div>
-                        <div class="bg-dark-700 rounded-xl p-4">
-                            <h4 class="font-semibold text-accent mb-2">🗄️ Database</h4>
-                            <ul class="text-sm space-y-1">
-                                <li>• sql-helper: SQL 쿼리 생성/최적화</li>
-                                <li>• migration-generator: DB 마이그레이션</li>
-                                <li>• schema-designer: 스키마 설계</li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <h3 class="text-xl font-semibold text-white mt-8">플러그인 검색 및 설치</h3>
-                    <pre><code class="text-green-400"># GitHub에서 직접 설치
-claude plugins add github:username/awesome-plugin
-
-# 설치된 플러그인 확인
-claude plugins list
-
-# 플러그인 업데이트
-claude plugins update plugin-name
-
-# 플러그인 제거
-claude plugins remove plugin-name</code></pre>
-
-                    <h3 class="text-xl font-semibold text-white mt-8">나만의 스킬 공유하기</h3>
-                    <pre><code class="text-green-400"># 1. GitHub 저장소 생성
-git init my-awesome-skill
-cd my-awesome-skill
-
-# 2. 플러그인 구조로 정리
-mkdir -p .claude-plugin skills/my-skill
-# ... 파일 작성 ...
-
-# 3. GitHub에 push
-git push origin main
-
-# 4. 다른 사용자가 설치
-claude plugins add github:your-username/my-awesome-skill</code></pre>
-
-                    <div class="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 mt-6">
-                        <p class="text-emerald-200 font-medium">Pro Tip</p>
-                        <p class="text-sm mt-1">README.md에 설치 방법과 사용 예시를 상세히 작성하세요. 좋은 문서화가 플러그인 채택의 핵심입니다!</p>
-                    </div>
-                </div>
-
-                <div class="mt-8 pt-6 border-t border-white/10 flex justify-between">
-                    <button onclick="showLesson(2)" class="bg-white/10 hover:bg-white/20 px-6 py-3 rounded-xl font-semibold transition-all">
-                        Previous
-                    </button>
-                    <button onclick="showLesson(4)" class="bg-accent hover:bg-emerald-400 text-dark-900 px-6 py-3 rounded-xl font-semibold transition-all">
-                        Next: 실전 자동화
-                    </button>
-                </div>
-            </div>
-        </section>
-
-        <!-- Lesson 4: 실전 자동화 -->
-        <section id="lesson4" class="lesson-content mb-12">
-            <div class="card rounded-2xl p-8">
-                <div class="flex items-center gap-4 mb-6">
-                    <span class="bg-accent/20 text-accent w-12 h-12 rounded-xl flex items-center justify-center text-xl font-bold">4</span>
-                    <h2 class="text-2xl font-bold">실전 자동화</h2>
-                </div>
-
-                <div class="space-y-6 text-gray-300">
-                    <div class="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4">
-                        <p class="text-emerald-200 font-medium">Skills + Headless + Commands = 완전 자동화</p>
-                        <p class="text-sm mt-1">지금까지 배운 Skills, Plugins, Headless Mode, Custom Commands를 조합하여 강력한 자동화 파이프라인을 구축합니다.</p>
-                    </div>
-
-                    <h3 class="text-xl font-semibold text-white">Headless Mode 기초</h3>
-                    <p>스크립트, CI/CD 파이프라인에서 Claude Code를 비대화형으로 실행합니다:</p>
-
-                    <pre><code class="text-green-400"># 기본 headless 실행
-claude -p "이 코드를 리뷰해줘" < code.py
-
-# 스킬과 함께 사용
-claude -p "/code-review src/"
-
-# JSON 출력 (자동화용)
-claude -p "분석해줘" --output-format json
-
-# 스트리밍 비활성화
-claude -p "수정해줘" --no-streaming</code></pre>
-
-                    <h3 class="text-xl font-semibold text-white mt-8">Custom Commands 정의</h3>
-                    <p>자주 사용하는 작업을 명령어로 정의합니다:</p>
-
-                    <pre><code class="text-green-400"># .claude/commands/daily-report.md
----
-description: 일일 작업 리포트 생성
----
-
-$ARGUMENTS
-
-다음을 수행해주세요:
-1. 오늘 커밋된 내용 요약
-2. 변경된 파일 목록
-3. TODO 항목 확인
-4. 결과를 daily-report.md로 저장</code></pre>
-
-                    <h3 class="text-xl font-semibold text-white mt-8">Skills + Commands 통합</h3>
-                    <p>여러 스킬을 순차적으로 실행하는 워크플로우:</p>
-
-                    <pre><code class="text-green-400"># .claude/commands/full-review.md
----
-description: 전체 코드 리뷰 워크플로우
----
-
-다음 스킬들을 순서대로 실행해주세요:
-
-1. /security-scan - 보안 취약점 검사
-2. /code-quality - 코드 품질 분석
-3. /test-coverage - 테스트 커버리지 확인
-4. 결과를 review-report.md로 저장</code></pre>
-
-                    <h3 class="text-xl font-semibold text-white mt-8">CI/CD 통합 예제</h3>
-                    <pre><code class="text-green-400"># .github/workflows/code-review.yml
-name: AI Code Review
-
-on: [pull_request]
-
-jobs:
-  review:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install Claude Code
-        run: npm install -g @anthropic-ai/claude-code
-
-      - name: Run AI Review
-        run: |
-          claude -p "/code-review --diff HEAD~1" \
-            --output-format json > review.json
-        env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-
-      - name: Post Review Comment
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const review = require('./review.json');
-            // ... PR에 코멘트 작성</code></pre>
-
-                    <h3 class="text-xl font-semibold text-white mt-8">자동화 스크립트</h3>
-                    <div class="space-y-4 mt-4">
-                        <div class="bg-dark-700 rounded-xl p-4">
-                            <h4 class="font-semibold text-accent mb-2">Morning Standup Generator</h4>
-                            <pre><code class="text-xs text-green-400">#!/bin/bash
-# scripts/morning-standup.sh
-
-echo "🌅 Generating standup report..."
-
-# 1. 어제 커밋 요약
-claude -p "어제 커밋 내용을 요약해줘" \
-  --output-format json > /tmp/commits.json
-
-# 2. 오늘 TODO 확인
-claude -p "TODO 주석을 찾아서 정리해줘" \
-  --output-format json > /tmp/todos.json
-
-# 3. 리포트 생성
-claude -p "스탠드업 리포트를 작성해줘" \
-  --files /tmp/commits.json,/tmp/todos.json
-
-echo "✅ Standup complete!"</code></pre>
-                        </div>
-
-                        <div class="bg-dark-700 rounded-xl p-4">
-                            <h4 class="font-semibold text-accent mb-2">Pre-commit Hook</h4>
-                            <pre><code class="text-xs text-green-400">#!/bin/bash
-# .git/hooks/pre-commit
-
-# Claude Code로 커밋 전 검사
-result=$(claude -p "/quick-review --staged" \
-  --output-format json)
-
-if echo "$result" | jq -e '.has_critical_issues' > /dev/null; then
-  echo "❌ Critical issues found:"
-  echo "$result" | jq '.issues[]'
-  exit 1
-fi
-
-echo "✅ Pre-commit check passed"
-exit 0</code></pre>
-                        </div>
-                    </div>
-
-                    <h3 class="text-xl font-semibold text-white mt-8">Best Practices</h3>
-                    <div class="grid md:grid-cols-2 gap-4 mt-4">
-                        <div class="bg-dark-700 rounded-xl p-4">
-                            <h4 class="font-semibold text-accent mb-2">명확한 프롬프트</h4>
-                            <p class="text-sm">상세하고 구체적인 지침이 더 좋은 결과를 만듭니다.</p>
-                        </div>
-                        <div class="bg-dark-700 rounded-xl p-4">
-                            <h4 class="font-semibold text-accent mb-2">단계별 분리</h4>
-                            <p class="text-sm">복잡한 작업은 번호가 매겨진 단계로 분리하세요.</p>
-                        </div>
-                        <div class="bg-dark-700 rounded-xl p-4">
-                            <h4 class="font-semibold text-accent mb-2">출력 형식 지정</h4>
-                            <p class="text-sm">JSON, Markdown 등 원하는 출력 형식을 명시하세요.</p>
-                        </div>
-                        <div class="bg-dark-700 rounded-xl p-4">
-                            <h4 class="font-semibold text-accent mb-2">에러 처리</h4>
-                            <p class="text-sm">자동화 스크립트에서 실패 케이스를 반드시 처리하세요.</p>
-                        </div>
-                    </div>
-
-                    <div class="bg-red-500/10 border border-red-500/30 rounded-xl p-4 mt-6">
-                        <p class="text-red-200 font-medium">CI/CD 보안 주의사항</p>
-                        <p class="text-sm mt-1"><code class="inline-code">ANTHROPIC_API_KEY</code>는 반드시 GitHub Secrets에 저장하세요. 절대로 코드에 직접 포함하지 마세요!</p>
-                    </div>
-
-                    <div class="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 mt-4">
-                        <p class="text-emerald-200 font-medium">Team Tip</p>
-                        <p class="text-sm mt-1">프로젝트 레벨 명령어는 <code class="inline-code">.claude/commands/</code>에 저장하여 팀 전체가 동일한 자동화 도구를 사용할 수 있도록 하세요.</p>
-                    </div>
-                </div>
-
-                <div class="mt-8 pt-6 border-t border-white/10 flex justify-between">
-                    <button onclick="showLesson(3)" class="bg-white/10 hover:bg-white/20 px-6 py-3 rounded-xl font-semibold transition-all">
-                        Previous
-                    </button>
-                    <button onclick="showLesson(5)" class="bg-accent hover:bg-emerald-400 text-dark-900 px-6 py-3 rounded-xl font-semibold transition-all">
-                        Next: Pro Tips & Plugins
-                    </button>
-                </div>
-            </div>
-        </section>
-
-        <!-- Lesson 5: Pro Tips & Plugins -->
-        <section id="lesson5" class="lesson-content mb-12">
-            <div class="card rounded-2xl p-8">
-                <div class="flex items-center gap-4 mb-6">
-                    <span class="bg-accent/20 text-accent w-12 h-12 rounded-xl flex items-center justify-center text-xl font-bold">5</span>
-                    <h2 class="text-2xl font-bold">Pro Tips & Plugins</h2>
-                </div>
-
-                <div class="space-y-6 text-gray-300">
-                    <div class="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4">
-                        <p class="text-emerald-200 font-medium">Boris Cherny's Claude Code Tips</p>
-                        <p class="text-sm mt-1">Anthropic Developer Relations의 Boris Cherny가 공유한 실전 팁과 공식 플러그인들입니다.</p>
-                    </div>
-
-                    <h3 class="text-xl font-semibold text-white">Tip 4: CLAUDE.md를 통한 팀 지식 축적</h3>
-                    <p>
-                        CLAUDE.md는 단순한 설정 파일이 아닙니다. <strong class="text-accent">팀의 집단 지식을 축적</strong>하는 도구로 활용하세요.
-                        한 명이 발견한 패턴, 해결한 문제, 주의사항이 모두의 자산이 됩니다.
-                    </p>
-                    <pre><code class="text-green-400"># CLAUDE.md - 팀 지식 축적 예시
-
-## 에러 해결 히스토리
-### TypeScript 컴파일 오류 (2026-01-15)
-- 문제: Cannot find module '@/lib/utils'
-- 원인: tsconfig.json paths 설정 누락
-- 해결: baseUrl과 paths 추가
-
-### API 타임아웃 이슈 (2026-01-18)
-- 문제: fetch timeout 30초 초과
-- 원인: 대용량 응답 처리
-- 해결: streaming 방식으로 전환
-
-## 코드베이스 주의사항
-- legacy/ 폴더는 건드리지 말 것 (마이그레이션 예정)
-- auth 모듈은 이전 패턴 사용 - 따라하지 말 것</code></pre>
-
-                    <h3 class="text-xl font-semibold text-white mt-8">Tip 5: 코드 리뷰 시 CLAUDE.md 업데이트</h3>
-                    <p>
-                        코드 리뷰 중 발견한 패턴이나 주의사항은 <strong class="text-accent">즉시 CLAUDE.md에 추가</strong>하세요.
-                        다음 사람이 같은 실수를 반복하지 않도록 합니다.
-                    </p>
-                    <div class="bg-dark-700 rounded-xl p-4">
-                        <h4 class="font-semibold text-accent mb-2">코드 리뷰 워크플로우</h4>
-                        <ol class="text-sm space-y-2">
-                            <li>1. PR 리뷰 중 반복되는 피드백 발견</li>
-                            <li>2. CLAUDE.md의 "Coding Conventions" 섹션에 추가</li>
-                            <li>3. 다음 PR부터 Claude가 자동으로 체크</li>
-                        </ol>
-                    </div>
-
-                    <h3 class="text-xl font-semibold text-white mt-8">Tip 7: 슬래시 커맨드 자동화 (/commit-push-pr)</h3>
-                    <p>
-                        반복적인 Git 작업을 하나의 커맨드로 자동화하세요.
-                        <code class="inline-code">/commit-push-pr</code> 같은 워크플로우 커맨드를 만들어 생산성을 높입니다.
-                    </p>
-                    <pre><code class="text-green-400"># .claude/commands/commit-push-pr.md
----
-description: 변경사항을 커밋하고 푸시한 후 PR을 생성합니다
----
-
-$ARGUMENTS
-
-다음을 순서대로 수행해주세요:
-
-1. 변경사항 분석
-   - git status로 변경된 파일 확인
-   - 변경 내용을 기반으로 커밋 메시지 생성
-
-2. 커밋 및 푸시
-   - Conventional Commits 형식 사용
-   - 현재 브랜치로 푸시
-
-3. PR 생성
-   - GitHub CLI (gh)로 PR 생성
-   - 변경사항 요약을 PR 본문에 포함
-
-4. PR URL 출력</code></pre>
-
-                    <h3 class="text-xl font-semibold text-white mt-8">Official Plugins</h3>
-                    <div class="space-y-4 mt-4">
-                        <div class="card rounded-xl p-4">
-                            <div class="flex items-center gap-3 mb-2">
-                                <span class="text-2xl">📝</span>
-                                <h5 class="font-bold text-accent">commit-commands</h5>
                             </div>
-                            <p class="text-sm text-gray-400 mb-3">
-                                Git 워크플로우를 자동화하는 플러그인입니다. /commit, /commit-push-pr 등의 명령어를 제공합니다.
-                            </p>
-                            <pre class="text-xs"><code class="text-green-400"># 설치
-claude plugins add github:anthropics/commit-commands
 
-# 사용
-/commit                 # 스마트 커밋 메시지 생성
-/commit-push-pr        # 커밋 → 푸시 → PR 생성 원스텝</code></pre>
-                        </div>
-                        <div class="card rounded-xl p-4">
-                            <div class="flex items-center gap-3 mb-2">
-                                <span class="text-2xl">🔍</span>
-                                <h5 class="font-bold text-accent">code-review</h5>
+                            <h4 class="font-bold text-lg mt-6 text-accent">Available Tools</h4>
+                            <div class="grid md:grid-cols-2 gap-4 mt-4">
+                                <div class="card rounded-xl p-4">
+                                    <h5 class="font-semibold text-accent mb-2">search_pages</h5>
+                                    <p class="text-sm text-gray-400">Search for pages in your workspace</p>
+                                </div>
+                                <div class="card rounded-xl p-4">
+                                    <h5 class="font-semibold text-accent mb-2">get_page</h5>
+                                    <p class="text-sm text-gray-400">Retrieve a page's content and properties</p>
+                                </div>
+                                <div class="card rounded-xl p-4">
+                                    <h5 class="font-semibold text-accent mb-2">create_page</h5>
+                                    <p class="text-sm text-gray-400">Create a new page or database entry</p>
+                                </div>
+                                <div class="card rounded-xl p-4">
+                                    <h5 class="font-semibold text-accent mb-2">update_page</h5>
+                                    <p class="text-sm text-gray-400">Update page content or properties</p>
+                                </div>
+                                <div class="card rounded-xl p-4">
+                                    <h5 class="font-semibold text-accent mb-2">query_database</h5>
+                                    <p class="text-sm text-gray-400">Query a database with filters and sorts</p>
+                                </div>
+                                <div class="card rounded-xl p-4">
+                                    <h5 class="font-semibold text-accent mb-2">add_database_entry</h5>
+                                    <p class="text-sm text-gray-400">Add a new entry to a database</p>
+                                </div>
                             </div>
-                            <p class="text-sm text-gray-400 mb-3">
-                                PR 자동 리뷰 플러그인입니다. 4개의 병렬 에이전트가 각각 보안, 성능, 코드 품질, 테스트를 검사합니다.
-                            </p>
-                            <pre class="text-xs"><code class="text-green-400"># 설치
-claude plugins add github:anthropics/code-review
 
-# 사용
-/code-review           # 현재 diff 리뷰
-/code-review --pr 123  # 특정 PR 리뷰
+                            <h4 class="font-bold text-lg mt-6 text-accent">Usage Example</h4>
+                            <div class="code-block">
+                                <div class="code-block-header">Claude Conversation</div>
+                                <pre><code class="text-green-400 text-sm">User: "Create a project page in Notion for our MVP"
 
-# 병렬 에이전트:
-# 1. security-agent: 보안 취약점 검사
-# 2. performance-agent: 성능 이슈 분석
-# 3. quality-agent: 코드 품질 검사
-# 4. test-agent: 테스트 커버리지 확인</code></pre>
+Claude: [Uses notion.create_page tool]
+<span class="code-comment"># Creates: New page with project details</span>
+
+User: "Add tasks to our sprint database"
+
+Claude: [Uses notion.add_database_entry tool]
+<span class="code-comment"># Creates: New entries in the database</span></code></pre>
+                            </div>
+
+                            <button onclick="completeLesson(2)" class="btn-secondary px-6 py-3 rounded-xl text-sm font-medium">
+                                Mark as Complete
+                            </button>
                         </div>
-                    </div>
-
-                    <div class="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 mt-6">
-                        <p class="text-emerald-200 font-medium">Best Practice: CLAUDE.md 업데이트 주기</p>
-                        <p class="text-sm mt-1">
-                            주 1회 "CLAUDE.md 정리 세션"을 가지세요. 누적된 정보를 정리하고, 더 이상 유효하지 않은 내용을 제거합니다.
-                            Claude에게 <code class="inline-code">"CLAUDE.md를 리뷰하고 개선점을 제안해줘"</code>라고 요청해도 좋습니다.
-                        </p>
                     </div>
                 </div>
 
-                <div class="mt-8 pt-6 border-t border-white/10 flex justify-between">
-                    <button onclick="showLesson(4)" class="bg-white/10 hover:bg-white/20 px-6 py-3 rounded-xl font-semibold transition-all">
-                        Previous
-                    </button>
-                    <button onclick="startQuiz()" class="bg-accent hover:bg-emerald-400 text-dark-900 px-6 py-3 rounded-xl font-semibold transition-all">
-                        Take the Quiz
-                    </button>
+                <!-- Lesson 3: Playwright MCP Deep Dive -->
+                <div id="lesson3" class="lesson-card rounded-2xl overflow-hidden">
+                    <div class="lesson-header p-6 flex items-center justify-between" onclick="toggleLesson(3)">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-amber-500/20 flex items-center justify-center text-2xl">3</div>
+                            <div>
+                                <h3 class="font-bold text-xl">Playwright MCP Deep Dive</h3>
+                                <p class="text-gray-400 text-sm">Browser automation and web scraping</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span id="lesson3-status" class="text-xs px-3 py-1 rounded-full bg-gray-700 text-gray-400">Not Started</span>
+                            <svg class="chevron w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="lesson-content">
+                        <div class="px-6 pb-6 space-y-6">
+                            <h4 class="font-bold text-lg text-accent">Playwright MCP Setup</h4>
+                            <div class="code-block">
+                                <div class="code-block-header">.claude/settings.local.json</div>
+                                <pre><code class="text-green-400 text-sm">{
+  <span class="code-string">"mcpServers"</span>: {
+    <span class="code-string">"playwright"</span>: {
+      <span class="code-string">"command"</span>: <span class="code-string">"npx"</span>,
+      <span class="code-string">"args"</span>: [<span class="code-string">"-y"</span>, <span class="code-string">"@anthropic-ai/mcp-server-playwright"</span>]
+    }
+  }
+}</code></pre>
+                            </div>
+
+                            <h4 class="font-bold text-lg mt-6 text-accent">Available Tools</h4>
+                            <div class="grid md:grid-cols-2 gap-4 mt-4">
+                                <div class="card rounded-xl p-4">
+                                    <h5 class="font-semibold text-accent mb-2">navigate</h5>
+                                    <p class="text-sm text-gray-400">Navigate to a URL</p>
+                                </div>
+                                <div class="card rounded-xl p-4">
+                                    <h5 class="font-semibold text-accent mb-2">click</h5>
+                                    <p class="text-sm text-gray-400">Click on elements by selector</p>
+                                </div>
+                                <div class="card rounded-xl p-4">
+                                    <h5 class="font-semibold text-accent mb-2">fill</h5>
+                                    <p class="text-sm text-gray-400">Fill input fields with text</p>
+                                </div>
+                                <div class="card rounded-xl p-4">
+                                    <h5 class="font-semibold text-accent mb-2">screenshot</h5>
+                                    <p class="text-sm text-gray-400">Take screenshots of pages</p>
+                                </div>
+                                <div class="card rounded-xl p-4">
+                                    <h5 class="font-semibold text-accent mb-2">get_text</h5>
+                                    <p class="text-sm text-gray-400">Extract text content from elements</p>
+                                </div>
+                                <div class="card rounded-xl p-4">
+                                    <h5 class="font-semibold text-accent mb-2">evaluate</h5>
+                                    <p class="text-sm text-gray-400">Run JavaScript in browser context</p>
+                                </div>
+                            </div>
+
+                            <h4 class="font-bold text-lg mt-6 text-accent">Use Cases</h4>
+                            <div class="card rounded-xl p-4 mt-4">
+                                <ul class="space-y-2 text-sm text-gray-300">
+                                    <li><span class="text-accent font-bold">Web Scraping:</span> Extract data from websites</li>
+                                    <li><span class="text-accent font-bold">E2E Testing:</span> Automated UI testing</li>
+                                    <li><span class="text-accent font-bold">Screenshot:</span> Generate page screenshots/PDFs</li>
+                                    <li><span class="text-accent font-bold">Form Automation:</span> Fill and submit forms</li>
+                                </ul>
+                            </div>
+
+                            <button onclick="completeLesson(3)" class="btn-secondary px-6 py-3 rounded-xl text-sm font-medium">
+                                Mark as Complete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lesson 4: MCP Combination Patterns -->
+                <div id="lesson4" class="lesson-card rounded-2xl overflow-hidden">
+                    <div class="lesson-header p-6 flex items-center justify-between" onclick="toggleLesson(4)">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center text-2xl">4</div>
+                            <div>
+                                <h3 class="font-bold text-xl">MCP Combination Patterns</h3>
+                                <p class="text-gray-400 text-sm">Building data pipelines with multiple MCPs</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span id="lesson4-status" class="text-xs px-3 py-1 rounded-full bg-gray-700 text-gray-400">Not Started</span>
+                            <svg class="chevron w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="lesson-content">
+                        <div class="px-6 pb-6 space-y-6">
+                            <div class="tip-box">
+                                <p class="text-emerald-200 font-medium">Power of Multiple MCPs</p>
+                                <p class="text-sm mt-1 text-gray-300">Combine multiple MCP servers to build powerful automated workflows. Data flows from one service to another seamlessly.</p>
+                            </div>
+
+                            <h4 class="font-bold text-lg text-accent">Example: Multi-MCP Setup</h4>
+                            <div class="code-block">
+                                <div class="code-block-header">.claude/settings.local.json</div>
+                                <pre><code class="text-green-400 text-sm">{
+  <span class="code-string">"mcpServers"</span>: {
+    <span class="code-string">"github"</span>: {
+      <span class="code-string">"command"</span>: <span class="code-string">"npx"</span>,
+      <span class="code-string">"args"</span>: [<span class="code-string">"-y"</span>, <span class="code-string">"@modelcontextprotocol/server-github"</span>],
+      <span class="code-string">"env"</span>: { <span class="code-string">"GITHUB_TOKEN"</span>: <span class="code-string">"${GITHUB_TOKEN}"</span> }
+    },
+    <span class="code-string">"notion"</span>: {
+      <span class="code-string">"command"</span>: <span class="code-string">"npx"</span>,
+      <span class="code-string">"args"</span>: [<span class="code-string">"-y"</span>, <span class="code-string">"@anthropic-ai/mcp-server-notion"</span>],
+      <span class="code-string">"env"</span>: { <span class="code-string">"NOTION_API_KEY"</span>: <span class="code-string">"${NOTION_API_KEY}"</span> }
+    },
+    <span class="code-string">"slack"</span>: {
+      <span class="code-string">"command"</span>: <span class="code-string">"npx"</span>,
+      <span class="code-string">"args"</span>: [<span class="code-string">"-y"</span>, <span class="code-string">"@anthropic-ai/mcp-server-slack"</span>],
+      <span class="code-string">"env"</span>: { <span class="code-string">"SLACK_TOKEN"</span>: <span class="code-string">"${SLACK_TOKEN}"</span> }
+    }
+  }
+}</code></pre>
+                            </div>
+
+                            <h4 class="font-bold text-lg mt-6 text-accent">Workflow Example: Issue Tracking Pipeline</h4>
+                            <div class="code-block">
+                                <div class="code-block-header">Automated Workflow</div>
+                                <pre><code class="text-green-400 text-sm">User: "Check new GitHub issues and update Notion board"
+
+<span class="code-comment"># 1. GitHub MCP: Fetch new issues</span>
+Claude uses github.list_issues(state="open", since="yesterday")
+  -> Returns 5 new issues
+
+<span class="code-comment"># 2. Notion MCP: Add to project board</span>
+Claude uses notion.add_database_entry for each issue
+  -> Creates cards in Notion database
+
+<span class="code-comment"># 3. Slack MCP: Notify team</span>
+Claude uses slack.send_message(channel="#dev")
+  -> Posts summary to Slack channel</code></pre>
+                            </div>
+
+                            <button onclick="completeLesson(4)" class="btn-secondary px-6 py-3 rounded-xl text-sm font-medium">
+                                Mark as Complete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lesson 5: MVP Development Strategy -->
+                <div id="lesson5" class="lesson-card rounded-2xl overflow-hidden">
+                    <div class="lesson-header p-6 flex items-center justify-between" onclick="toggleLesson(5)">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-pink-500/20 flex items-center justify-center text-2xl">5</div>
+                            <div>
+                                <h3 class="font-bold text-xl">MVP Development Strategy</h3>
+                                <p class="text-gray-400 text-sm">Rapid prototyping with MCP and Skills</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span id="lesson5-status" class="text-xs px-3 py-1 rounded-full bg-gray-700 text-gray-400">Not Started</span>
+                            <svg class="chevron w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="lesson-content">
+                        <div class="px-6 pb-6 space-y-6">
+                            <div class="tip-box">
+                                <p class="text-emerald-200 font-medium">MVP Development with Claude Code</p>
+                                <p class="text-sm mt-1 text-gray-300">Use MCP servers for rapid prototyping. Focus on core features first, leverage external services to minimize custom code.</p>
+                            </div>
+
+                            <h4 class="font-bold text-lg text-accent">MVP Development Approach</h4>
+                            <div class="card rounded-xl p-4 mt-4">
+                                <ol class="space-y-3 text-sm text-gray-300">
+                                    <li><span class="text-accent font-bold">1. Define Core Features:</span> Identify 3 must-have features</li>
+                                    <li><span class="text-accent font-bold">2. Choose MCP Servers:</span> Select 2+ servers that enable your features</li>
+                                    <li><span class="text-accent font-bold">3. Create Skills:</span> Build skills to orchestrate MCP tools</li>
+                                    <li><span class="text-accent font-bold">4. Prototype Fast:</span> Use /commit and /review for rapid iteration</li>
+                                    <li><span class="text-accent font-bold">5. Test & Iterate:</span> Get feedback early, improve continuously</li>
+                                </ol>
+                            </div>
+
+                            <h4 class="font-bold text-lg mt-6 text-accent">Example MVP: Discord Bot</h4>
+                            <div class="code-block">
+                                <div class="code-block-header">Project Structure</div>
+                                <pre><code class="text-green-400 text-sm">discord-bot-mvp/
++-- .claude/
+|   +-- settings.local.json  <span class="code-comment"># MCP: GitHub, Notion</span>
+|   +-- skills/
+|       +-- issue-tracker/
+|           +-- SKILL.md     <span class="code-comment"># Issue tracking automation</span>
++-- src/
+|   +-- bot.js               <span class="code-comment"># Discord bot code</span>
+|   +-- commands/            <span class="code-comment"># Bot commands</span>
++-- CLAUDE.md                <span class="code-comment"># Project context</span>
++-- package.json</code></pre>
+                            </div>
+
+                            <h4 class="font-bold text-lg mt-6 text-accent">Core Features Checklist</h4>
+                            <div class="grid md:grid-cols-3 gap-4 mt-4">
+                                <div class="card rounded-xl p-4 text-center">
+                                    <div class="text-3xl mb-2">Feature 1</div>
+                                    <p class="text-sm text-gray-400">User Input</p>
+                                    <p class="text-xs text-accent mt-1">(Required)</p>
+                                </div>
+                                <div class="card rounded-xl p-4 text-center">
+                                    <div class="text-3xl mb-2">Feature 2</div>
+                                    <p class="text-sm text-gray-400">Data Processing</p>
+                                    <p class="text-xs text-accent mt-1">(Required)</p>
+                                </div>
+                                <div class="card rounded-xl p-4 text-center">
+                                    <div class="text-3xl mb-2">Feature 3</div>
+                                    <p class="text-sm text-gray-400">Output/Result</p>
+                                    <p class="text-xs text-accent mt-1">(Required)</p>
+                                </div>
+                            </div>
+
+                            <div class="warning-box mt-6">
+                                <div class="flex items-start gap-3">
+                                    <span class="text-xl">Tip</span>
+                                    <div>
+                                        <p class="text-amber-200 font-medium">Keep It Simple</p>
+                                        <p class="text-sm mt-1 text-gray-300">MVP means Minimum Viable Product. Focus on proving your concept works, not building everything at once.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button onclick="completeLesson(5)" class="btn-secondary px-6 py-3 rounded-xl text-sm font-medium">
+                                Mark as Complete
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
 
         <!-- Terminology Section -->
-        <section class="mb-12">
-            <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-4">용어 설명</h2>
+        <section class="mb-16">
+            <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-4">TERMINOLOGY</h2>
             <div class="space-y-3">
                 <details class="card rounded-xl p-4 cursor-pointer">
                     <summary class="font-bold text-white flex items-center justify-between">
-                        Skills
+                        MCP Server
                         <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                         </svg>
                     </summary>
                     <p class="text-gray-400 text-sm mt-3">
-                        Claude에게 특정 작업 방법을 가르치는 지침입니다. SKILL.md 파일로 정의하며,
-                        <code class="bg-dark-800 px-1 rounded text-xs">/skill-name</code>으로 직접 호출하거나 맥락에 맞게 자동 발견됩니다.
+                        A service that implements MCP protocol to connect Claude to external tools.
+                        Examples: Notion MCP, Playwright MCP, GitHub MCP.
                     </p>
                 </details>
                 <details class="card rounded-xl p-4 cursor-pointer">
                     <summary class="font-bold text-white flex items-center justify-between">
-                        Plugins
+                        Data Pipeline
                         <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                         </svg>
                     </summary>
                     <p class="text-gray-400 text-sm mt-3">
-                        여러 기능(commands, skills, hooks, MCP 서버)을 하나로 묶어 버전 관리하고 공유할 수 있는 확장 패키지입니다.
-                        <code class="bg-dark-800 px-1 rounded text-xs">claude plugins add</code>로 설치합니다.
+                        A workflow where data flows through multiple services. With MCP, Claude orchestrates data between different servers automatically.
                     </p>
                 </details>
                 <details class="card rounded-xl p-4 cursor-pointer">
                     <summary class="font-bold text-white flex items-center justify-between">
-                        Headless Mode
+                        MVP (Minimum Viable Product)
                         <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                         </svg>
                     </summary>
                     <p class="text-gray-400 text-sm mt-3">
-                        <code class="bg-dark-800 px-1 rounded text-xs">claude -p "prompt"</code>로 비대화형 실행하는 모드입니다.
-                        CI/CD 파이프라인, 자동화 스크립트에서 사용합니다.
-                        <code class="bg-dark-800 px-1 rounded text-xs">--output-format json</code>으로 JSON 출력도 가능합니다.
+                        A product with just enough features to satisfy early customers and provide feedback for future development.
                     </p>
                 </details>
                 <details class="card rounded-xl p-4 cursor-pointer">
                     <summary class="font-bold text-white flex items-center justify-between">
-                        Custom Commands
+                        Browser Automation
                         <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                         </svg>
                     </summary>
                     <p class="text-gray-400 text-sm mt-3">
-                        <code class="bg-dark-800 px-1 rounded text-xs">.claude/commands/</code> 폴더에 저장되는 재사용 가능한 프롬프트입니다.
-                        <code class="bg-dark-800 px-1 rounded text-xs">/command-name</code>으로 호출하며, 팀 전체가 공유할 수 있습니다.
-                    </p>
-                </details>
-                <details class="card rounded-xl p-4 cursor-pointer">
-                    <summary class="font-bold text-white flex items-center justify-between">
-                        CLAUDE.md
-                        <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                        </svg>
-                    </summary>
-                    <p class="text-gray-400 text-sm mt-3">
-                        프로젝트 루트에 있는 Claude 설정 파일입니다. 코딩 컨벤션, 아키텍처, 주의사항 등을 작성하면
-                        Claude가 자동으로 읽어 맥락을 파악합니다. 팀 지식 축적 도구로도 활용됩니다.
+                        Controlling a web browser programmatically. Playwright MCP enables Claude to navigate pages, click buttons, fill forms, and extract data.
                     </p>
                 </details>
             </div>
         </section>
 
         <!-- Quiz Section -->
-        <section id="quizSection" class="hidden mb-12">
+        <section class="mb-16">
+            <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-6">KNOWLEDGE CHECK</h2>
             <div class="card rounded-2xl p-8">
                 <div class="flex items-center justify-between mb-6">
-                    <h2 class="text-2xl font-bold">Week 4 Quiz</h2>
-                    <span class="text-sm text-gray-400">Question <span id="currentQ">1</span>/10</span>
+                    <h3 class="font-bold text-2xl">Quiz: MCP Advanced</h3>
+                    <span id="quizProgress" class="text-sm text-gray-400">Question 1/10</span>
                 </div>
 
                 <div id="quizContainer">
-                    <!-- Questions injected by JS -->
+                    <!-- Quiz questions will be rendered here -->
                 </div>
 
-                <div class="mt-8 pt-6 border-t border-white/10 flex justify-between">
-                    <button id="prevQ" onclick="prevQuestion()" class="bg-white/10 hover:bg-white/20 px-6 py-3 rounded-xl font-semibold transition-all hidden">
-                        Previous
-                    </button>
-                    <button id="nextQ" onclick="nextQuestion()" class="bg-accent hover:bg-emerald-400 text-dark-900 px-6 py-3 rounded-xl font-semibold transition-all ml-auto">
-                        Next
-                    </button>
+                <div id="quizResults" class="hidden text-center py-8">
+                    <div class="text-6xl mb-4" id="resultEmoji">Congrats!</div>
+                    <h4 class="text-2xl font-bold mb-2">Quiz Complete!</h4>
+                    <p class="text-gray-400 mb-6">You scored <span id="finalScore" class="text-accent font-bold">0</span>/10</p>
+                    <div class="flex gap-4 justify-center">
+                        <button onclick="retakeQuiz()" class="btn-secondary px-6 py-3 rounded-xl text-sm font-medium">
+                            Retake Quiz
+                        </button>
+                        <a id="challengeQuizBtn" href="week4.html" class="btn-primary px-6 py-3 rounded-xl text-sm font-medium inline-flex items-center gap-2">
+                            Go to Challenge
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                            </svg>
+                        </a>
+                    </div>
                 </div>
             </div>
         </section>
 
-        <!-- Quiz Complete -->
-        <section id="quizComplete" class="hidden mb-12">
-            <div class="card rounded-2xl p-12 text-center">
-                <div class="text-6xl mb-6">🎉</div>
-                <h2 class="text-3xl font-bold mb-4">Quiz Complete!</h2>
-                <p class="text-gray-400 text-lg mb-2">Your Score</p>
-                <p class="text-5xl font-bold text-accent mb-8"><span id="finalScore">0</span>/10</p>
-                <div class="flex flex-wrap justify-center gap-4">
-                    <button onclick="retakeQuiz()" class="bg-white/10 hover:bg-white/20 border border-white/10 px-6 py-3 rounded-xl transition-all font-medium">
-                        Retake Quiz
-                    </button>
-                    <a href="week4.html" class="bg-accent hover:bg-emerald-400 text-dark-900 px-6 py-3 rounded-xl font-semibold transition-all inline-block">
-                        Go to Challenge
+        <!-- Go to Challenge CTA -->
+        <section class="mb-16">
+            <div class="card rounded-3xl p-8 border-accent/30 bg-gradient-to-br from-accent/5 to-transparent">
+                <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div>
+                        <h3 class="text-2xl font-bold mb-2">Ready for the Challenge?</h3>
+                        <p class="text-gray-400">Build an MVP with 2+ MCP servers and 3 core features.</p>
+                    </div>
+                    <a id="challengeBtn" href="week4.html" class="btn-primary px-8 py-4 rounded-xl font-bold text-lg flex items-center gap-3 whitespace-nowrap">
+                        Start Challenge
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                        </svg>
                     </a>
                 </div>
             </div>
@@ -966,166 +722,289 @@ claude plugins add github:anthropics/code-review
         </div>
     </footer>
 
+    <script src="config.js"></script>
     <script>
-        // Quiz questions
-        const questions = [
+        // Challenge Status Check
+        const API_BASE = window.API_BASE || '';
+        const WEEK = 4;
+
+        async function checkChallengeStatus() {
+            try {
+                const response = await fetch(`${API_BASE}/api/challenge/${WEEK}/status`);
+                if (response.ok) {
+                    const data = await response.json();
+
+                    if (data.status !== 'started') {
+                        // Disable all challenge buttons
+                        const challengeButtons = [
+                            document.getElementById('challengeNavBtn'),
+                            document.getElementById('challengeQuizBtn'),
+                            document.getElementById('challengeBtn')
+                        ];
+
+                        challengeButtons.forEach(btn => {
+                            if (btn) {
+                                btn.classList.add('opacity-50', 'cursor-not-allowed', 'pointer-events-none');
+                            }
+                        });
+
+                        // Add warning message after main CTA button
+                        const mainBtn = document.getElementById('challengeBtn');
+                        if (mainBtn && mainBtn.parentElement) {
+                            const existingMsg = mainBtn.parentElement.querySelector('.challenge-warning');
+                            if (!existingMsg) {
+                                const msg = document.createElement('p');
+                                msg.className = 'challenge-warning text-sm text-amber-400 mt-2 text-center w-full';
+                                msg.textContent = 'Challenge not started by admin yet';
+                                mainBtn.parentElement.appendChild(msg);
+                            }
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error('Failed to check challenge status:', e);
+            }
+        }
+
+        // Quiz Data
+        const quizQuestions = [
             {
-                q: "SKILL.md 파일에서 필수로 포함해야 하는 필드는?",
-                options: ["name, allowed-tools", "name, description", "description, model", "user-invocable, hooks"],
-                correct: 1
-            },
-            {
-                q: "스킬이 여러 위치에 같은 이름으로 존재할 때 우선순위가 가장 높은 것은?",
-                options: ["글로벌 스킬 (~/.claude/skills)", "사용자 스킬", "프로젝트 스킬 (.claude/skills)", "모두 동일"],
+                question: "Which MCP server is used for browser automation?",
+                options: ["Notion MCP", "GitHub MCP", "Playwright MCP", "PostgreSQL MCP"],
                 correct: 2
             },
             {
-                q: "user-invocable: true로 설정하면 어떤 기능이 활성화되나요?",
-                options: ["Claude가 자동으로 스킬을 발견", "/skill-name으로 직접 호출 가능", "다른 사용자와 공유 가능", "API에서 사용 가능"],
+                question: "What command adds an MCP server to Claude Code?",
+                options: ["claude install mcp", "claude mcp add", "mcp install", "claude add server"],
                 correct: 1
             },
             {
-                q: "Plugin의 매니페스트 파일 이름은?",
-                options: ["manifest.json", "plugin.json", "package.json", "config.json"],
+                question: "What is the Notion MCP used for?",
+                options: ["Database queries", "Document/database CRUD operations", "Browser automation", "Git operations"],
                 correct: 1
             },
             {
-                q: "Plugin에 포함될 수 있는 구성요소가 아닌 것은?",
-                options: ["commands", "skills", "templates", "mcp-servers"],
+                question: "Which MCP server would you use to query a PostgreSQL database?",
+                options: ["Notion MCP", "postgres MCP", "GitHub MCP", "Slack MCP"],
+                correct: 1
+            },
+            {
+                question: "What environment variable is needed for GitHub MCP?",
+                options: ["GITHUB_API_KEY", "GH_TOKEN", "GITHUB_TOKEN", "GITHUB_SECRET"],
                 correct: 2
             },
             {
-                q: "Plugin의 명령어를 호출할 때 사용하는 문법은?",
-                options: ["@plugin-name/command", "plugin-name::command", "/plugin-name:command", "#plugin-name.command"],
+                question: "What Playwright MCP tool takes page screenshots?",
+                options: ["capture", "screenshot", "take_photo", "snap"],
+                correct: 1
+            },
+            {
+                question: "How many core features should an MVP have minimum?",
+                options: ["1", "3", "5", "10"],
+                correct: 1
+            },
+            {
+                question: "Which file stores MCP server configurations?",
+                options: ["mcp.json", ".claude/settings.local.json", "package.json", "mcp.config.js"],
+                correct: 1
+            },
+            {
+                question: "What does MVP stand for?",
+                options: ["Maximum Value Product", "Minimum Viable Product", "Most Valuable Player", "Model Version Protocol"],
+                correct: 1
+            },
+            {
+                question: "Which is a benefit of combining multiple MCP servers?",
+                options: ["Slower execution", "More complex setup", "Automated data pipelines", "Higher costs"],
                 correct: 2
-            },
-            {
-                q: "GitHub에서 플러그인을 설치하는 올바른 명령어는?",
-                options: ["claude install github:user/repo", "claude plugins add github:user/repo", "claude get github:user/repo", "npm install claude-plugin-name"],
-                correct: 1
-            },
-            {
-                q: "MCP 서버를 찾을 수 있는 공식 리소스는?",
-                options: ["npmjs.com", "github.com/modelcontextprotocol/servers", "claude-plugins.com", "mcp-store.io"],
-                correct: 1
-            },
-            {
-                q: "Headless Mode에서 JSON 출력을 받으려면?",
-                options: ["--json", "--output json", "--output-format json", "--format=json"],
-                correct: 2
-            },
-            {
-                q: "CI/CD에서 Claude Code를 사용할 때 필요한 환경 변수는?",
-                options: ["CLAUDE_API_KEY", "ANTHROPIC_API_KEY", "CLAUDE_TOKEN", "AI_API_KEY"],
-                correct: 1
             }
         ];
 
         let currentQuestion = 0;
-        let answers = new Array(questions.length).fill(null);
         let score = 0;
+        let answeredQuestions = new Array(quizQuestions.length).fill(null);
+        let completedLessons = new Set();
 
-        // Load saved progress
-        function loadProgress() {
-            const saved = sessionStorage.getItem('week4_quiz');
+        function loadState() {
+            const saved = sessionStorage.getItem('week4_learn_state');
             if (saved) {
-                const data = JSON.parse(saved);
-                answers = data.answers || answers;
-                score = data.score || 0;
-                document.getElementById('quizScore').textContent = score;
+                const state = JSON.parse(saved);
+                completedLessons = new Set(state.completedLessons || []);
+                score = state.quizScore || 0;
+                answeredQuestions = state.answeredQuestions || new Array(quizQuestions.length).fill(null);
+                currentQuestion = state.currentQuestion || 0;
+            }
+            updateProgress();
+            updateLessonStatuses();
+            renderQuiz();
+        }
+
+        function saveState() {
+            const state = {
+                completedLessons: Array.from(completedLessons),
+                quizScore: score,
+                answeredQuestions: answeredQuestions,
+                currentQuestion: currentQuestion
+            };
+            sessionStorage.setItem('week4_learn_state', JSON.stringify(state));
+        }
+
+        function toggleLesson(num) {
+            const lesson = document.getElementById(`lesson${num}`);
+            const content = lesson.querySelector('.lesson-content');
+            const chevron = lesson.querySelector('.chevron');
+
+            document.querySelectorAll('.lesson-card').forEach(card => {
+                if (card.id !== `lesson${num}`) {
+                    card.classList.remove('open');
+                    card.querySelector('.lesson-content').classList.remove('open');
+                    card.querySelector('.chevron').classList.remove('open');
+                }
+            });
+
+            lesson.classList.toggle('open');
+            content.classList.toggle('open');
+            chevron.classList.toggle('open');
+        }
+
+        function completeLesson(num) {
+            completedLessons.add(num);
+            saveState();
+            updateLessonStatuses();
+            updateProgress();
+
+            if (num < 5) {
+                setTimeout(() => toggleLesson(num + 1), 300);
             }
         }
 
-        function saveProgress() {
-            sessionStorage.setItem('week4_quiz', JSON.stringify({ answers, score }));
-            document.getElementById('quizScore').textContent = score;
+        function updateLessonStatuses() {
+            for (let i = 1; i <= 5; i++) {
+                const status = document.getElementById(`lesson${i}-status`);
+                if (completedLessons.has(i)) {
+                    status.textContent = 'Completed';
+                    status.className = 'text-xs px-3 py-1 rounded-full bg-green-500/20 text-green-400';
+                }
+            }
         }
 
-        // Lesson navigation
-        function showLesson(num) {
-            document.querySelectorAll('.lesson-content').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.lesson-btn').forEach(el => el.classList.remove('active'));
-            document.getElementById(`lesson${num}`).classList.add('active');
-            document.querySelector(`[data-lesson="${num}"]`).classList.add('active');
-            document.getElementById('quizSection').classList.add('hidden');
-            document.getElementById('quizComplete').classList.add('hidden');
+        function updateProgress() {
+            const lessonProgress = completedLessons.size;
+            const progressPercent = (lessonProgress / 5) * 100;
+
+            document.getElementById('progressText').textContent = `${lessonProgress}/5 Lessons`;
+            document.getElementById('progressFill').style.width = `${progressPercent}%`;
+            document.getElementById('quizScoreDisplay').textContent = score;
+
+            if (lessonProgress === 5 && score >= 7) {
+                document.getElementById('completionStatus').classList.remove('hidden');
+            }
         }
 
-        document.querySelectorAll('.lesson-btn').forEach(btn => {
-            btn.addEventListener('click', () => showLesson(parseInt(btn.dataset.lesson)));
-        });
+        function renderQuiz() {
+            const container = document.getElementById('quizContainer');
+            const results = document.getElementById('quizResults');
 
-        // Quiz functions
-        function startQuiz() {
-            document.querySelectorAll('.lesson-content').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.lesson-btn').forEach(el => el.classList.remove('active'));
-            document.getElementById('quizSection').classList.remove('hidden');
-            document.getElementById('quizComplete').classList.add('hidden');
-            currentQuestion = 0;
-            renderQuestion();
-        }
+            if (answeredQuestions.every(a => a !== null)) {
+                container.classList.add('hidden');
+                results.classList.remove('hidden');
+                document.getElementById('finalScore').textContent = score;
+                document.getElementById('resultEmoji').textContent = score >= 7 ? 'Excellent!' : score >= 5 ? 'Good job!' : 'Keep learning!';
+                return;
+            }
 
-        function renderQuestion() {
-            const q = questions[currentQuestion];
-            document.getElementById('currentQ').textContent = currentQuestion + 1;
+            container.classList.remove('hidden');
+            results.classList.add('hidden');
 
-            let html = `<p class="text-lg mb-6">${q.q}</p><div class="space-y-3">`;
-            q.options.forEach((opt, i) => {
-                const selected = answers[currentQuestion] === i;
-                const selectedClass = selected ? 'bg-accent/20 border-accent' : 'bg-dark-700 border-white/10';
-                html += `
-                    <button onclick="selectAnswer(${i})" class="w-full text-left p-4 rounded-xl border ${selectedClass} hover:border-accent/50 transition-all">
-                        <span class="inline-block w-6 h-6 rounded-full border border-current text-center text-sm mr-3">${String.fromCharCode(65 + i)}</span>
-                        ${opt}
+            const q = quizQuestions[currentQuestion];
+            document.getElementById('quizProgress').textContent = `Question ${currentQuestion + 1}/10`;
+
+            container.innerHTML = `
+                <div class="mb-6">
+                    <p class="text-lg font-medium mb-6">${q.question}</p>
+                    <div class="space-y-3">
+                        ${q.options.map((opt, i) => `
+                            <div class="quiz-option card rounded-xl p-4 ${answeredQuestions[currentQuestion] === i ? (i === q.correct ? 'correct' : 'incorrect') : ''}"
+                                 onclick="selectAnswer(${i})" ${answeredQuestions[currentQuestion] !== null ? 'style="pointer-events: none;"' : ''}>
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-lg bg-dark-600 flex items-center justify-center text-sm font-bold">
+                                        ${String.fromCharCode(65 + i)}
+                                    </div>
+                                    <span>${opt}</span>
+                                    ${answeredQuestions[currentQuestion] === i ? (i === q.correct ? '<span class="ml-auto text-green-400">Correct</span>' : '<span class="ml-auto text-red-400">Wrong</span>') : ''}
+                                    ${answeredQuestions[currentQuestion] !== null && i === q.correct && answeredQuestions[currentQuestion] !== i ? '<span class="ml-auto text-green-400">Correct Answer</span>' : ''}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                <div class="flex justify-between items-center">
+                    <button onclick="prevQuestion()" class="btn-secondary px-4 py-2 rounded-xl text-sm" ${currentQuestion === 0 ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>
+                        Previous
                     </button>
-                `;
-            });
-            html += '</div>';
-            document.getElementById('quizContainer').innerHTML = html;
-
-            document.getElementById('prevQ').classList.toggle('hidden', currentQuestion === 0);
-            document.getElementById('nextQ').textContent = currentQuestion === questions.length - 1 ? 'Finish' : 'Next';
+                    <div class="flex gap-1">
+                        ${quizQuestions.map((_, i) => `
+                            <div class="w-2 h-2 rounded-full ${i === currentQuestion ? 'bg-accent' : answeredQuestions[i] !== null ? (answeredQuestions[i] === quizQuestions[i].correct ? 'bg-green-500' : 'bg-red-500') : 'bg-gray-600'}"></div>
+                        `).join('')}
+                    </div>
+                    <button onclick="nextQuestion()" class="btn-primary px-4 py-2 rounded-xl text-sm" ${answeredQuestions[currentQuestion] === null ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>
+                        ${currentQuestion === quizQuestions.length - 1 ? 'Finish' : 'Next'}
+                    </button>
+                </div>
+            `;
         }
 
-        function selectAnswer(idx) {
-            answers[currentQuestion] = idx;
-            renderQuestion();
+        function selectAnswer(index) {
+            if (answeredQuestions[currentQuestion] !== null) return;
+
+            answeredQuestions[currentQuestion] = index;
+            if (index === quizQuestions[currentQuestion].correct) {
+                score++;
+            }
+            saveState();
+            updateProgress();
+            renderQuiz();
         }
 
         function nextQuestion() {
-            if (currentQuestion < questions.length - 1) {
+            if (answeredQuestions[currentQuestion] === null) return;
+            if (currentQuestion < quizQuestions.length - 1) {
                 currentQuestion++;
-                renderQuestion();
+                saveState();
+                renderQuiz();
             } else {
-                finishQuiz();
+                renderQuiz();
             }
         }
 
         function prevQuestion() {
             if (currentQuestion > 0) {
                 currentQuestion--;
-                renderQuestion();
+                saveState();
+                renderQuiz();
             }
         }
 
-        function finishQuiz() {
-            score = answers.reduce((acc, ans, i) => acc + (ans === questions[i].correct ? 1 : 0), 0);
-            saveProgress();
-            document.getElementById('quizSection').classList.add('hidden');
-            document.getElementById('quizComplete').classList.remove('hidden');
-            document.getElementById('finalScore').textContent = score;
-        }
-
         function retakeQuiz() {
-            answers = new Array(questions.length).fill(null);
             currentQuestion = 0;
-            document.getElementById('quizComplete').classList.add('hidden');
-            document.getElementById('quizSection').classList.remove('hidden');
-            renderQuestion();
+            score = 0;
+            answeredQuestions = new Array(quizQuestions.length).fill(null);
+            saveState();
+            updateProgress();
+            renderQuiz();
         }
 
-        // Initialize
-        loadProgress();
+        document.addEventListener('DOMContentLoaded', () => {
+            loadState();
+            for (let i = 1; i <= 5; i++) {
+                if (!completedLessons.has(i)) {
+                    toggleLesson(i);
+                    break;
+                }
+            }
+            // Check challenge status
+            checkChallengeStatus();
+        });
     </script>
 </body>
 </html>

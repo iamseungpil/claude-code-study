@@ -692,6 +692,13 @@ main().catch(err => {
             </div>
         </section>
 
+        <!-- Challenge Not Started Message -->
+        <div id="challengeNotStarted" class="hidden mb-8 p-6 bg-amber-500/10 border border-amber-500/30 rounded-2xl text-center">
+            <span class="text-4xl block mb-4">&#128274;</span>
+            <h3 class="text-xl font-bold text-amber-400 mb-2">Challenge Not Yet Started</h3>
+            <p class="text-gray-400">Admin has not started this week's challenge yet. Please wait.</p>
+        </div>
+
         <!-- Submit -->
         <section class="mb-16" id="submit">
             <h2 class="text-sm font-bold text-purple-400 uppercase tracking-widest mb-4">SUBMIT YOUR WORK</h2>
@@ -836,9 +843,29 @@ main().catch(err => {
                     const data = await response.json();
 
                     if (data.challenge_status !== 'started') {
-                        showStatus('Challenge not started yet. Wait for admin.', 'text-gray-400');
-                        document.getElementById('startBtn').disabled = true;
-                        document.getElementById('startBtn').classList.add('opacity-50', 'cursor-not-allowed');
+                        // Show challenge not started message
+                        const notStartedDiv = document.getElementById('challengeNotStarted');
+                        if (notStartedDiv) notStartedDiv.classList.remove('hidden');
+
+                        // Hide challenge content sections
+                        const stagesSection = document.getElementById('stagesSection');
+                        const claudemdSection = document.getElementById('claudemdSection');
+                        const scoringSection = document.getElementById('scoringSection');
+                        if (stagesSection) stagesSection.classList.add('hidden');
+                        if (claudemdSection) claudemdSection.classList.add('hidden');
+                        if (scoringSection) scoringSection.classList.add('hidden');
+
+                        // Disable start button
+                        const startBtn = document.getElementById('startBtn');
+                        if (startBtn) {
+                            startBtn.disabled = true;
+                            startBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                        }
+
+                        // Hide timer hint
+                        const hint = document.getElementById('timerNotStartedHint');
+                        if (hint) hint.classList.add('hidden');
+
                         return;
                     }
 
