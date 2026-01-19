@@ -806,6 +806,9 @@ def trigger_evaluation(week: int, participant_id: str, github_url: str):
             logger.info(f"Evaluation successful: {result['scores']}")
         else:
             logger.error(f"Evaluation failed: {result.get('error')}")
+            # BUG FIX: Save error results to Firestore
+            # Previously error results were not being saved, only logged
+            db.save_evaluation(week, participant_id, result)
 
     except Exception as e:
         logger.error(f"Evaluation exception: {e}")
