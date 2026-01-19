@@ -1,27 +1,16 @@
-# Cloudflare Pages Redirects
-# Serve actual HTML files instead of SPA fallback
+# Cloudflare Pages - Disable SPA fallback
+# Force serve actual HTML files with 200! (forced rewrite)
 
-# Explicit routes for all HTML pages
-/frontend/index.html        /frontend/index.html        200
-/frontend/admin.html        /frontend/admin.html        200
-/frontend/leaderboard.html  /frontend/leaderboard.html  200
-/frontend/week1.html        /frontend/week1.html        200
-/frontend/week2.html        /frontend/week2.html        200
-/frontend/week3.html        /frontend/week3.html        200
-/frontend/week4.html        /frontend/week4.html        200
-/frontend/week5.html        /frontend/week5.html        200
-/frontend/week1-learn.html  /frontend/week1-learn.html  200
-/frontend/week2-learn.html  /frontend/week2-learn.html  200
-/frontend/week3-learn.html  /frontend/week3-learn.html  200
-/frontend/week4-learn.html  /frontend/week4-learn.html  200
-/frontend/week5-learn.html  /frontend/week5-learn.html  200
-/frontend/config.js         /frontend/config.js         200
-
-# Root path redirects
-/index.html        /frontend/index.html        200
-/admin.html        /frontend/admin.html        200
-/leaderboard.html  /frontend/leaderboard.html  200
-
-# Default: serve static files as-is (no SPA fallback)
-/frontend/*  /frontend/:splat  200
-/*           /:splat           200
+/admin.html         /admin.html         200!
+/leaderboard.html   /leaderboard.html   200!
+/week1.html         /week1.html         200!
+/week2.html         /week2.html         200!
+/week3.html         /week3.html         200!
+/week4.html         /week4.html         200!
+/week5.html         /week5.html         200!
+/week1-learn.html   /week1-learn.html   200!
+/week2-learn.html   /week2-learn.html   200!
+/week3-learn.html   /week3-learn.html   200!
+/week4-learn.html   /week4-learn.html   200!
+/week5-learn.html   /week5-learn.html   200!
+/config.js          /config.js          200!
