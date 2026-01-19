@@ -203,7 +203,7 @@
             <div class="card rounded-2xl p-6 max-w-md">
                 <div class="flex items-center justify-between mb-3">
                     <span class="text-sm font-medium text-gray-400">Learning Progress</span>
-                    <span id="progressText" class="text-sm font-bold text-accent">0/4 Lessons</span>
+                    <span id="progressText" class="text-sm font-bold text-accent">0/5 Lessons</span>
                 </div>
                 <div class="progress-bar h-2">
                     <div id="progressFill" class="progress-fill" style="width: 0%"></div>
@@ -222,6 +222,143 @@
             <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-6">LESSONS</h2>
 
             <div class="space-y-4">
+                <!-- Lesson 0: Getting Started - Claude Code Installation -->
+                <div id="lesson0" class="lesson-card rounded-2xl overflow-hidden">
+                    <div class="lesson-header p-6 flex items-center justify-between" onclick="toggleLesson(0)">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-green-500/20 flex items-center justify-center text-2xl">0</div>
+                            <div>
+                                <h3 class="font-bold text-xl">Getting Started</h3>
+                                <p class="text-gray-400 text-sm">Claude Code Installation & Setup</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span id="lesson0-status" class="text-xs px-3 py-1 rounded-full bg-gray-700 text-gray-400">Not Started</span>
+                            <svg class="chevron w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="lesson-content">
+                        <div class="px-6 pb-6 space-y-6">
+                            <!-- What is Claude Code -->
+                            <div>
+                                <h4 class="font-bold text-lg mb-3 text-accent">What is Claude Code?</h4>
+                                <p class="text-gray-300 mb-4">
+                                    Claude Code is an agentic coding tool from Anthropic that lives in your terminal. It understands your codebase, helps you edit files, and executes terminal commands—all within a chat-based interface.
+                                </p>
+                                <div class="bg-dark-800/50 p-4 rounded-xl border border-white/5 mb-4">
+                                    <ul class="text-gray-300 space-y-2 text-sm">
+                                        <li>• <strong>Natural language coding</strong> - Describe what you want in plain English</li>
+                                        <li>• <strong>Context-aware</strong> - Understands your entire project structure</li>
+                                        <li>• <strong>File editing</strong> - Can read, create, and modify files</li>
+                                        <li>• <strong>Terminal integration</strong> - Runs commands and shows results</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <!-- Requirements -->
+                            <div>
+                                <h4 class="font-bold text-lg mb-3 text-accent">Requirements</h4>
+                                <div class="bg-dark-800/50 p-4 rounded-xl border border-white/5">
+                                    <ul class="text-gray-300 space-y-2 text-sm">
+                                        <li>• <strong>macOS</strong> or <strong>Linux</strong> (Windows via WSL2)</li>
+                                        <li>• <strong>Node.js 18+</strong> - <code class="bg-dark-600 px-2 py-0.5 rounded text-xs">node --version</code></li>
+                                        <li>• <strong>npm</strong> (comes with Node.js)</li>
+                                        <li>• <strong>Anthropic API Key</strong> or <strong>Anthropic Max Plan</strong></li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <!-- Installation -->
+                            <div>
+                                <h4 class="font-bold text-lg mb-3 text-accent">Installation</h4>
+                                <p class="text-gray-300 mb-4">
+                                    Install Claude Code globally using npm:
+                                </p>
+                                <div class="code-block mb-4">
+                                    <div class="code-block-header">Terminal</div>
+                                    <pre><span class="code-comment"># Install Claude Code globally</span>
+npm install -g @anthropic-ai/claude-code
+
+<span class="code-comment"># Verify installation</span>
+claude --version
+
+<span class="code-comment"># Start Claude Code</span>
+claude</pre>
+                                </div>
+                                <div class="bg-amber-500/10 p-4 rounded-xl border border-amber-500/30 text-amber-400 text-sm">
+                                    <strong>Tip:</strong> If you get permission errors, try <code class="bg-dark-600 px-2 py-0.5 rounded text-xs">sudo npm install -g @anthropic-ai/claude-code</code> or fix npm permissions.
+                                </div>
+                            </div>
+
+                            <!-- API Key Setup -->
+                            <div>
+                                <h4 class="font-bold text-lg mb-3 text-accent">API Key Setup</h4>
+                                <p class="text-gray-300 mb-4">
+                                    Claude Code needs your Anthropic API key. You can set it up in two ways:
+                                </p>
+
+                                <div class="space-y-4">
+                                    <!-- Option 1: Interactive Login -->
+                                    <div class="bg-dark-800/50 p-4 rounded-xl border border-white/5">
+                                        <h5 class="font-semibold text-white mb-2">Option 1: Interactive Login (Recommended)</h5>
+                                        <p class="text-gray-400 text-sm mb-3">Run <code class="bg-dark-600 px-2 py-0.5 rounded text-xs">claude</code> and follow the prompts to log in with your Anthropic account.</p>
+                                        <div class="code-block">
+                                            <pre><span class="code-comment"># Start Claude Code and follow login prompts</span>
+claude</pre>
+                                        </div>
+                                    </div>
+
+                                    <!-- Option 2: Environment Variable -->
+                                    <div class="bg-dark-800/50 p-4 rounded-xl border border-white/5">
+                                        <h5 class="font-semibold text-white mb-2">Option 2: Environment Variable</h5>
+                                        <p class="text-gray-400 text-sm mb-3">Set your API key as an environment variable in your shell profile:</p>
+                                        <div class="code-block">
+                                            <pre><span class="code-comment"># Add to ~/.zshrc or ~/.bashrc</span>
+<span class="code-keyword">export</span> ANTHROPIC_API_KEY=<span class="code-string">"sk-ant-..."</span>
+
+<span class="code-comment"># Reload your shell</span>
+source ~/.zshrc</pre>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- First Run -->
+                            <div>
+                                <h4 class="font-bold text-lg mb-3 text-accent">Your First Run</h4>
+                                <p class="text-gray-300 mb-4">
+                                    Navigate to a project directory and start Claude Code:
+                                </p>
+                                <div class="code-block mb-4">
+                                    <div class="code-block-header">Terminal</div>
+                                    <pre><span class="code-comment"># Navigate to your project</span>
+cd /path/to/your/project
+
+<span class="code-comment"># Start Claude Code</span>
+claude
+
+<span class="code-comment"># Try these commands:</span>
+<span class="code-string">/init</span>           <span class="code-comment"># Analyze project and create CLAUDE.md</span>
+<span class="code-string">/help</span>           <span class="code-comment"># Show all available commands</span>
+<span class="code-string">/status</span>         <span class="code-comment"># Show current context and settings</span></pre>
+                                </div>
+                                <div class="bg-green-500/10 p-4 rounded-xl border border-green-500/30 text-green-400 text-sm">
+                                    <strong>Success!</strong> You're now ready to start using Claude Code. Try asking it to explain your codebase or make a small change!
+                                </div>
+                            </div>
+
+                            <!-- Complete Lesson Button -->
+                            <div class="flex justify-end pt-4 border-t border-white/5">
+                                <button onclick="completeLesson(0)" class="btn-secondary px-6 py-3 rounded-xl text-sm font-medium">
+                                    Mark as Complete &#10003;
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Lesson 1: Adding Context -->
                 <div id="lesson1" class="lesson-card rounded-2xl overflow-hidden">
                     <div class="lesson-header p-6 flex items-center justify-between" onclick="toggleLesson(1)">
@@ -781,9 +918,9 @@ think more about how to optimize this database query</code></pre>
         }
 
         function updateLessonStatuses() {
-            for (let i = 1; i <= 4; i++) {
+            for (let i = 0; i <= 4; i++) {
                 const status = document.getElementById(`lesson${i}-status`);
-                if (completedLessons.has(i)) {
+                if (status && completedLessons.has(i)) {
                     status.textContent = 'Completed';
                     status.className = 'text-xs px-3 py-1 rounded-full bg-green-500/20 text-green-400';
                 }
@@ -792,13 +929,13 @@ think more about how to optimize this database query</code></pre>
 
         function updateProgress() {
             const lessonProgress = completedLessons.size;
-            const progressPercent = (lessonProgress / 4) * 100;
+            const progressPercent = (lessonProgress / 5) * 100;
 
-            document.getElementById('progressText').textContent = `${lessonProgress}/4 Lessons`;
+            document.getElementById('progressText').textContent = `${lessonProgress}/5 Lessons`;
             document.getElementById('progressFill').style.width = `${progressPercent}%`;
             document.getElementById('quizScoreDisplay').textContent = score;
 
-            if (lessonProgress === 4 && score >= 7) {
+            if (lessonProgress === 5 && score >= 7) {
                 document.getElementById('completionStatus').classList.remove('hidden');
             }
         }
@@ -901,8 +1038,8 @@ think more about how to optimize this database query</code></pre>
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', () => {
             loadState();
-            // Auto-open first incomplete lesson
-            for (let i = 1; i <= 4; i++) {
+            // Auto-open first incomplete lesson (starting from Lesson 0)
+            for (let i = 0; i <= 4; i++) {
                 if (!completedLessons.has(i)) {
                     toggleLesson(i);
                     break;
