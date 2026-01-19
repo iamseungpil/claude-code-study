@@ -3,6 +3,55 @@
 ## Purpose
 Automated evaluation system for 5-week Claude Code study group.
 
+## Architecture
+
+### Deployment Modes
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    Local Development                            │
+│  ┌──────────────┐     ┌──────────────┐                         │
+│  │   Browser    │────▶│   FastAPI    │  localhost:8003         │
+│  │              │◀────│   Backend    │  (serves frontend too)  │
+│  └──────────────┘     └──────────────┘                         │
+└─────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────┐
+│              Production (Cloudflare + Local Backend)            │
+│  ┌──────────────┐     ┌──────────────┐     ┌──────────────┐    │
+│  │   Browser    │────▶│  Cloudflare  │────▶│   FastAPI    │    │
+│  │              │◀────│    Pages     │◀────│   Backend    │    │
+│  └──────────────┘     └──────────────┘     └──────────────┘    │
+│                        (frontend)      Cloudflare (local:8003) │
+│                                         Tunnel                  │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Key Components
+- **Frontend**: Static HTML/JS served from `frontend/` directory
+- **Backend**: FastAPI server (`backend/server.py`) on port 8003
+- **Config**: `frontend/config.js` - API base URL detection
+- **Data**: `data/users.json`, `data/challenges.json` (gitignored)
+
+### Starting Local Server
+```bash
+# Start backend (serves both API and frontend)
+python backend/server.py
+
+# Or using uvicorn directly
+uvicorn backend.server:app --host 0.0.0.0 --port 8003
+
+# Access at http://localhost:8003
+```
+
+### Cloudflare Tunnel (for remote access)
+```bash
+# Expose local backend via Cloudflare Tunnel
+cloudflared tunnel --url http://localhost:8003
+
+# Copy generated URL (e.g., https://xxx.trycloudflare.com)
+# Update frontend/config.js: CONFIGURED_API_BASE = 'https://xxx.trycloudflare.com'
+```
+
 ## Key Directories
 - `submissions/weekN/` - Participant submissions (git clone)
 - `evaluations/weekN/` - Evaluation results (JSON)
@@ -60,3 +109,46 @@ time_bonus = +10 (≤70%) | +5 (≤85%) | 0 (on time) | -5/5min (late)
 - **Cause**: Users registered with old code version (before `last_name` parameter was added)
 - **Solution**: `get_profile_image_url()` now uses `firstname+lastname` pattern (e.g., "seungpillee.png")
 - **Note**: Existing users need to re-register to get profile image
+
+## Known Issues & Fixes (2026-01-19)
+
+### Issue 5: /index.html 404 Error
+- **Cause**: FastAPI had route for `/` but NOT for `/index.html`
+- **Symptom**: Clicking "login" link from week1.html caused connection error
+- **Solution**: Added explicit `/index.html` route in `backend/server.py`
+- **File Modified**: `backend/server.py` (line ~1077)
+
+### Issue 6: config.js 404 Error (Login Failure)
+- **Cause**: No route for static JS files in FastAPI
+- **Symptom**: `API_BASE` undefined, all API calls failed
+- **Solution**: Added routes for `config.js` and all `week*-learn.html` files
+- **File Modified**: `backend/server.py` (lines ~1117-1141)
+- **Lesson**: When using FileResponse for static files, ALL files need explicit routes
+
+### Issue 7: Challenge Sections Hidden Before Timer Start
+- **Cause**: `stagesSection`, `claudemdSection`, `scoringSection` had `class="hidden"`
+- **Symptom**: Users couldn't see what to implement before starting timer
+- **Solution**: Removed `hidden` class from all three sections
+- **Files Modified**: `frontend/week1.html`, `frontend/week2.html`
+
+### Issue 8: npm Cache Permission Error
+- **Cause**: npm cache folder had root-owned files
+- **Symptom**: `EACCES: permission denied` during `npm install`
+- **Solution**: Use `--cache /tmp/npm-cache` flag or fix permissions with `sudo chown -R $(whoami) ~/.npm`
+
+## Evaluation System Notes
+
+### Build Verification (Required)
+The evaluation command (`/project:evaluate-submission`) MUST run:
+```bash
+cd submissions/weekN/{participant_id}
+npm install --cache /tmp/npm-cache
+npm run build
+```
+- Build failure = 50% penalty on stage scores
+- Build status recorded in `build_status` field of evaluation JSON
+
+### Evaluation Feedback Display
+- After submission, frontend polls `/api/evaluations/{week}/{participant_id}`
+- Displays score breakdown, feedback, strengths, improvements
+- Polling interval: 10 seconds, max 30 attempts (5 minutes)
