@@ -438,25 +438,10 @@
                     const data = await response.json();
 
                     if (data.status !== 'started') {
-                        // Show challenge not started message
-                        document.getElementById('challengeNotStarted').classList.remove('hidden');
-
-                        // Hide challenge content sections
-                        ['stagesSection', 'learningSection', 'deliverablesSection', 'scoringSection'].forEach(id => {
-                            const el = document.getElementById(id);
-                            if (el) el.classList.add('hidden');
-                        });
-
-                        // Disable start button
-                        const startBtn = document.getElementById('startBtn');
-                        if (startBtn) {
-                            startBtn.disabled = true;
-                            startBtn.classList.add('opacity-50', 'cursor-not-allowed');
-                        }
-
-                        // Hide timer hint
-                        const hint = document.getElementById('timerNotStartedHint');
-                        if (hint) hint.classList.add('hidden');
+                        // Challenge not started - redirect to main page
+                        alert('Week 5 Challenge has not started yet. Please wait for the admin to start the challenge.');
+                        window.location.href = 'index.html';
+                        return;
                     }
                 }
             } catch (e) {

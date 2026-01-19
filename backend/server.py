@@ -572,6 +572,57 @@ async def admin_end_challenge(week: int, admin: dict = Depends(require_admin)):
     }
 
 
+@app.post("/api/admin/challenge/{week}/restart")
+async def admin_restart_challenge(week: int, admin: dict = Depends(require_admin)):
+    """
+    Admin restarts a challenge by clearing all data.
+    - Deletes all submissions for the week
+    - Deletes all evaluations for the week
+    - Resets challenge to not_started state
+    """
+    if not 1 <= week <= 5:
+        raise HTTPException(400, "Week must be between 1 and 5")
+
+    deleted_submissions = 0
+    deleted_evaluations = 0
+
+    # Delete submissions directory for this week
+    submissions_dir = Path("submissions") / f"week{week}"
+    if submissions_dir.exists():
+        import shutil
+        for item in submissions_dir.iterdir():
+            if item.is_dir():
+                shutil.rmtree(item)
+                deleted_submissions += 1
+
+    # Delete evaluations for this week
+    evaluations_dir = Path("evaluations") / f"week{week}"
+    if evaluations_dir.exists():
+        for item in evaluations_dir.glob("*.json"):
+            item.unlink()
+            deleted_evaluations += 1
+
+    # Reset challenge to initial state
+    challenges = load_challenges()
+    week_key = f"week{week}"
+    challenges[week_key] = {
+        "status": "not_started",
+        "start_time": None,
+        "end_time": None,
+        "started_by": None,
+        "personal_starts": {}
+    }
+    save_challenges(challenges)
+
+    return {
+        "status": "restarted",
+        "week": week,
+        "deleted_submissions": deleted_submissions,
+        "deleted_evaluations": deleted_evaluations,
+        "message": f"Week {week} has been reset. All submissions and evaluations cleared."
+    }
+
+
 # ============== User Management (Admin) ==============
 
 @app.get("/api/admin/users")

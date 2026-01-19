@@ -270,7 +270,7 @@
             
             <div class="space-y-6">
                 <!-- Week 1 -->
-                <div id="week1Card" class="week-card block rounded-3xl p-8 hover:glow-blue group opacity-60">
+                <div id="week1Card" class="week-card block rounded-3xl p-8 hover:glow-blue group">
                     <span class="week-number bg-accent-blue text-dark-900">WEEK 1</span>
                     <div class="flex flex-col md:flex-row md:items-center gap-6">
                         <div class="flex-1">
@@ -310,7 +310,7 @@
                 </div>
 
                 <!-- Week 2 -->
-                <div id="week2Card" class="week-card block rounded-3xl p-8 hover:glow-purple group opacity-60">
+                <div id="week2Card" class="week-card block rounded-3xl p-8 hover:glow-purple group">
                     <span class="week-number bg-accent-purple text-dark-900">WEEK 2</span>
                     <div class="flex flex-col md:flex-row md:items-center gap-6">
                         <div class="flex-1">
@@ -345,7 +345,7 @@
                 </div>
 
                 <!-- Week 3 -->
-                <div id="week3Card" class="week-card block rounded-3xl p-8 hover:glow-amber group opacity-60">
+                <div id="week3Card" class="week-card block rounded-3xl p-8 hover:glow-amber group">
                     <span class="week-number bg-accent-amber text-dark-900">WEEK 3</span>
                     <div class="flex flex-col md:flex-row md:items-center gap-6">
                         <div class="flex-1">
@@ -379,7 +379,7 @@
                 </div>
 
                 <!-- Week 4 -->
-                <div id="week4Card" class="week-card block rounded-3xl p-8 hover:glow-emerald group opacity-60">
+                <div id="week4Card" class="week-card block rounded-3xl p-8 hover:glow-emerald group">
                     <span class="week-number bg-accent-emerald text-dark-900">WEEK 4</span>
                     <div class="flex flex-col md:flex-row md:items-center gap-6">
                         <div class="flex-1">
@@ -414,7 +414,7 @@
                 </div>
 
                 <!-- Week 5 -->
-                <div id="week5Card" class="week-card block rounded-3xl p-8 hover:glow-rose group opacity-60">
+                <div id="week5Card" class="week-card block rounded-3xl p-8 hover:glow-rose group">
                     <span class="week-number bg-gradient-to-r from-accent-rose to-accent-amber text-dark-900">FINAL</span>
                     <div class="flex flex-col md:flex-row md:items-center gap-6">
                         <div class="flex-1">
@@ -840,29 +840,21 @@
             for (let week = 1; week <= 5; week++) {
                 const weekKey = `week${week}`;
                 const challenge = challengesStatus[weekKey];
-                const card = document.getElementById(`week${week}Card`);
                 const badge = document.getElementById(`week${week}Badge`);
 
-                if (!card || !badge) continue;
+                if (!badge) continue;
 
+                // All cards stay bright (no opacity changes)
+                // Only update badge based on status
                 if (challenge && challenge.status === 'started') {
-                    // Active challenge - full opacity, green badge
-                    card.classList.remove('opacity-60');
-                    card.classList.add('opacity-100');
                     badge.textContent = 'In Progress';
                     badge.className = 'text-emerald-400 text-xs font-bold px-2 py-1 rounded-full bg-emerald-900/30 border border-emerald-700/30';
                 } else if (challenge && challenge.status === 'ended') {
-                    // Ended challenge - slightly dimmed, gray badge
-                    card.classList.remove('opacity-100');
-                    card.classList.add('opacity-60');
                     badge.textContent = 'Ended';
-                    badge.className = 'text-gray-400 text-xs font-bold px-2 py-1 rounded-full bg-gray-800';
+                    badge.className = 'text-blue-400 text-xs font-bold px-2 py-1 rounded-full bg-blue-900/30 border border-blue-700/30';
                 } else {
-                    // Not started - dimmed, gray badge
-                    card.classList.remove('opacity-100');
-                    card.classList.add('opacity-60');
                     badge.textContent = 'Not Started';
-                    badge.className = 'text-gray-600 text-xs font-bold px-2 py-1 rounded-full bg-gray-800';
+                    badge.className = 'text-gray-400 text-xs font-bold px-2 py-1 rounded-full bg-gray-800 border border-gray-700/30';
                 }
             }
         }
