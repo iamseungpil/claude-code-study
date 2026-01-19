@@ -195,6 +195,21 @@ def run_e2e_tests(code_dir: Path, week: int, port: int = 3000) -> dict:
         test_dest.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy(test_file, test_dest)
 
+        # Install @playwright/test in the submission directory
+        # This is needed because npx playwright test requires @playwright/test package
+        logger.info("Installing @playwright/test in submission directory")
+        install_pw = subprocess.run(
+            ["npm", "install", "--save-dev", "@playwright/test", "--cache", "/tmp/npm-cache"],
+            cwd=str(code_dir),
+            capture_output=True,
+            text=True,
+            timeout=60
+        )
+        if install_pw.returncode != 0:
+            logger.warning(f"Failed to install @playwright/test: {install_pw.stderr[:200]}")
+            result["errors"].append("Failed to install Playwright test runner")
+            return result
+
         # Create playwright config if not exists
         playwright_config = code_dir / "playwright.config.js"
         if not playwright_config.exists():
@@ -322,7 +337,16 @@ Return ONLY a JSON object with this structure:
 """
 
     try:
-        # Run Claude Code CLI
+        # Run Claude Code CLI in non-interactive mode
+        # --print (-p): Print mode, non-interactive
+        # --output-format json: Return JSON output
+        # ANTHROPIC_API_KEY: Required for API authentication
+        api_key = os.environ.get("ANTHROPIC_API_KEY", "")
+        if not api_key:
+            logger.error("ANTHROPIC_API_KEY not set")
+            return {"error": "ANTHROPIC_API_KEY environment variable not set"}
+
+        logger.info("Running Claude Code CLI evaluation")
         result = subprocess.run(
             ["claude", "-p", prompt, "--output-format", "json"],
             cwd=str(code_dir),
@@ -331,11 +355,20 @@ Return ONLY a JSON object with this structure:
             timeout=300,
             env={
                 **os.environ,
-                "ANTHROPIC_API_KEY": os.environ.get("ANTHROPIC_API_KEY", "")
+                "ANTHROPIC_API_KEY": api_key,
+                "CI": "true",  # Disable interactive prompts
+                "TERM": "dumb"  # Prevent terminal escape codes
             }
         )
 
         output = result.stdout.strip()
+        stderr = result.stderr.strip()
+
+        # Log Claude CLI execution result
+        if result.returncode != 0:
+            logger.error(f"Claude CLI failed with code {result.returncode}")
+            logger.error(f"stderr: {stderr[:500]}")
+            return {"error": f"Claude CLI failed: {stderr[:300]}"}
 
         # Find JSON in output
         json_start = output.find('{')
@@ -345,6 +378,7 @@ Return ONLY a JSON object with this structure:
             return json.loads(output[json_start:json_end])
         else:
             logger.error(f"No JSON in Claude output: {output[:500]}")
+            logger.error(f"stderr: {stderr[:500]}")
             return {"error": "No JSON found in Claude output", "raw": output[:500]}
 
     except subprocess.TimeoutExpired:

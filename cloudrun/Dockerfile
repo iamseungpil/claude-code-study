@@ -31,7 +31,8 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Claude Code CLI and Playwright globally
-RUN npm install -g @anthropic-ai/claude-code playwright
+# Note: @playwright/test is the test runner, playwright is the library
+RUN npm install -g @anthropic-ai/claude-code @playwright/test playwright
 RUN npx playwright install chromium
 
 # Set working directory
