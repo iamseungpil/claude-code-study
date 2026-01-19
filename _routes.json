@@ -1,12 +1,14 @@
 {
   "version": 1,
-  "description": "Route configuration for Cloudflare Pages",
-  "include": [],
+  "description": "Route configuration for Cloudflare Pages - HTML files go through middleware",
+  "include": [
+    "/frontend/*.html"
+  ],
   "exclude": [
-    "/frontend/*",
-    "/*.html",
-    "/*.js",
-    "/*.css",
-    "/*.json"
+    "/frontend/*.js",
+    "/frontend/*.css",
+    "/frontend/*.png",
+    "/frontend/*.jpg",
+    "/frontend/*.svg"
   ]
 }
