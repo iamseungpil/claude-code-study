@@ -389,6 +389,28 @@ async def admin_end_challenge(week: int, admin: dict = Depends(require_admin)):
     }
 
 
+@app.post("/api/admin/challenge/{week}/restart")
+async def admin_restart_challenge(week: int, admin: dict = Depends(require_admin)):
+    """
+    Admin restarts a challenge by clearing all data.
+    - Deletes all submissions for the week
+    - Deletes all evaluations for the week
+    - Resets challenge to not_started state
+    """
+    if not 1 <= week <= 5:
+        raise HTTPException(400, "Week must be between 1 and 5")
+
+    result = db.restart_challenge(week)
+
+    return {
+        "status": "restarted",
+        "week": week,
+        "deleted_submissions": result["deleted_submissions"],
+        "deleted_evaluations": result["deleted_evaluations"],
+        "message": f"Week {week} has been reset. All submissions and evaluations cleared."
+    }
+
+
 @app.get("/api/admin/users")
 async def admin_list_users(admin: dict = Depends(require_admin)):
     """Admin gets list of all registered users."""

@@ -32,6 +32,9 @@
         .submit-card { background: linear-gradient(135deg, rgba(52, 211, 153, 0.1) 0%, rgba(52, 211, 153, 0.02) 100%); border: 1px solid rgba(52, 211, 153, 0.2); }
         .btn-primary { background: linear-gradient(135deg, #34d399 0%, #10b981 100%); color: #000; transition: all 0.3s ease; }
         .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 30px -10px rgba(52, 211, 153, 0.5); }
+        .btn-secondary { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); transition: all 0.3s ease; }
+        .btn-secondary:hover { background: rgba(255,255,255,0.1); }
+        .timer-display { font-variant-numeric: tabular-nums; }
     </style>
     <script src="config.js"></script>
 </head>
@@ -56,7 +59,7 @@
                 <span class="bg-gray-700 text-gray-300 px-3 py-1 rounded-full text-xs font-bold">Upcoming</span>
             </div>
             <h1 class="text-4xl md:text-5xl font-bold mb-4 tracking-tight">🤖 Bot or App MVP</h1>
-            <p class="text-xl text-gray-400 mb-8 max-w-2xl">Develop a Discord bot or web dashboard MVP as a team. Share team context with CLAUDE.md.</p>
+            <p class="text-xl text-gray-400 mb-8 max-w-2xl">Build an MVP using 2+ MCP servers for rapid prototyping. Use Skills for development workflow automation.</p>
             <div class="flex flex-wrap gap-3">
                 <div class="bg-dark-700/60 border border-white/10 rounded-xl px-5 py-3 flex items-center gap-3">
                     <span class="text-2xl">⏱️</span>
@@ -79,9 +82,9 @@
             <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-4">SITUATION</h2>
             <div class="card rounded-2xl p-8">
                 <p class="text-lg text-gray-300 leading-relaxed">
-                    You need to develop a <strong class="text-white">practical tool</strong> for your lab or team.
-                    Share context with teammates using <strong class="text-accent">CLAUDE.md</strong>,
-                    and build an automated development pipeline using Headless mode.
+                    You need to develop a <strong class="text-white">practical MVP tool</strong> for your lab or team.
+                    Leverage <strong class="text-accent">MCP servers</strong> (Notion, GitHub, Playwright, etc.) for rapid prototyping,
+                    and use <strong class="text-accent">Skills</strong> for development workflow automation.
                 </p>
             </div>
         </section>
@@ -112,7 +115,7 @@
             </div>
         </section>
 
-        <section class="mb-16">
+        <section id="stagesSection" class="mb-16">
             <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-4">WHAT TO DO</h2>
             <div class="space-y-4">
                 <div class="card rounded-2xl p-6 flex gap-5">
@@ -146,33 +149,33 @@
             </div>
         </section>
 
-        <section class="mb-16">
+        <section id="learningSection" class="mb-16">
             <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-4">WHAT YOU'LL LEARN</h2>
             <div class="grid md:grid-cols-2 gap-4">
                 <div class="card rounded-2xl p-6">
+                    <div class="flex items-center gap-3 mb-3"><span class="text-2xl">🔌</span><h3 class="font-bold text-lg">MCP Integration</h3></div>
+                    <p class="text-gray-400 text-sm mb-3">Connect 2+ MCP servers for your MVP</p>
+                    <code class="text-xs bg-dark-600 px-3 py-1.5 rounded-lg text-accent">Notion, GitHub, Playwright</code>
+                </div>
+                <div class="card rounded-2xl p-6">
+                    <div class="flex items-center gap-3 mb-3"><span class="text-2xl">⚡</span><h3 class="font-bold text-lg">Skills Usage</h3></div>
+                    <p class="text-gray-400 text-sm mb-3">Development workflow automation</p>
+                    <code class="text-xs bg-dark-600 px-3 py-1.5 rounded-lg text-accent">/commit, /review-pr</code>
+                </div>
+                <div class="card rounded-2xl p-6">
+                    <div class="flex items-center gap-3 mb-3"><span class="text-2xl">🚀</span><h3 class="font-bold text-lg">MVP Development</h3></div>
+                    <p class="text-gray-400 text-sm mb-3">Rapid prototyping with 3 core features</p>
+                    <code class="text-xs bg-dark-600 px-3 py-1.5 rounded-lg text-accent">Focus on essentials</code>
+                </div>
+                <div class="card rounded-2xl p-6">
                     <div class="flex items-center gap-3 mb-3"><span class="text-2xl">📋</span><h3 class="font-bold text-lg">CLAUDE.md</h3></div>
-                    <p class="text-gray-400 text-sm mb-3">Project context shared by the whole team</p>
+                    <p class="text-gray-400 text-sm mb-3">Project context documentation</p>
                     <code class="text-xs bg-dark-600 px-3 py-1.5 rounded-lg text-accent">Create at project root</code>
-                </div>
-                <div class="card rounded-2xl p-6">
-                    <div class="flex items-center gap-3 mb-3"><span class="text-2xl">🖥️</span><h3 class="font-bold text-lg">Headless Mode (-p)</h3></div>
-                    <p class="text-gray-400 text-sm mb-3">Run without interaction</p>
-                    <code class="text-xs bg-dark-600 px-3 py-1.5 rounded-lg text-accent">claude -p "task"</code>
-                </div>
-                <div class="card rounded-2xl p-6">
-                    <div class="flex items-center gap-3 mb-3"><span class="text-2xl">🔀</span><h3 class="font-bold text-lg">Git Integration</h3></div>
-                    <p class="text-gray-400 text-sm mb-3">Branch, commit, PR automation</p>
-                    <code class="text-xs bg-dark-600 px-3 py-1.5 rounded-lg text-accent">Create and review PRs</code>
-                </div>
-                <div class="card rounded-2xl p-6">
-                    <div class="flex items-center gap-3 mb-3"><span class="text-2xl">🔐</span><h3 class="font-bold text-lg">Permissions</h3></div>
-                    <p class="text-gray-400 text-sm mb-3">Safe automated execution settings</p>
-                    <code class="text-xs bg-dark-600 px-3 py-1.5 rounded-lg text-accent">allowedTools config</code>
                 </div>
             </div>
         </section>
 
-        <section class="mb-16">
+        <section id="deliverablesSection" class="mb-16">
             <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-4">DELIVERABLES</h2>
             <div class="card rounded-2xl p-8">
                 <div class="grid md:grid-cols-2 gap-6">
@@ -201,16 +204,16 @@
             </div>
         </section>
 
-        <section class="mb-16">
+        <section id="scoringSection" class="mb-16">
             <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-4">SCORING RUBRIC</h2>
             <div class="card rounded-2xl overflow-hidden">
                 <table class="w-full">
                     <thead><tr class="bg-dark-600/50 text-left"><th class="px-6 py-4 font-semibold">Category</th><th class="px-6 py-4 font-semibold text-right">Points</th></tr></thead>
                     <tbody class="divide-y divide-white/5">
-                        <tr><td class="px-6 py-5"><div class="font-medium text-lg">MVP Functionality</div><div class="text-sm text-gray-500 mt-1">Core feature implementation, completeness</div></td><td class="px-6 py-5 text-right"><span class="text-2xl font-bold text-accent">30</span></td></tr>
-                        <tr><td class="px-6 py-5"><div class="font-medium text-lg">CLAUDE.md Quality</div><div class="text-sm text-gray-500 mt-1">Context sharing, documentation</div></td><td class="px-6 py-5 text-right"><span class="text-2xl font-bold text-accent">20</span></td></tr>
-                        <tr><td class="px-6 py-5"><div class="font-medium text-lg">Automation (Headless)</div><div class="text-sm text-gray-500 mt-1">-p mode utilization</div></td><td class="px-6 py-5 text-right"><span class="text-2xl font-bold text-accent">20</span></td></tr>
-                        <tr><td class="px-6 py-5"><div class="font-medium text-lg">Teamwork (Git)</div><div class="text-sm text-gray-500 mt-1">Collaboration workflow, PRs</div></td><td class="px-6 py-5 text-right"><span class="text-2xl font-bold text-accent">20</span></td></tr>
+                        <tr><td class="px-6 py-5"><div class="font-medium text-lg">MCP Integration</div><div class="text-sm text-gray-500 mt-1">2+ MCP servers connected and used</div></td><td class="px-6 py-5 text-right"><span class="text-2xl font-bold text-accent">25</span></td></tr>
+                        <tr><td class="px-6 py-5"><div class="font-medium text-lg">MVP Functionality</div><div class="text-sm text-gray-500 mt-1">3 core features working</div></td><td class="px-6 py-5 text-right"><span class="text-2xl font-bold text-accent">30</span></td></tr>
+                        <tr><td class="px-6 py-5"><div class="font-medium text-lg">Skills Usage</div><div class="text-sm text-gray-500 mt-1">/commit, /review-pr, custom skills</div></td><td class="px-6 py-5 text-right"><span class="text-2xl font-bold text-accent">15</span></td></tr>
+                        <tr><td class="px-6 py-5"><div class="font-medium text-lg">Code Quality</div><div class="text-sm text-gray-500 mt-1">Error handling, documentation</div></td><td class="px-6 py-5 text-right"><span class="text-2xl font-bold text-accent">20</span></td></tr>
                         <tr class="bg-green-500/5"><td class="px-6 py-5"><div class="font-medium text-lg text-green-400">⏱️ Time Bonus</div></td><td class="px-6 py-5 text-right"><span class="text-2xl font-bold text-green-400">+10</span></td></tr>
                     </tbody>
                     <tfoot><tr class="bg-dark-600/30"><td class="px-6 py-4 font-bold text-lg">Total</td><td class="px-6 py-4 text-right"><span class="text-3xl font-bold bg-gradient-to-r from-accent to-emerald-300 bg-clip-text text-transparent">100</span></td></tr></tfoot>
@@ -218,14 +221,73 @@
             </div>
         </section>
 
+        <!-- Challenge Not Started Message -->
+        <div id="challengeNotStarted" class="hidden mb-8 p-6 bg-amber-500/10 border border-amber-500/30 rounded-2xl text-center">
+            <span class="text-4xl block mb-4">&#128274;</span>
+            <h3 class="text-xl font-bold text-amber-400 mb-2">Challenge Not Yet Started</h3>
+            <p class="text-gray-400">Admin has not started this week's challenge yet. Please wait.</p>
+        </div>
+
         <section class="mb-16" id="submit">
             <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-4">SUBMIT YOUR WORK</h2>
             <div class="submit-card rounded-3xl p-8">
-                <div class="text-center py-12">
-                    <span class="text-6xl mb-4 block">🔒</span>
-                    <h3 class="text-2xl font-bold mb-2">Coming Soon</h3>
-                    <p class="text-gray-400">Week 4 is not yet open.</p>
+                <!-- Instructions -->
+                <div id="instructionsContainer" class="hidden mb-8 p-6 bg-dark-800/50 rounded-2xl border border-white/5">
+                    <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                        <span>&#128203;</span> How to Submit
+                    </h3>
+                    <ol class="space-y-3 text-gray-300">
+                        <li class="flex gap-3">
+                            <span class="bg-accent/20 text-accent w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">1</span>
+                            <span>Push your code to a <strong>GitHub repository</strong></span>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="bg-accent/20 text-accent w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">2</span>
+                            <span>Make sure <strong>CLAUDE.md</strong> and your <strong>MVP code</strong> are included</span>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="bg-accent/20 text-accent w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">3</span>
+                            <span>Enter your repository URL below and click <strong>Submit</strong></span>
+                        </li>
+                    </ol>
                 </div>
+
+                <!-- Timer Display -->
+                <div id="timerContainer" class="hidden mb-8 p-6 bg-accent/10 rounded-2xl border border-accent/30 text-center">
+                    <div class="text-sm text-accent mb-2">Elapsed Time</div>
+                    <div id="timerDisplay" class="timer-display text-5xl font-bold text-white">00:00</div>
+                </div>
+
+                <!-- Login Warning -->
+                <div id="login-warning" class="mb-6 p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl text-amber-400">
+                    <span>Please <a href="index.html" class="text-accent underline hover:text-emerald-300">login</a> to submit your solution.</span>
+                </div>
+
+                <!-- Form -->
+                <form id="submitForm" class="space-y-6">
+                    <div id="githubUrlContainer" class="hidden">
+                        <label class="block text-sm font-medium mb-2 text-gray-300">GitHub Repository URL</label>
+                        <input type="url" id="githubUrl" required
+                               class="w-full bg-dark-800 border border-white/10 rounded-xl px-5 py-4 focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent/50 transition-all text-lg mono"
+                               placeholder="https://github.com/username/mvp-week4">
+                    </div>
+                    <div class="flex flex-col sm:flex-row gap-4 pt-4">
+                        <!-- Timer not started hint -->
+                        <div id="timerNotStartedHint" class="flex-1 p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl text-amber-400 text-center">
+                            <span>Start Timer to reveal challenge details and submit form</span>
+                        </div>
+                        <button type="button" id="startBtn" onclick="startChallenge()"
+                                class="btn-secondary flex-1 text-white font-bold py-4 px-6 rounded-xl text-lg flex items-center justify-center gap-2">
+                            <span>&#9201;</span> Start Timer
+                        </button>
+                        <button type="submit" id="submitBtn"
+                                class="hidden btn-primary flex-1 text-white font-bold py-4 px-6 rounded-xl text-lg flex items-center justify-center gap-2">
+                            <span>&#128640;</span> Submit
+                        </button>
+                    </div>
+                </form>
+
+                <div id="statusMessage" class="mt-6 text-center hidden"></div>
             </div>
         </section>
     </main>
@@ -235,5 +297,261 @@
             <a href="index.html" class="text-gray-500 hover:text-accent transition-colors">← Back to Home</a>
         </div>
     </footer>
+
+    <script src="config.js"></script>
+    <script>
+        const API_BASE = window.API_BASE || '';
+        const WEEK = 4;
+
+        let timerInterval = null;
+        let currentUser = null;
+        let personalStartTime = null;
+
+        async function checkLoginStatus() {
+            const token = localStorage.getItem('auth_token');
+            const loginWarning = document.getElementById('login-warning');
+            const startBtn = document.getElementById('startBtn');
+            const submitBtn = document.getElementById('submitBtn');
+
+            if (!token) {
+                if (loginWarning) loginWarning.classList.remove('hidden');
+                startBtn.disabled = true;
+                startBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                submitBtn.disabled = true;
+                submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                const hint = document.getElementById('timerNotStartedHint');
+                if (hint) hint.classList.add('hidden');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/api/auth/me`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    currentUser = await response.json();
+                    if (loginWarning) loginWarning.classList.add('hidden');
+                    startBtn.disabled = false;
+                    startBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    submitBtn.disabled = false;
+                    submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                } else {
+                    localStorage.removeItem('auth_token');
+                    if (loginWarning) loginWarning.classList.remove('hidden');
+                    startBtn.disabled = true;
+                    startBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                    submitBtn.disabled = true;
+                    submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                    const hint = document.getElementById('timerNotStartedHint');
+                    if (hint) hint.classList.add('hidden');
+                }
+            } catch (e) {
+                console.error('Auth check failed:', e);
+                if (loginWarning) loginWarning.classList.remove('hidden');
+            }
+        }
+
+        async function loadChallengeStatus() {
+            try {
+                const response = await fetch(`${API_BASE}/api/challenge/${WEEK}/status`);
+                if (response.ok) {
+                    const data = await response.json();
+
+                    if (data.status !== 'started') {
+                        // Show challenge not started message
+                        document.getElementById('challengeNotStarted').classList.remove('hidden');
+
+                        // Hide challenge content sections
+                        ['stagesSection', 'learningSection', 'deliverablesSection', 'scoringSection'].forEach(id => {
+                            const el = document.getElementById(id);
+                            if (el) el.classList.add('hidden');
+                        });
+
+                        // Disable start button
+                        const startBtn = document.getElementById('startBtn');
+                        if (startBtn) {
+                            startBtn.disabled = true;
+                            startBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                        }
+
+                        // Hide timer hint
+                        const hint = document.getElementById('timerNotStartedHint');
+                        if (hint) hint.classList.add('hidden');
+                    }
+                }
+            } catch (e) {
+                console.error('Failed to check challenge status:', e);
+            }
+        }
+
+        async function loadPersonalStatus() {
+            const token = localStorage.getItem('auth_token');
+            if (!token || !currentUser) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/api/challenge/${WEEK}/my-status`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+
+                    if (data.challenge_status !== 'started') {
+                        return; // Already handled by loadChallengeStatus
+                    }
+
+                    if (data.personal_status === 'in_progress' || data.personal_status === 'submitted') {
+                        personalStartTime = data.personal_start_time;
+
+                        document.getElementById('timerContainer').classList.remove('hidden');
+                        document.getElementById('startBtn').disabled = true;
+                        document.getElementById('startBtn').classList.add('opacity-50', 'cursor-not-allowed');
+                        document.getElementById('startBtn').innerHTML = 'Timer Started';
+
+                        timerInterval = setInterval(updateTimer, 1000);
+                        updateTimer();
+
+                        showChallengeForm();
+
+                        if (data.personal_status === 'submitted') {
+                            document.getElementById('submitBtn').disabled = true;
+                            document.getElementById('submitBtn').classList.add('opacity-50', 'cursor-not-allowed');
+                            document.getElementById('submitBtn').innerHTML = 'Submitted';
+                            showStatus('Already submitted for this week', 'text-green-400');
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error('Failed to load personal status:', e);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await checkLoginStatus();
+            await loadChallengeStatus();
+            await loadPersonalStatus();
+        });
+
+        function updateTimer() {
+            if (!personalStartTime) return;
+            const startDate = new Date(personalStartTime);
+            const elapsed = Math.floor((Date.now() - startDate.getTime()) / 1000);
+            const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
+            const seconds = (elapsed % 60).toString().padStart(2, '0');
+            document.getElementById('timerDisplay').textContent = `${minutes}:${seconds}`;
+        }
+
+        function showChallengeForm() {
+            // Show hidden sections
+            ['stagesSection', 'learningSection', 'deliverablesSection', 'scoringSection'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.remove('hidden');
+            });
+
+            // Show submission form elements
+            const instructions = document.getElementById('instructionsContainer');
+            const githubUrl = document.getElementById('githubUrlContainer');
+            const submitBtn = document.getElementById('submitBtn');
+            if (instructions) instructions.classList.remove('hidden');
+            if (githubUrl) githubUrl.classList.remove('hidden');
+            if (submitBtn) submitBtn.classList.remove('hidden');
+
+            const hint = document.getElementById('timerNotStartedHint');
+            if (hint) hint.classList.add('hidden');
+        }
+
+        async function startChallenge() {
+            if (!currentUser) {
+                showStatus('Please login first', 'text-amber-400');
+                return;
+            }
+
+            const token = localStorage.getItem('auth_token');
+
+            try {
+                const response = await fetch(`${API_BASE}/api/challenge/${WEEK}/start-personal`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    personalStartTime = data.started_at;
+
+                    document.getElementById('timerContainer').classList.remove('hidden');
+                    timerInterval = setInterval(updateTimer, 1000);
+                    updateTimer();
+
+                    document.getElementById('startBtn').disabled = true;
+                    document.getElementById('startBtn').classList.add('opacity-50', 'cursor-not-allowed');
+                    document.getElementById('startBtn').innerHTML = 'Timer Started';
+
+                    showChallengeForm();
+
+                    showStatus('Timer started! Good luck!', 'text-green-400');
+                } else {
+                    const error = await response.json();
+                    showStatus(error.detail || 'Failed to start timer', 'text-red-400');
+                }
+            } catch (e) {
+                showStatus('Connection error', 'text-red-400');
+            }
+        }
+
+        document.getElementById('submitForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            if (!currentUser) {
+                showStatus('Please login first', 'text-amber-400');
+                return;
+            }
+
+            const githubUrl = document.getElementById('githubUrl').value;
+
+            if (!githubUrl) {
+                showStatus('Please enter GitHub URL', 'text-amber-400');
+                return;
+            }
+
+            try {
+                const token = localStorage.getItem('auth_token');
+                const response = await fetch(`${API_BASE}/api/submissions/submit`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        week: WEEK,
+                        github_url: githubUrl
+                    })
+                });
+
+                if (timerInterval) clearInterval(timerInterval);
+
+                if (response.ok) {
+                    const data = await response.json();
+                    showStatus(`Submission complete! Elapsed time: ${data.elapsed_minutes?.toFixed(1) || '-'} minutes. Evaluation will start shortly.`, 'text-green-400');
+                    document.getElementById('submitBtn').disabled = true;
+                    document.getElementById('submitBtn').classList.add('opacity-50', 'cursor-not-allowed');
+                    document.getElementById('submitBtn').innerHTML = 'Submitted';
+                } else {
+                    const error = await response.json();
+                    showStatus('Submission failed: ' + (error.detail || 'Unknown error'), 'text-red-400');
+                }
+
+            } catch (error) {
+                showStatus('Submission failed: ' + error.message, 'text-red-400');
+            }
+        });
+
+        function showStatus(message, colorClass) {
+            const el = document.getElementById('statusMessage');
+            el.textContent = message;
+            el.className = `mt-6 text-center text-lg font-medium ${colorClass}`;
+            el.classList.remove('hidden');
+        }
+    </script>
 </body>
 </html>

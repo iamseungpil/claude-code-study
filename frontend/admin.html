@@ -126,6 +126,14 @@
         let currentUser = null;
         let challengesStatus = {};
 
+        // Sanitize HTML to prevent XSS
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
         const WEEK_TIME_LIMITS = {
             1: 45, 2: 50, 3: 60, 4: 60, 5: 75
         };
@@ -243,8 +251,8 @@
                             : `<div class="w-10 h-10 rounded-full bg-accent-purple/30 flex items-center justify-center text-lg font-bold">${user.first_name ? user.first_name.charAt(0).toUpperCase() : '?'}</div>`
                         }
                         <div>
-                            <div class="font-medium">${user.full_name || user.user_id}</div>
-                            <div class="text-sm text-gray-500">@${user.user_id} ${user.role === 'admin' ? '<span class="text-accent-rose">• Admin</span>' : ''}</div>
+                            <div class="font-medium">${escapeHtml(user.full_name || user.user_id)}</div>
+                            <div class="text-sm text-gray-500">@${escapeHtml(user.user_id)} ${user.role === 'admin' ? '<span class="text-accent-rose">• Admin</span>' : ''}</div>
                         </div>
                     </div>
                     <div class="flex items-center gap-4">
@@ -351,8 +359,8 @@
                             <div class="flex items-center justify-between">
                                 <div>
                                     <div class="text-sm text-gray-400">Duration</div>
-                                    <div class="text-lg text-gray-300">${challenge.start_time && challenge.end_time ? 
-                                        formatTime(Math.floor((new Date(challenge.end_time) - new Date(challenge.start_time)) / 1000)) : 
+                                    <div class="text-lg text-gray-300">${challenge.start_time && challenge.end_time ?
+                                        formatTime(Math.floor((new Date(challenge.end_time) - new Date(challenge.start_time)) / 1000)) :
                                         '-'}</div>
                                 </div>
                                 <div class="text-right">
@@ -361,6 +369,11 @@
                                 </div>
                             </div>
                         </div>
+                    `;
+                    buttons = `
+                        <button onclick="restartChallenge(${week})" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-xl transition-all flex items-center gap-2">
+                            <span>🔄</span> Restart (Clear All Data)
+                        </button>
                     `;
                 }
 
@@ -446,6 +459,43 @@
                 if (response.ok) {
                     alert(`Week ${week} challenge ended.`);
                     loadChallengesStatus();
+                } else {
+                    const error = await response.json();
+                    alert(`Error: ${error.detail}`);
+                }
+            } catch (e) {
+                alert('Connection error');
+            }
+        }
+
+        async function restartChallenge(week) {
+            // Require user to type DELETE to confirm
+            const confirmation = prompt(
+                `⚠️ WARNING: This will DELETE all submissions and evaluations for Week ${week}.\n\n` +
+                `This action cannot be undone!\n\n` +
+                `Type "DELETE" to confirm:`
+            );
+
+            if (confirmation !== 'DELETE') {
+                alert('Restart cancelled. You must type "DELETE" exactly to confirm.');
+                return;
+            }
+
+            const token = localStorage.getItem('auth_token');
+            try {
+                const response = await fetch(`${API_BASE}/api/admin/challenge/${week}/restart`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    alert(`Week ${week} has been reset!\n\n` +
+                          `Deleted ${data.deleted_submissions} submissions\n` +
+                          `Deleted ${data.deleted_evaluations} evaluations\n\n` +
+                          `Challenge is now ready to start again.`);
+                    loadChallengesStatus();
+                    loadRecentSubmissions();
                 } else {
                     const error = await response.json();
                     alert(`Error: ${error.detail}`);

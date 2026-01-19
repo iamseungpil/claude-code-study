@@ -172,6 +172,47 @@ def update_personal_status(week: int, user_id: str, status: str):
         update_challenge(week, challenge)
 
 
+def restart_challenge(week: int) -> dict:
+    """
+    Restart a challenge by clearing all data and resetting to initial state.
+    - Deletes all submissions for the week
+    - Deletes all evaluations for the week
+    - Resets challenge document to not_started state
+    Returns counts of deleted documents.
+    """
+    deleted_submissions = 0
+    deleted_evaluations = 0
+
+    # Delete all submissions for this week
+    submissions_query = db.collection(SUBMISSIONS_COLLECTION).where("week", "==", week)
+    for doc in submissions_query.stream():
+        doc.reference.delete()
+        deleted_submissions += 1
+
+    # Delete all evaluations for this week
+    evaluations_query = db.collection(EVALUATIONS_COLLECTION).where("week", "==", week)
+    for doc in evaluations_query.stream():
+        doc.reference.delete()
+        deleted_evaluations += 1
+
+    # Reset challenge document to initial state
+    initial_state = {
+        "status": "not_started",
+        "start_time": None,
+        "end_time": None,
+        "started_by": None,
+        "personal_starts": {}
+    }
+    db.collection(CHALLENGES_COLLECTION).document(f"week{week}").set(initial_state)
+
+    return {
+        "week": week,
+        "deleted_submissions": deleted_submissions,
+        "deleted_evaluations": deleted_evaluations,
+        "status": "restarted"
+    }
+
+
 # ============== Submissions ==============
 
 def save_submission_metadata(week: int, participant_id: str, metadata: dict):
