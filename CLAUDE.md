@@ -292,3 +292,5 @@ npx playwright test registration.spec.ts --project=site-tests
 - Use `--protocol http2` flag for more stable connections
 - QUIC protocol may timeout on some networks
 - Example: `cloudflared tunnel --url http://localhost:8003 --protocol http2`
+
+### Auto-Deploy Test: 2026-01-20 22:18:11
