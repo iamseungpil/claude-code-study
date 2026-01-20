@@ -943,7 +943,37 @@ async def submit_solution(
     submission_dir = SUBMISSIONS_DIR / f"week{data.week}" / participant_id
     submission_dir.mkdir(parents=True, exist_ok=True)
 
-    # Create metadata with personal time reference
+    # Load existing metadata to track submission history
+    metadata_file = submission_dir / "metadata.json"
+    existing_history = []
+    submission_number = 1
+
+    if metadata_file.exists():
+        with open(metadata_file) as f:
+            existing_metadata = json.load(f)
+            existing_history = existing_metadata.get("submission_history", [])
+            # If no history but has submitted_at, create first entry from existing data
+            if not existing_history and existing_metadata.get("submitted_at"):
+                existing_history.append({
+                    "submission_number": 1,
+                    "github_url": existing_metadata.get("github_url"),
+                    "submitted_at": existing_metadata.get("submitted_at"),
+                    "elapsed_seconds": existing_metadata.get("elapsed_seconds"),
+                    "elapsed_minutes": existing_metadata.get("elapsed_minutes")
+                })
+            submission_number = len(existing_history) + 1
+
+    # Create new submission entry
+    new_submission = {
+        "submission_number": submission_number,
+        "github_url": data.github_url,
+        "submitted_at": submission_time.isoformat(),
+        "elapsed_seconds": round(elapsed_seconds, 1),
+        "elapsed_minutes": round(elapsed_minutes, 1)
+    }
+    existing_history.append(new_submission)
+
+    # Create metadata with personal time reference and history
     metadata = {
         "participant_id": participant_id,
         "week": data.week,
@@ -953,7 +983,9 @@ async def submit_solution(
         "global_start_time": challenge.get("start_time"),
         "elapsed_seconds": round(elapsed_seconds, 1),
         "elapsed_minutes": round(elapsed_minutes, 1),
-        "status": "submitted"
+        "status": "submitted",
+        "submission_number": submission_number,
+        "submission_history": existing_history
     }
 
     # Clone repository FIRST (before updating status)
@@ -969,7 +1001,6 @@ async def submit_solution(
 
     metadata["status"] = "cloned"
 
-    metadata_file = submission_dir / "metadata.json"
     with open(metadata_file, 'w') as f:
         json.dump(metadata, f, indent=2)
 
@@ -981,7 +1012,10 @@ async def submit_solution(
         "message": "Evaluation will start shortly",
         "participant_id": participant_id,
         "week": data.week,
-        "elapsed_minutes": round(elapsed_minutes, 1)
+        "elapsed_minutes": round(elapsed_minutes, 1),
+        "submission_number": submission_number,
+        "is_resubmission": submission_number > 1,
+        "submission_history": existing_history
     }
 
 
@@ -1002,6 +1036,51 @@ async def list_submissions(week: int):
                     submissions.append(json.load(f))
     
     return submissions
+
+
+@app.get("/api/submissions/{week}/{participant_id}/history")
+async def get_submission_history(week: int, participant_id: str):
+    """Get submission history for a specific participant."""
+    submission_dir = SUBMISSIONS_DIR / f"week{week}" / participant_id
+    metadata_file = submission_dir / "metadata.json"
+
+    if not metadata_file.exists():
+        return {"submission_history": [], "total_submissions": 0}
+
+    with open(metadata_file) as f:
+        metadata = json.load(f)
+
+    history = metadata.get("submission_history", [])
+
+    # If no history array but has submission data, create initial entry
+    if not history and metadata.get("submitted_at"):
+        history = [{
+            "submission_number": 1,
+            "github_url": metadata.get("github_url"),
+            "submitted_at": metadata.get("submitted_at"),
+            "elapsed_seconds": metadata.get("elapsed_seconds"),
+            "elapsed_minutes": metadata.get("elapsed_minutes")
+        }]
+
+    # Add evaluation scores to history if available
+    eval_file = EVALUATIONS_DIR / f"week{week}" / f"{participant_id}.json"
+    if eval_file.exists():
+        with open(eval_file) as f:
+            eval_data = json.load(f)
+            # Add latest evaluation to the most recent submission
+            if history:
+                history[-1]["evaluation"] = {
+                    "total": eval_data.get("scores", {}).get("total"),
+                    "rubric": eval_data.get("scores", {}).get("rubric"),
+                    "time_rank_bonus": eval_data.get("scores", {}).get("time_rank_bonus"),
+                    "evaluated_at": eval_data.get("evaluated_at")
+                }
+
+    return {
+        "submission_history": history,
+        "total_submissions": len(history),
+        "personal_start_time": metadata.get("personal_start_time")
+    }
 
 
 # ============== Evaluations & Leaderboard ==============

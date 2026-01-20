@@ -758,6 +758,18 @@ useEffect(() =&gt; {
                 </form>
 
                 <div id="statusMessage" class="mt-6 text-center hidden"></div>
+
+                <!-- Submission History Section -->
+                <div id="submissionHistory" class="mt-8 hidden">
+                    <div class="border-t border-white/10 pt-6">
+                        <h3 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                            <span>📋</span> Submission History
+                        </h3>
+                        <div id="submissionHistoryList" class="space-y-3">
+                            <!-- History items will be inserted here -->
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
     </main>
@@ -891,9 +903,10 @@ useEffect(() =&gt; {
             // Check challenge status - will redirect if not started
             await loadPersonalStatus();
 
-            // Check for existing evaluation results
+            // Check for existing evaluation results and submission history
             if (currentUser) {
                 await checkExistingEvaluation();
+                await loadSubmissionHistory();
             }
         });
 
@@ -998,7 +1011,7 @@ useEffect(() =&gt; {
                     })
                 });
 
-                if (timerInterval) clearInterval(timerInterval);
+                // Timer continues running after submit (don't stop it)
 
                 if (response.ok) {
                     const data = await response.json();
@@ -1031,6 +1044,11 @@ useEffect(() =&gt; {
                     document.getElementById('submitBtn').disabled = true;
                     document.getElementById('submitBtn').classList.add('opacity-50', 'cursor-not-allowed');
                     document.getElementById('submitBtn').innerHTML = 'Evaluating...';
+
+                    // Update submission history from response
+                    if (data.submission_history) {
+                        displaySubmissionHistory(data.submission_history);
+                    }
 
                     // Start polling for evaluation results
                     pollEvaluation(1, currentUser.user_id);
@@ -1184,6 +1202,9 @@ useEffect(() =&gt; {
                 submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
                 submitBtn.innerHTML = '🔄 Resubmit';
             }
+
+            // Refresh submission history to show evaluation scores
+            loadSubmissionHistory();
         }
 
         // Check for existing evaluation on page load (for already submitted users)
@@ -1199,6 +1220,79 @@ useEffect(() =&gt; {
             } catch (error) {
                 // No evaluation yet, that's fine
             }
+        }
+
+        // Fetch and display submission history
+        async function loadSubmissionHistory() {
+            if (!currentUser) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/api/submissions/${WEEK}/${currentUser.user_id}/history`);
+                if (response.ok) {
+                    const data = await response.json();
+                    displaySubmissionHistory(data.submission_history || []);
+                }
+            } catch (error) {
+                console.error('Failed to load submission history:', error);
+            }
+        }
+
+        // Display submission history in the UI
+        function displaySubmissionHistory(history) {
+            const container = document.getElementById('submissionHistory');
+            const list = document.getElementById('submissionHistoryList');
+
+            if (!history || history.length === 0) {
+                container.classList.add('hidden');
+                return;
+            }
+
+            container.classList.remove('hidden');
+
+            // Sort by submission number descending (latest first)
+            const sortedHistory = [...history].sort((a, b) => b.submission_number - a.submission_number);
+
+            list.innerHTML = sortedHistory.map((sub, index) => {
+                const isLatest = index === 0;
+                const tryNum = sub.submission_number;
+                const tryLabel = tryNum === 1 ? '1st' : tryNum === 2 ? '2nd' : tryNum === 3 ? '3rd' : `${tryNum}th`;
+                const elapsed = sub.elapsed_minutes?.toFixed(1) || '-';
+                const submittedAt = sub.submitted_at ? new Date(sub.submitted_at).toLocaleString('ko-KR') : '-';
+                const hasEval = sub.evaluation && sub.evaluation.total !== null;
+
+                return `
+                    <div class="p-4 rounded-xl ${isLatest ? 'bg-accent/10 border border-accent/30' : 'bg-dark-800/50 border border-white/5'}">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center gap-2">
+                                <span class="text-lg font-bold ${isLatest ? 'text-accent' : 'text-gray-400'}">${tryLabel} Try</span>
+                                ${isLatest ? '<span class="text-xs bg-accent/20 text-accent px-2 py-0.5 rounded">Latest</span>' : ''}
+                            </div>
+                            ${hasEval ? `
+                                <div class="text-right">
+                                    <span class="text-2xl font-bold text-white">${sub.evaluation.total}</span>
+                                    <span class="text-sm text-gray-400">pts</span>
+                                </div>
+                            ` : '<span class="text-sm text-amber-400">⏳ Evaluating...</span>'}
+                        </div>
+                        <div class="grid grid-cols-2 gap-4 text-sm">
+                            <div>
+                                <span class="text-gray-500">Elapsed:</span>
+                                <span class="text-white ml-1">${elapsed} min</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-500">Submitted:</span>
+                                <span class="text-white ml-1">${submittedAt}</span>
+                            </div>
+                        </div>
+                        ${hasEval ? `
+                            <div class="mt-2 pt-2 border-t border-white/5 grid grid-cols-2 gap-2 text-xs">
+                                <div><span class="text-gray-500">Rubric:</span> <span class="text-white">${sub.evaluation.rubric || 0}</span></div>
+                                <div><span class="text-gray-500">Time Bonus:</span> <span class="text-purple-400">+${sub.evaluation.time_rank_bonus || 0}</span></div>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('');
         }
     </script>
 </body>
