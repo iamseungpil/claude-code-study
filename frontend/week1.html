@@ -1090,17 +1090,29 @@ useEffect(() =&gt; {
 
                 if (response.ok) {
                     const evalData = await response.json();
-                    displayEvaluationFeedback(evalData);
+                    // Check if evaluation is complete (not still "evaluating")
+                    if (evalData.status === 'completed') {
+                        displayEvaluationFeedback(evalData);
+                    } else if (evalData.status === 'evaluating') {
+                        // Still evaluating, keep polling
+                        showStatus(`Evaluation in progress... (${attempts + 1}/${maxAttempts})`, 'text-blue-400');
+                        setTimeout(() => pollEvaluation(week, participantId, attempts + 1), 5000);
+                    } else if (evalData.status === 'error') {
+                        showStatus('Evaluation failed: ' + (evalData.error || 'Unknown error'), 'text-red-400');
+                    } else {
+                        // Unknown status, show results anyway
+                        displayEvaluationFeedback(evalData);
+                    }
                 } else if (response.status === 404) {
                     // Not yet evaluated, poll again
                     showStatus(`Evaluation in progress... (${attempts + 1}/${maxAttempts})`, 'text-blue-400');
-                    setTimeout(() => pollEvaluation(week, participantId, attempts + 1), 10000);
+                    setTimeout(() => pollEvaluation(week, participantId, attempts + 1), 5000);
                 } else {
                     showStatus('Error checking evaluation status', 'text-red-400');
                 }
             } catch (error) {
                 console.error('Evaluation poll error:', error);
-                setTimeout(() => pollEvaluation(week, participantId, attempts + 1), 10000);
+                setTimeout(() => pollEvaluation(week, participantId, attempts + 1), 5000);
             }
         }
 

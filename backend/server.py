@@ -909,9 +909,14 @@ def clone_github_repo(github_url: str, target_dir: Path) -> bool:
 # Each evaluation runs in its own thread, allowing multiple concurrent evaluations
 _evaluation_executor = ThreadPoolExecutor(max_workers=10, thread_name_prefix="eval_")
 
+# Lock to prevent concurrent evaluations for the same user/week
+# Key: "week_participant_id", Value: True if evaluation in progress
+_evaluation_locks: dict[str, bool] = {}
+
 
 def _run_evaluation_sync(week: int, participant_id: str):
     """Synchronous evaluation function (runs in thread pool)."""
+    lock_key = f"{week}_{participant_id}"
     try:
         logging.info(f"Starting evaluation for {participant_id} week{week}")
         subprocess.run(
@@ -925,6 +930,9 @@ def _run_evaluation_sync(week: int, participant_id: str):
         logging.error(f"Evaluation timeout for {participant_id} week{week}")
     except Exception as e:
         logging.error(f"Evaluation error for {participant_id} week{week}: {e}")
+    finally:
+        # Release the lock when evaluation completes
+        _evaluation_locks.pop(lock_key, None)
 
 
 async def trigger_evaluation(week: int, participant_id: str):
@@ -932,7 +940,18 @@ async def trigger_evaluation(week: int, participant_id: str):
 
     Uses ThreadPoolExecutor to run evaluations concurrently.
     Multiple users submitting at the same time will not block each other.
+    If evaluation is already in progress for this user/week, skip (no duplicate runs).
     """
+    lock_key = f"{week}_{participant_id}"
+
+    # Check if evaluation is already in progress for this user/week
+    if _evaluation_locks.get(lock_key):
+        logging.info(f"Evaluation already in progress for {participant_id} week{week}, skipping duplicate")
+        return
+
+    # Acquire lock
+    _evaluation_locks[lock_key] = True
+
     loop = asyncio.get_event_loop()
     # Schedule the evaluation to run in the thread pool
     loop.run_in_executor(_evaluation_executor, _run_evaluation_sync, week, participant_id)
@@ -1059,6 +1078,18 @@ async def submit_solution(
         logging.info(f"Saved submission to SQLite: {participant_id} week{data.week} try{submission_number}")
     except Exception as e:
         logging.warning(f"SQLite save failed: {e}")
+
+    # Mark evaluation as "evaluating" before starting (so polling knows to wait)
+    eval_file = EVALUATIONS_DIR / f"week{data.week}" / f"{participant_id}.json"
+    eval_file.parent.mkdir(parents=True, exist_ok=True)
+    with open(eval_file, 'w') as f:
+        json.dump({
+            "participant": participant_id,
+            "week": data.week,
+            "status": "evaluating",
+            "submission_number": submission_number,
+            "started_at": datetime.now(timezone.utc).isoformat()
+        }, f, indent=2)
 
     # Trigger evaluation in background (non-blocking, concurrent)
     asyncio.create_task(trigger_evaluation(data.week, participant_id))
