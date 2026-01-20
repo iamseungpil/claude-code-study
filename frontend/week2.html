@@ -1013,6 +1013,13 @@ main().catch(err => {
                     document.getElementById('submitBtn').innerHTML = '🔄 Resubmit';
                 } else {
                     const error = await response.json();
+                    // If authentication error, redirect to login
+                    if (response.status === 401) {
+                        localStorage.removeItem('auth_token');
+                        alert('Your session has expired. Please login again.');
+                        window.location.href = 'index.html';
+                        return;
+                    }
                     showStatus('Submission failed: ' + (error.detail || 'Unknown error'), 'text-red-400');
                 }
 
