@@ -157,15 +157,21 @@ npm run build
 
 **IMPORTANT**: The system is currently running with **Local Backend + Cloudflare Tunnel**, NOT Cloud Run.
 
+### ⚠️ Cloud Run is NOT Used
+- `cloudrun/` directory exists but is **deprecated/unused**
+- DO NOT deploy to Cloud Run - it has memory/timeout limits that break evaluation
+- All evaluation happens on local machine via Claude CLI
+
 ### Architecture
 ```
 Frontend (Cloudflare Pages) → Cloudflare Tunnel → Local Backend (localhost:8003)
 ```
 
 ### Why Local Backend?
-- Cloud Run free tier has memory/timeout limits
-- Local backend allows full Claude CLI evaluation
+- Cloud Run free tier has memory/timeout limits (OOM kills during npm install)
+- Local backend allows full Claude CLI evaluation with Playwright
 - Cloudflare Tunnel provides secure remote access
+- No cold start delays
 
 ### Running the System
 ```bash
@@ -240,3 +246,24 @@ cloudflared tunnel --url http://localhost:8003
 - **Use forced rewrites** (`200!`) to avoid Pretty URLs conflict
 - **Use clean URLs** in all internal links (no `.html` extension)
 - **Use `/` for JavaScript redirects** to home page (not `index.html`)
+
+## Timer & Submission System (2026-01-20)
+
+### Timer Behavior
+- Timer starts when user clicks "Start Timer" and records `personal_start_time`
+- Timer uses start/end time calculation (not counting seconds)
+- **Timer continues running after submit** - does NOT stop on submission
+- Elapsed time = `current_time - personal_start_time`
+
+### Submission History
+- Backend tracks all submissions in `metadata.json` under `submission_history` array
+- Each submission records: `submission_number`, `github_url`, `submitted_at`, `elapsed_seconds`, `elapsed_minutes`
+- API endpoint: `GET /api/submissions/{week}/{participant_id}/history`
+- Frontend displays submission history with "1st Try", "2nd Try", etc.
+- Latest submission highlighted with evaluation scores when available
+
+### Resubmission Flow
+1. User can resubmit anytime (button changes to "🔄 Resubmit")
+2. New submission is appended to `submission_history`
+3. Evaluation runs on latest submission
+4. Time rank bonus is recalculated based on latest submission time
