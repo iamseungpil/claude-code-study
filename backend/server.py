@@ -1331,13 +1331,7 @@ if SERVE_STATIC:
         """Serve config.js."""
         return FileResponse(FRONTEND_DIR / "config.js", media_type="application/javascript")
 
-    @app.get("/{filename:path}")
-    async def serve_static_file(filename: str):
-        """Serve allowed static HTML files."""
-        if filename in ALLOWED_HTML_FILES:
-            return FileResponse(FRONTEND_DIR / filename)
-        raise HTTPException(404, "File not found")
-
+    # NOTE: Specific routes MUST be defined BEFORE catch-all routes
     @app.get("/challenges/week1/uigen.zip")
     async def serve_week1_uigen():
         """Serve Week 1 UIGen project zip."""
@@ -1353,6 +1347,14 @@ if SERVE_STATIC:
         if not file_path.exists():
             raise HTTPException(404, f"{filename} not found")
         return FileResponse(file_path, filename=filename)
+
+    # Catch-all route MUST be last (matches any path not matched above)
+    @app.get("/{filename:path}")
+    async def serve_static_file(filename: str):
+        """Serve allowed static HTML files."""
+        if filename in ALLOWED_HTML_FILES:
+            return FileResponse(FRONTEND_DIR / filename)
+        raise HTTPException(404, "File not found")
 
 
 # ============== Health Check ==============
