@@ -29,32 +29,51 @@
     // API Base URL Detection Logic
     // ============================================================
 
+    const STORAGE_KEY = 'claude_code_study_api_base';
+
     const getApiBase = () => {
         // 1. URL parameter override (for testing): ?api=https://xxx.trycloudflare.com
+        // Also save to localStorage for persistence across page navigations
         const urlParams = new URLSearchParams(window.location.search);
         const apiParam = urlParams.get('api');
         if (apiParam) {
             console.log('[Config] API_BASE from URL param:', apiParam);
+            try {
+                localStorage.setItem(STORAGE_KEY, apiParam);
+            } catch (e) {
+                console.warn('[Config] Could not save API_BASE to localStorage:', e);
+            }
             return apiParam;
         }
 
-        // 2. Use explicitly configured value if available
+        // 2. Check localStorage for previously saved API_BASE (from URL param)
+        try {
+            const savedApiBase = localStorage.getItem(STORAGE_KEY);
+            if (savedApiBase) {
+                console.log('[Config] API_BASE from localStorage:', savedApiBase);
+                return savedApiBase;
+            }
+        } catch (e) {
+            console.warn('[Config] Could not read API_BASE from localStorage:', e);
+        }
+
+        // 3. Use explicitly configured value if available
         if (CONFIGURED_API_BASE) {
             return CONFIGURED_API_BASE;
         }
 
-        // 3. Local development: FastAPI serving on same port (localhost:8003)
+        // 4. Local development: FastAPI serving on same port (localhost:8003)
         if (window.location.port === '8003') {
             return '';  // same-origin
         }
 
-        // 4. Local development: Frontend served on different port (e.g., VS Code Live Server)
+        // 5. Local development: Frontend served on different port (e.g., VS Code Live Server)
         if (window.location.hostname === 'localhost' ||
             window.location.hostname === '127.0.0.1') {
             return 'http://localhost:8003';
         }
 
-        // 5. Production (Cloudflare Pages): API not configured
+        // 6. Production (Cloudflare Pages): API not configured
         console.warn(
             '[Config] API_BASE not configured for production.\n' +
             'Options:\n' +

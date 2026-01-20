@@ -185,6 +185,7 @@ ALLOWED_ORIGINS = [
     "http://127.0.0.1:8001",
     "http://localhost:5500",  # VS Code Live Server
     "http://127.0.0.1:5500",
+    "https://claude-code-study.pages.dev",  # Cloudflare Pages production
 ]
 
 # Cloudflare Pages 도메인 추가
