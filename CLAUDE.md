@@ -192,3 +192,11 @@ cloudflared tunnel --url http://localhost:8003
 - **Non-started challenges (week 2-5)**: Redirecting to index.html is CORRECT behavior
 - Users should NOT be able to access challenge pages before admin starts them
 - Only fix if a STARTED challenge is not accessible
+
+### JWT_SECRET Configuration (IMPORTANT)
+- The backend uses JWT for authentication
+- **Without a persistent JWT_SECRET**, tokens become invalid after server restart
+- **Solution**: Create `.env` file with `JWT_SECRET=<random-hex-string>`
+- Generate: `openssl rand -hex 32`
+- The backend loads `.env` automatically using python-dotenv
+- `.env` is gitignored - never commit secrets!

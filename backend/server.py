@@ -16,6 +16,10 @@ from pathlib import Path
 from typing import Optional
 from contextlib import asynccontextmanager
 
+# Load .env file if it exists
+from dotenv import load_dotenv
+load_dotenv()
+
 import bcrypt
 import jwt
 import httpx
