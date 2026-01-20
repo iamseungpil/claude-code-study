@@ -140,6 +140,220 @@ def run_playwright_evaluation(week: int, participant_id: str) -> dict:
         return {"error": f"Playwright evaluation error: {str(e)}"}
 
 
+def read_submission_code(submission_path: Path) -> dict:
+    """Read key code files from a submission for code-only evaluation.
+
+    Args:
+        submission_path: Path to the submission directory
+
+    Returns:
+        Dict with code files, CLAUDE.md content, package.json, and structure
+    """
+    result = {
+        "files": {},
+        "claude_md": None,
+        "package_json": None,
+        "structure": []
+    }
+
+    # Check if code is in 'code' subdirectory
+    code_dir = submission_path
+    if (submission_path / "code" / "package.json").exists():
+        code_dir = submission_path / "code"
+
+    # Read CLAUDE.md
+    for claude_path in [code_dir / "CLAUDE.md", submission_path / "CLAUDE.md"]:
+        if claude_path.exists():
+            content = claude_path.read_text()
+            result["claude_md"] = content[:8000]  # Limit size
+            break
+
+    # Read package.json
+    pkg_path = code_dir / "package.json"
+    if pkg_path.exists():
+        try:
+            result["package_json"] = json.loads(pkg_path.read_text())
+        except json.JSONDecodeError:
+            pass
+
+    # Read key source files
+    patterns = [
+        "src/components/**/*.tsx",
+        "src/components/**/*.ts",
+        "src/app/**/*.tsx",
+        "src/app/**/*.ts",
+        "src/lib/**/*.tsx",
+        "src/lib/**/*.ts",
+        "app/**/*.tsx",
+        "components/**/*.tsx",
+    ]
+
+    for pattern in patterns:
+        for f in code_dir.glob(pattern):
+            if "node_modules" in str(f):
+                continue
+            rel_path = str(f.relative_to(code_dir))
+            try:
+                content = f.read_text()
+                if len(content) < 15000:  # Skip huge files
+                    result["files"][rel_path] = content
+            except Exception:
+                pass
+
+    # Get directory structure
+    try:
+        result["structure"] = [
+            str(p.relative_to(code_dir))
+            for p in code_dir.rglob("*")
+            if p.is_file() and "node_modules" not in str(p) and ".git" not in str(p)
+        ][:100]
+    except Exception:
+        pass
+
+    return result
+
+
+def run_code_only_evaluation(week: int, participant_id: str) -> dict:
+    """Evaluate submission by reading code only (no npm/build/E2E).
+
+    This method reads the source code files and sends them to Claude
+    for evaluation based on the rubric criteria.
+
+    Args:
+        week: The week number
+        participant_id: The participant's ID
+
+    Returns:
+        Dict with evaluation results
+    """
+    submission_path = SUBMISSIONS_DIR / f"week{week}" / participant_id
+    rubric_path = RUBRICS_DIR / f"week{week}_rubric.md"
+
+    if not submission_path.exists():
+        return {"error": f"Submission not found: {submission_path}"}
+
+    if not rubric_path.exists():
+        return {"error": f"Rubric not found: {rubric_path}"}
+
+    # Read code files
+    print(f"Reading code files from {submission_path}...")
+    code_data = read_submission_code(submission_path)
+
+    if not code_data["files"]:
+        return {"error": "No source files found in submission"}
+
+    # Read rubric
+    rubric_content = rubric_path.read_text()
+
+    # Format code files for Claude
+    code_summary = []
+    for path, content in sorted(code_data["files"].items()):
+        # Prioritize key files
+        if any(key in path.lower() for key in ["headeractions", "commandpalette", "header"]):
+            code_summary.insert(0, f"### {path}\n```tsx\n{content}\n```")
+        else:
+            code_summary.append(f"### {path}\n```tsx\n{content}\n```")
+
+    # Limit total code size
+    total_code = "\n\n".join(code_summary[:30])
+    if len(total_code) > 50000:
+        total_code = total_code[:50000] + "\n\n... (truncated)"
+
+    # Build evaluation prompt
+    prompt = f"""You are evaluating a Week {week} submission for Claude Code Study.
+
+## Evaluation Mode: Code Analysis Only
+Evaluate based on code review. DO NOT run any commands.
+
+## CLAUDE.md Content
+{code_data.get("claude_md") or "No CLAUDE.md found"}
+
+## Project Structure (partial)
+{chr(10).join(code_data["structure"][:40])}
+
+## Source Code Files
+{total_code}
+
+## Rubric
+{rubric_content}
+
+## Instructions
+1. Analyze the code structure and implementation
+2. Check each stage's requirements against the code
+3. Evaluate CLAUDE.md quality (learnings, structure)
+4. Score according to rubric (max 80 points)
+
+**Scoring Guide:**
+- Stage 1 (Clear All): Look for Trash2 icon, Dialog component, reset() call (20 points)
+- Stage 2 (Download ZIP): Look for JSZip, getAllFiles(), download logic (25 points)
+- Stage 3 (Keyboard): Look for Cmd+K handler, CommandPalette component (20 points)
+- CLAUDE.md: Learnings documented, structured well (15 points)
+
+## Output Format
+Return ONLY valid JSON (no markdown, no explanation):
+{{
+    "rubric_score": <0-80>,
+    "breakdown": {{
+        "stage_1_clear_all": <0-20>,
+        "stage_2_download_zip": <0-25>,
+        "stage_3_keyboard": <0-20>,
+        "claude_md_quality": <0-15>
+    }},
+    "feedback": "<2-3 sentence summary in Korean>",
+    "strengths": ["<strength 1>", "<strength 2>"],
+    "improvements": ["<improvement 1>", "<improvement 2>"]
+}}"""
+
+    # Run Claude CLI
+    try:
+        print("Running Claude code analysis...")
+        result = subprocess.run(
+            ["claude", "-p", prompt, "--output-format", "json"],
+            capture_output=True,
+            text=True,
+            timeout=180,  # 3 minute timeout
+            env={**os.environ, "CI": "true"}
+        )
+
+        output = result.stdout.strip()
+
+        # Try to parse JSON from output
+        # Claude with --output-format json returns JSON directly
+        try:
+            parsed = json.loads(output)
+            # Handle nested result structure
+            if "result" in parsed:
+                output = parsed["result"]
+                if isinstance(output, str):
+                    # Find JSON in the result string
+                    json_start = output.find('{')
+                    json_end = output.rfind('}') + 1
+                    if json_start >= 0 and json_end > json_start:
+                        return json.loads(output[json_start:json_end])
+                elif isinstance(output, dict):
+                    return output
+            elif "rubric_score" in parsed:
+                return parsed
+        except json.JSONDecodeError:
+            pass
+
+        # Fallback: find JSON in output
+        json_start = output.find('{')
+        json_end = output.rfind('}') + 1
+
+        if json_start >= 0 and json_end > json_start:
+            return json.loads(output[json_start:json_end])
+        else:
+            return {"error": "No valid JSON in Claude output", "raw": output[:500]}
+
+    except subprocess.TimeoutExpired:
+        return {"error": "Code evaluation timed out"}
+    except json.JSONDecodeError as e:
+        return {"error": f"JSON parse error: {e}"}
+    except Exception as e:
+        return {"error": f"Code evaluation error: {str(e)}"}
+
+
 def run_claude_evaluation(week: int, participant_id: str) -> dict:
     """Run Claude Code to evaluate the submission."""
     submission_path = SUBMISSIONS_DIR / f"week{week}" / participant_id
@@ -187,17 +401,17 @@ def run_claude_evaluation(week: int, participant_id: str) -> dict:
         return {"error": str(e)}
 
 
-def evaluate_submission(week: int, participant_id: str, use_playwright: bool = True) -> dict:
+def evaluate_submission(week: int, participant_id: str, use_playwright: bool = False) -> dict:
     """Complete evaluation: rubric score + time rank bonus.
 
     Scoring:
-    - Rubric Score: Up to 80 points (evaluated by Claude or Playwright)
+    - Rubric Score: Up to 80 points (evaluated by Claude code analysis)
     - Time Rank Bonus: Up to 20 points (based on submission order)
 
     Args:
         week: The week number
         participant_id: The participant's ID
-        use_playwright: Whether to use Playwright evaluation for Week 1 (default: True)
+        use_playwright: Whether to use Playwright evaluation (default: False, use code-only)
     """
 
     # Load metadata for time calculation
@@ -210,8 +424,7 @@ def evaluate_submission(week: int, participant_id: str, use_playwright: bool = T
     time_rank = get_submission_rank(week, participant_id)
     time_rank_bonus = calculate_time_rank_bonus(time_rank)
 
-    # Try Playwright evaluation for Week 1
-    playwright_result = None
+    # Optional: Try Playwright evaluation for Week 1 (if explicitly requested)
     if use_playwright and week == 1:
         print(f"Running Playwright evaluation for {participant_id}...")
         playwright_result = run_playwright_evaluation(week, participant_id)
@@ -246,9 +459,9 @@ def evaluate_submission(week: int, participant_id: str, use_playwright: bool = T
             save_evaluation(week, participant_id, result)
             return result
 
-    # Fallback to Claude evaluation
-    print(f"Running Claude evaluation for {participant_id}...")
-    claude_result = run_claude_evaluation(week, participant_id)
+    # Default: Code-only evaluation (Claude reads code and evaluates)
+    print(f"Running code-only evaluation for {participant_id}...")
+    claude_result = run_code_only_evaluation(week, participant_id)
 
     if "error" in claude_result:
         error_result = {
@@ -425,7 +638,8 @@ if __name__ == "__main__":
 
     if len(sys.argv) < 2:
         print("Usage:")
-        print("  python evaluator.py evaluate <week> <participant_id> [--no-playwright]")
+        print("  python evaluator.py evaluate <week> <participant_id> [--playwright]")
+        print("  python evaluator.py evaluate-code <week> <participant_id>  # Code-only (default)")
         print("  python evaluator.py evaluate-playwright <week> <participant_id>")
         print("  python evaluator.py evaluate-all <week>")
         print("  python evaluator.py recalculate-ranks <week>")
@@ -437,8 +651,15 @@ if __name__ == "__main__":
     if command == "evaluate" and len(sys.argv) >= 4:
         week = int(sys.argv[2])
         participant_id = sys.argv[3]
-        use_playwright = "--no-playwright" not in sys.argv
+        use_playwright = "--playwright" in sys.argv
         result = evaluate_submission(week, participant_id, use_playwright=use_playwright)
+        print(json.dumps(result, indent=2))
+
+    elif command == "evaluate-code" and len(sys.argv) >= 4:
+        # Explicit code-only evaluation
+        week = int(sys.argv[2])
+        participant_id = sys.argv[3]
+        result = run_code_only_evaluation(week, participant_id)
         print(json.dumps(result, indent=2))
 
     elif command == "evaluate-playwright" and len(sys.argv) >= 4:
