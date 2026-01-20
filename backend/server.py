@@ -1191,6 +1191,23 @@ if SERVE_STATIC:
     async def serve_week5_learn():
         return FileResponse(FRONTEND_DIR / "week5-learn.html")
 
+    # Serve challenge files (uigen.zip, etc.)
+    @app.get("/challenges/week1/uigen.zip")
+    async def serve_week1_uigen():
+        """Serve Week 1 UIGen project zip."""
+        zip_path = BASE_DIR / "challenges" / "week1" / "uigen.zip"
+        if not zip_path.exists():
+            raise HTTPException(404, "uigen.zip not found")
+        return FileResponse(zip_path, filename="uigen.zip", media_type="application/zip")
+
+    @app.get("/challenges/week2/{filename}")
+    async def serve_week2_challenge(filename: str):
+        """Serve Week 2 challenge files."""
+        file_path = BASE_DIR / "challenges" / "week2" / filename
+        if not file_path.exists():
+            raise HTTPException(404, f"{filename} not found")
+        return FileResponse(file_path, filename=filename)
+
 
 # ============== Health Check ==============
 
