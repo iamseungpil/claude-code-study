@@ -800,7 +800,7 @@ main().catch(err => {
             // No token - redirect to main page
             if (!token) {
                 alert('Please login to access the challenge page.');
-                window.location.href = 'index.html';
+                window.location.href = '/';
                 return false;
             }
 
@@ -828,13 +828,13 @@ main().catch(err => {
                     // Invalid token - redirect to main page
                     localStorage.removeItem('auth_token');
                     alert('Your session has expired. Please login again.');
-                    window.location.href = 'index.html';
+                    window.location.href = '/';
                     return false;
                 }
             } catch (e) {
                 console.error('Auth check failed:', e);
                 alert('Authentication failed. Please login again.');
-                window.location.href = 'index.html';
+                window.location.href = '/';
                 return false;
             }
         }
@@ -855,7 +855,7 @@ main().catch(err => {
                     if (data.challenge_status !== 'started') {
                         // Challenge not started - redirect to main page
                         alert('Week 2 Challenge has not started yet. Please wait for the admin to start the challenge.');
-                        window.location.href = 'index.html';
+                        window.location.href = '/';
                         return;
                     }
 
@@ -1031,7 +1031,7 @@ main().catch(err => {
                     if (response.status === 401) {
                         localStorage.removeItem('auth_token');
                         alert('Your session has expired. Please login again.');
-                        window.location.href = 'index.html';
+                        window.location.href = '/';
                         return;
                     }
                     showStatus('Submission failed: ' + (error.detail || 'Unknown error'), 'text-red-400');

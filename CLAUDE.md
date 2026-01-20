@@ -224,6 +224,14 @@ cloudflared tunnel --url http://localhost:8003
   - `frontend/_redirects` - Changed all `200` to `200!`
   - All HTML files - Updated internal links to clean URLs
 
+### Issue 11: JavaScript Redirect Using index.html (2026-01-20)
+- **Cause**: Challenge pages had `window.location.href = 'index.html'` for login redirects
+  - Cloudflare Pages returns 308 redirect for `index.html` → `/`
+  - This causes unnecessary redirect chain
+- **Symptom**: Non-logged-in users redirected to `/index` URL instead of `/`
+- **Solution**: Changed all JavaScript redirects from `'index.html'` to `'/'`
+- **Files Modified**: All `week*.html` files
+
 ### Cloudflare Pages Configuration (IMPORTANT)
 - **Build output directory**: `frontend`
 - **Files served at**: Root paths (`/index.html`, `/week1.html`, etc.)
@@ -231,3 +239,4 @@ cloudflared tunnel --url http://localhost:8003
 - **DO NOT** create `_redirects` at repository root
 - **Use forced rewrites** (`200!`) to avoid Pretty URLs conflict
 - **Use clean URLs** in all internal links (no `.html` extension)
+- **Use `/` for JavaScript redirects** to home page (not `index.html`)

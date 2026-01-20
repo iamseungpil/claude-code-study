@@ -323,7 +323,7 @@
             // No token - redirect to main page
             if (!token) {
                 alert('Please login to access the challenge page.');
-                window.location.href = 'index.html';
+                window.location.href = '/';
                 return false;
             }
 
@@ -351,13 +351,13 @@
                     // Invalid token - redirect to main page
                     localStorage.removeItem('auth_token');
                     alert('Your session has expired. Please login again.');
-                    window.location.href = 'index.html';
+                    window.location.href = '/';
                     return false;
                 }
             } catch (e) {
                 console.error('Auth check failed:', e);
                 alert('Authentication failed. Please login again.');
-                window.location.href = 'index.html';
+                window.location.href = '/';
                 return false;
             }
         }
@@ -371,7 +371,7 @@
                     if (data.status !== 'started') {
                         // Challenge not started - redirect to main page
                         alert('Week 4 Challenge has not started yet. Please wait for the admin to start the challenge.');
-                        window.location.href = 'index.html';
+                        window.location.href = '/';
                         return;
                     }
                 }
@@ -567,7 +567,7 @@
                     if (response.status === 401) {
                         localStorage.removeItem('auth_token');
                         alert('Your session has expired. Please login again.');
-                        window.location.href = 'index.html';
+                        window.location.href = '/';
                         return;
                     }
                     showStatus('Submission failed: ' + (error.detail || 'Unknown error'), 'text-red-400');
