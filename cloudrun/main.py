@@ -43,6 +43,13 @@ NAME_PATTERN = re.compile(r'^[a-zA-Z가-힣\s]{1,50}$')
 
 # ============== Pydantic Models ==============
 
+def validate_week_range(v: int) -> int:
+    """Shared week validation (1-5)."""
+    if not 1 <= v <= 5:
+        raise ValueError('Week must be between 1 and 5')
+    return v
+
+
 class SubmissionRequest(BaseModel):
     week: int
     github_url: str
@@ -50,9 +57,7 @@ class SubmissionRequest(BaseModel):
     @field_validator('week')
     @classmethod
     def validate_week(cls, v):
-        if not 1 <= v <= 5:
-            raise ValueError('Week must be between 1 and 5')
-        return v
+        return validate_week_range(v)
 
     @field_validator('github_url')
     @classmethod
@@ -182,11 +187,8 @@ def create_jwt_token(user_data: dict) -> str:
 def verify_jwt_token(token: str) -> Optional[dict]:
     """Verify a JWT token and return the payload."""
     try:
-        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
-        return payload
-    except jwt.ExpiredSignatureError:
-        return None
-    except jwt.InvalidTokenError:
+        return jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+    except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
         return None
 
 

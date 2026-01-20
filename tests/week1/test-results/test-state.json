@@ -1,0 +1,15 @@
+{
+  "stage1": {
+    "clearButtonExists": true,
+    "dialogWorks": true
+  },
+  "stage2": {
+    "downloadButtonExists": true,
+    "zipDownloads": true
+  },
+  "stage3": {
+    "cmdKOpensPalette": true,
+    "paletteHasCommands": true,
+    "commandsWorkAndEsc": true
+  }
+}

@@ -55,6 +55,13 @@ GITHUB_URL_PATTERN = re.compile(r'^https://github\.com/[a-zA-Z0-9_-]+/[a-zA-Z0-9
 NAME_PATTERN = re.compile(r'^[a-zA-Z가-힣\s]{1,50}$')
 
 # Pydantic Models
+def validate_week_range(v: int) -> int:
+    """Shared week validation (1-5)."""
+    if not 1 <= v <= 5:
+        raise ValueError('Week must be between 1 and 5')
+    return v
+
+
 class SubmissionRequest(BaseModel):
     week: int
     github_url: str
@@ -62,9 +69,7 @@ class SubmissionRequest(BaseModel):
     @field_validator('week')
     @classmethod
     def validate_week(cls, v):
-        if not 1 <= v <= 5:
-            raise ValueError('Week must be between 1 and 5')
-        return v
+        return validate_week_range(v)
 
     @field_validator('github_url')
     @classmethod
@@ -72,6 +77,7 @@ class SubmissionRequest(BaseModel):
         if not GITHUB_URL_PATTERN.match(v):
             raise ValueError('Invalid GitHub URL format')
         return v
+
 
 class ParticipantRegister(BaseModel):
     participant_id: str
@@ -85,6 +91,7 @@ class ParticipantRegister(BaseModel):
             raise ValueError('Participant ID must be 3-30 characters (letters, numbers, _, -)')
         return v
 
+
 class StartChallenge(BaseModel):
     participant_id: str
     week: int
@@ -92,9 +99,8 @@ class StartChallenge(BaseModel):
     @field_validator('week')
     @classmethod
     def validate_week(cls, v):
-        if not 1 <= v <= 5:
-            raise ValueError('Week must be between 1 and 5')
-        return v
+        return validate_week_range(v)
+
 
 class EndChallenge(BaseModel):
     participant_id: str
@@ -103,9 +109,7 @@ class EndChallenge(BaseModel):
     @field_validator('week')
     @classmethod
     def validate_week(cls, v):
-        if not 1 <= v <= 5:
-            raise ValueError('Week must be between 1 and 5')
-        return v
+        return validate_week_range(v)
 
 # Authentication Models
 class UserRegister(BaseModel):
@@ -272,11 +276,8 @@ def create_jwt_token(user_data: dict) -> str:
 def verify_jwt_token(token: str) -> Optional[dict]:
     """Verify a JWT token and return the payload."""
     try:
-        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
-        return payload
-    except jwt.ExpiredSignatureError:
-        return None
-    except jwt.InvalidTokenError:
+        return jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+    except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
         return None
 
 
@@ -594,7 +595,6 @@ async def admin_restart_challenge(week: int, admin: dict = Depends(require_admin
     # Delete submissions directory for this week
     submissions_dir = Path("submissions") / f"week{week}"
     if submissions_dir.exists():
-        import shutil
         for item in submissions_dir.iterdir():
             if item.is_dir():
                 shutil.rmtree(item)
@@ -1139,79 +1139,32 @@ async def get_week_leaderboard(week: int):
 
 # ============== Static Files (Local Development Only) ==============
 
+# Allowed static HTML files (prevents arbitrary file access)
+ALLOWED_HTML_FILES = {
+    "index.html", "leaderboard.html", "admin.html",
+    "week1.html", "week2.html", "week3.html", "week4.html", "week5.html",
+    "week1-learn.html", "week2-learn.html", "week3-learn.html",
+    "week4-learn.html", "week5-learn.html"
+}
+
 if SERVE_STATIC:
     @app.get("/")
     async def serve_index():
         """Serve main page."""
         return FileResponse(FRONTEND_DIR / "index.html")
 
-    @app.get("/index.html")
-    async def serve_index_html():
-        """Serve main page (explicit path)."""
-        return FileResponse(FRONTEND_DIR / "index.html")
-
-    @app.get("/leaderboard.html")
-    async def serve_leaderboard():
-        """Serve leaderboard page."""
-        return FileResponse(FRONTEND_DIR / "leaderboard.html")
-
-    @app.get("/admin.html")
-    async def serve_admin():
-        """Serve admin page."""
-        return FileResponse(FRONTEND_DIR / "admin.html")
-
-    @app.get("/week1.html")
-    async def serve_week1():
-        """Serve week 1 page."""
-        return FileResponse(FRONTEND_DIR / "week1.html")
-
-    @app.get("/week2.html")
-    async def serve_week2():
-        """Serve week 2 page."""
-        return FileResponse(FRONTEND_DIR / "week2.html")
-
-    @app.get("/week3.html")
-    async def serve_week3():
-        """Serve week 3 page."""
-        return FileResponse(FRONTEND_DIR / "week3.html")
-
-    @app.get("/week4.html")
-    async def serve_week4():
-        """Serve week 4 page."""
-        return FileResponse(FRONTEND_DIR / "week4.html")
-
-    @app.get("/week5.html")
-    async def serve_week5():
-        """Serve week 5 page."""
-        return FileResponse(FRONTEND_DIR / "week5.html")
-
     @app.get("/config.js")
     async def serve_config_js():
         """Serve config.js."""
         return FileResponse(FRONTEND_DIR / "config.js", media_type="application/javascript")
 
-    # Serve week-learn pages
-    @app.get("/week1-learn.html")
-    async def serve_week1_learn():
-        return FileResponse(FRONTEND_DIR / "week1-learn.html")
+    @app.get("/{filename:path}")
+    async def serve_static_file(filename: str):
+        """Serve allowed static HTML files."""
+        if filename in ALLOWED_HTML_FILES:
+            return FileResponse(FRONTEND_DIR / filename)
+        raise HTTPException(404, "File not found")
 
-    @app.get("/week2-learn.html")
-    async def serve_week2_learn():
-        return FileResponse(FRONTEND_DIR / "week2-learn.html")
-
-    @app.get("/week3-learn.html")
-    async def serve_week3_learn():
-        return FileResponse(FRONTEND_DIR / "week3-learn.html")
-
-    @app.get("/week4-learn.html")
-    async def serve_week4_learn():
-        return FileResponse(FRONTEND_DIR / "week4-learn.html")
-
-    @app.get("/week5-learn.html")
-    async def serve_week5_learn():
-        return FileResponse(FRONTEND_DIR / "week5-learn.html")
-
-    # Serve challenge files (uigen.zip, etc.)
     @app.get("/challenges/week1/uigen.zip")
     async def serve_week1_uigen():
         """Serve Week 1 UIGen project zip."""

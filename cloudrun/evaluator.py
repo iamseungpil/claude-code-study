@@ -765,6 +765,8 @@ def run_claude_evaluation_code_only(code_dir: Path, week: int,
     without running npm install, npm build, or E2E tests. This saves
     memory and works within Cloud Run free tier constraints.
 
+    Uses Claude CLI for evaluation (requires @anthropic-ai/claude-code installed).
+
     Args:
         code_dir: Path to the cloned submission directory
         week: Week number
@@ -833,49 +835,76 @@ Return ONLY valid JSON:
 }}"""
 
     try:
-        api_key = os.environ.get("ANTHROPIC_API_KEY", "")
-        if not api_key:
-            logger.error("ANTHROPIC_API_KEY not set")
-            return {"error": "ANTHROPIC_API_KEY environment variable not set"}
+        logger.info("Running Claude CLI evaluation (code-only mode)")
 
-        logger.info("Running Claude Code CLI evaluation (code-only mode)")
+        # Check if credentials file exists (OAuth login)
+        credentials_file = Path("/root/.claude/.credentials.json")
+        if credentials_file.exists():
+            logger.info("Using OAuth credentials from /root/.claude/.credentials.json")
+        else:
+            # Fallback to API key if no credentials file
+            api_key = os.environ.get("ANTHROPIC_API_KEY", "")
+            if not api_key:
+                logger.error("No credentials file and ANTHROPIC_API_KEY not set")
+                return {"error": "No authentication available (no credentials file or API key)"}
+
+        # Use Claude CLI for evaluation
+        # --print (-p): Print mode, non-interactive
+        # --output-format json: Request JSON output
+        # CI=true environment variable handles non-interactive mode
+        # HOME=/root ensures Claude CLI finds ~/.claude/.credentials.json
+        env = {
+            **os.environ,
+            "CI": "true",
+            "TERM": "dumb",
+            "HOME": "/root"  # Ensure Claude CLI finds credentials at /root/.claude/
+        }
+
         result = subprocess.run(
-            ["claude", "-p", prompt, "--output-format", "json"],
+            [
+                "claude", "-p", prompt,
+                "--output-format", "json"
+            ],
             cwd=str(code_dir),
             capture_output=True,
             text=True,
-            timeout=300,
-            env={
-                **os.environ,
-                "ANTHROPIC_API_KEY": api_key,
-                "CI": "true",
-                "TERM": "dumb"
-            }
+            timeout=300,  # 5 minute timeout
+            env=env
         )
 
         output = result.stdout.strip()
         stderr = result.stderr.strip()
 
+        logger.info(f"Claude CLI exit code: {result.returncode}")
+        if stderr:
+            logger.info(f"Claude CLI stderr (first 500 chars): {stderr[:500]}")
+
         if result.returncode != 0:
             logger.error(f"Claude CLI failed with code {result.returncode}")
+            logger.error(f"stdout: {output[:500]}")
             logger.error(f"stderr: {stderr[:500]}")
-            return {"error": f"Claude CLI failed: {stderr[:300]}"}
+            return {"error": f"Claude CLI failed (exit {result.returncode}): {stderr[:300] or output[:300]}"}
 
         # Find JSON in output
         json_start = output.find('{')
         json_end = output.rfind('}') + 1
 
         if json_start >= 0 and json_end > json_start:
-            return json.loads(output[json_start:json_end])
+            parsed = json.loads(output[json_start:json_end])
+            logger.info(f"Claude CLI evaluation successful, rubric_score: {parsed.get('rubric_score')}")
+            return parsed
         else:
             logger.error(f"No JSON in Claude output: {output[:500]}")
             return {"error": "No JSON found in Claude output", "raw": output[:500]}
 
     except subprocess.TimeoutExpired:
-        return {"error": "Evaluation timed out"}
+        logger.error("Claude CLI evaluation timed out (300s)")
+        return {"error": "Evaluation timed out (300s)"}
     except json.JSONDecodeError as e:
+        logger.error(f"JSON parse error: {e}")
         return {"error": f"JSON parse error: {e}"}
     except Exception as e:
+        logger.error(f"Evaluation error: {e}")
         return {"error": str(e)}
 
 

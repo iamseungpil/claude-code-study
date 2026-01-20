@@ -1,0 +1,39 @@
+{
+  "timestamp": "2026-01-20T06:08:45.058Z",
+  "testResults": {
+    "stage1": {
+      "clearButtonExists": true,
+      "dialogWorks": true
+    },
+    "stage2": {
+      "downloadButtonExists": true,
+      "zipDownloads": true
+    },
+    "stage3": {
+      "cmdKOpensPalette": true,
+      "paletteHasCommands": true,
+      "commandsWorkAndEsc": true
+    }
+  },
+  "scores": {
+    "stage1": {
+      "clearButtonExists": 10,
+      "dialogWorks": 10,
+      "total": 20
+    },
+    "stage2": {
+      "downloadButtonExists": 10,
+      "zipDownloads": 15,
+      "total": 25
+    },
+    "stage3": {
+      "cmdKOpensPalette": 10,
+      "paletteHasCommands": 10,
+      "commandsWorkAndEsc": 5,
+      "total": 25
+    },
+    "playwrightTotal": 70
+  },
+  "maxPlaywrightScore": 70,
+  "passed": true
+}

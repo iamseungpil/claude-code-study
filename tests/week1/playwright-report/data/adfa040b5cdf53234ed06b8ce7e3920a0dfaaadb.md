@@ -1,0 +1,102 @@
+# Page snapshot
+
+```yaml
+- generic:
+  - alert
+  - generic:
+    - generic:
+      - generic:
+        - generic:
+          - generic:
+            - heading [level=1]: React Component Generator
+          - generic:
+            - generic:
+              - generic:
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic:
+                        - generic:
+                          - img
+                        - paragraph: Start a conversation to generate React components
+                        - paragraph: I can help you create buttons, forms, cards, and more
+              - generic:
+                - generic:
+                  - generic:
+                    - textbox:
+                      - /placeholder: Describe the React component you want to create...
+                    - button [disabled]:
+                      - img
+      - separator
+      - generic:
+        - generic:
+          - generic:
+            - generic:
+              - tablist:
+                - tab [selected]: Preview
+                - tab: Code
+            - generic:
+              - combobox:
+                - img
+                - text: "New Design #86279"
+                - img
+              - button:
+                - img
+                - text: Clear All
+              - button:
+                - img
+                - text: Download ZIP
+              - button:
+                - img
+                - text: New Design
+              - button:
+                - img
+            - generic:
+              - heading [level=2]: Command Palette
+              - paragraph: Search for a command to run...
+          - generic:
+            - generic:
+              - generic:
+                - generic:
+                  - generic:
+                    - img
+                  - heading [level=3]: Welcome to UI Generator
+                  - paragraph: Start building React components with AI assistance
+                  - paragraph: Ask the AI to create your first component to see it live here
+  - dialog "Command Palette" [ref=e2]:
+    - generic [ref=e3]:
+      - generic [ref=e5]:
+        - img [ref=e6]
+        - combobox [expanded] [active] [ref=e9]
+      - listbox "Suggestions" [ref=e10]:
+        - generic [ref=e11]:
+          - generic [ref=e12]: File Actions
+          - group "File Actions" [ref=e13]:
+            - option "New Design" [selected] [ref=e14]:
+              - img
+              - generic [ref=e15]: New Design
+            - option "Download as ZIP" [ref=e16]:
+              - img
+              - generic [ref=e17]: Download as ZIP
+            - option "Clear All Files" [ref=e18]:
+              - img
+              - generic [ref=e19]: Clear All Files
+          - separator [ref=e20]
+          - generic [ref=e21]: View
+          - group "View" [ref=e22]:
+            - option "Switch to Preview" [ref=e23]:
+              - img
+              - generic [ref=e24]: Switch to Preview
+            - option "Switch to Code" [ref=e25]:
+              - img
+              - generic [ref=e26]: Switch to Code
+          - separator [ref=e27]
+          - generic [ref=e28]: Account
+          - group "Account" [ref=e29]:
+            - option "Sign Out" [ref=e30]:
+              - img
+              - generic [ref=e31]: Sign Out
+    - button "Close" [ref=e32]:
+      - img
+      - generic [ref=e33]: Close
+```

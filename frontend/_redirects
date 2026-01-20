@@ -2,20 +2,20 @@
 # Build output directory should be set to "frontend" in Cloudflare Pages settings
 # This makes files available at root: /week1.html, /index.html, etc.
 
-# Clean URLs - serve HTML without .html extension
-/week1          /week1.html         200
-/week2          /week2.html         200
-/week3          /week3.html         200
-/week4          /week4.html         200
-/week5          /week5.html         200
-/week1-learn    /week1-learn.html   200
-/week2-learn    /week2-learn.html   200
-/week3-learn    /week3-learn.html   200
-/week4-learn    /week4-learn.html   200
-/week5-learn    /week5-learn.html   200
-/leaderboard    /leaderboard.html   200
-/admin          /admin.html         200
-/index          /index.html         200
+# Clean URLs - serve HTML without .html extension (200! = forced rewrite)
+/week1          /week1.html         200!
+/week2          /week2.html         200!
+/week3          /week3.html         200!
+/week4          /week4.html         200!
+/week5          /week5.html         200!
+/week1-learn    /week1-learn.html   200!
+/week2-learn    /week2-learn.html   200!
+/week3-learn    /week3-learn.html   200!
+/week4-learn    /week4-learn.html   200!
+/week5-learn    /week5-learn.html   200!
+/leaderboard    /leaderboard.html   200!
+/admin          /admin.html         200!
+/index          /index.html         200!
 
 # Legacy /frontend/* paths - redirect to root for backward compatibility
 /frontend/week1.html    /week1.html         301

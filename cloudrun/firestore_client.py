@@ -425,20 +425,14 @@ def list_evaluations(week: int) -> List[dict]:
     return [doc.to_dict() for doc in docs]
 
 
+# Time rank bonus points (shared with evaluator.py)
+TIME_RANK_POINTS = {1: 20, 2: 17, 3: 14, 4: 11, 5: 8}
+DEFAULT_TIME_RANK_POINTS = 5
+
+
 def _calculate_time_rank_bonus(rank: int) -> int:
     """Calculate time rank bonus based on submission order."""
-    if rank == 1:
-        return 20
-    elif rank == 2:
-        return 17
-    elif rank == 3:
-        return 14
-    elif rank == 4:
-        return 11
-    elif rank == 5:
-        return 8
-    else:
-        return 5
+    return TIME_RANK_POINTS.get(rank, DEFAULT_TIME_RANK_POINTS)
 
 
 def get_week_leaderboard(week: int) -> List[dict]:
