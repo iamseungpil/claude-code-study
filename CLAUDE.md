@@ -155,20 +155,12 @@ npm run build
 
 ## Current Deployment Setup (2026-01-20)
 
-**IMPORTANT**: The system is currently running with **Local Backend + Cloudflare Tunnel**, NOT Cloud Run.
-
-### ⚠️ Cloud Run is NOT Used
-- `cloudrun/` directory exists but is **deprecated/unused**
-- DO NOT deploy to Cloud Run - it has memory/timeout limits that break evaluation
-- All evaluation happens on local machine via Claude CLI
-
 ### Architecture
 ```
 Frontend (Cloudflare Pages) → Cloudflare Tunnel → Local Backend (localhost:8003)
 ```
 
 ### Why Local Backend?
-- Cloud Run free tier has memory/timeout limits (OOM kills during npm install)
 - Local backend allows full Claude CLI evaluation with Playwright
 - Cloudflare Tunnel provides secure remote access
 - No cold start delays

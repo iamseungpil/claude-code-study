@@ -20,8 +20,8 @@
     // Production Settings
     // ============================================================
 
-    // Backend API URL (Google Cloud Run)
-    // Production: https://claude-code-study-api-240377751675.asia-northeast3.run.app
+    // Backend API URL (via Cloudflare Tunnel)
+    // Set to your Cloudflare Tunnel URL when exposing local backend
     // Leave empty for local development (auto-detected)
     const CONFIGURED_API_BASE = 'https://measuring-strikes-clothing-stewart.trycloudflare.com';
 

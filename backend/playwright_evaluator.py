@@ -113,10 +113,8 @@ def install_dependencies(project_path: str) -> Dict[str, Any]:
         project_dir = Path(project_path)
 
         # Copy pre-installed uigen node_modules if available (speeds up npm install significantly)
-        # Check both cloudrun path (Docker) and local path
         uigen_base_paths = [
-            Path("/app/uigen-base/node_modules"),  # Docker/Cloud Run
-            BASE_DIR / "cloudrun" / "uigen-base" / "node_modules",  # Local development
+            Path(__file__).parent / "uigen-base" / "node_modules",  # backend/uigen-base/
         ]
 
         target_modules = project_dir / "node_modules"
