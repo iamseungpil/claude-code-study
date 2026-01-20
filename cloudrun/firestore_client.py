@@ -576,7 +576,7 @@ def get_season_leaderboard() -> List[dict]:
             season_scores[pid]["weekly_scores"][f"week{week}"] = {
                 "rank": rank,
                 "points": points,
-                "score": entry["total"]
+                "score": entry.get("total", entry.get("scores", {}).get("total", 0))
             }
 
     # Sort by total points
