@@ -223,7 +223,7 @@
             <div class="card rounded-2xl p-6">
                 <!-- Download Button -->
                 <div class="mb-6">
-                    <a href="challenges/week2/hooks-challenge.zip" download
+                    <a id="download-hooks-btn" href="#" download="hooks-challenge.zip"
                        class="inline-flex items-center gap-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold py-4 px-8 rounded-xl text-lg hover:scale-105 transition-transform">
                         <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
@@ -896,6 +896,15 @@ main().catch(err => {
         }
 
         document.addEventListener('DOMContentLoaded', async () => {
+            // Set download URL using API_BASE
+            const downloadBtn = document.getElementById('download-hooks-btn');
+            if (downloadBtn && window.API_BASE) {
+                downloadBtn.href = `${window.API_BASE}/challenges/week2/hooks-challenge.zip`;
+            } else if (downloadBtn) {
+                // Fallback for local development
+                downloadBtn.href = '/challenges/week2/hooks-challenge.zip';
+            }
+
             // Check login first - will redirect if not logged in
             const isLoggedIn = await checkLoginStatus();
             if (!isLoggedIn) return;
