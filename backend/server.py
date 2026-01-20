@@ -6,11 +6,14 @@ FastAPI server for submission handling and leaderboard
 
 import json
 import logging
+import logging.handlers
 import os
 import re
 import subprocess
 import shutil
 import secrets
+import hmac
+import hashlib
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Optional
@@ -25,10 +28,10 @@ load_dotenv()
 import bcrypt
 import jwt
 import httpx
-from fastapi import FastAPI, HTTPException, Depends, Header
+from fastapi import FastAPI, HTTPException, Depends, Header, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel, field_validator
 
 # Import SQLite database module
@@ -55,6 +58,14 @@ if not JWT_SECRET:
     logging.warning("Using auto-generated JWT_SECRET. Set JWT_SECRET env var for production.")
 JWT_ALGORITHM = "HS256"
 JWT_EXPIRATION_HOURS = 24
+
+# GitHub Webhook Configuration
+GITHUB_WEBHOOK_SECRET = os.environ.get("GITHUB_WEBHOOK_SECRET", "")
+if not GITHUB_WEBHOOK_SECRET:
+    logging.warning("GITHUB_WEBHOOK_SECRET not set. Webhook verification disabled.")
+
+# Restart flag file for watcher.py
+RESTART_FLAG_FILE = Path(__file__).parent / "restart_flag.txt"
 
 # Configuration
 BASE_DIR = Path(__file__).parent.parent
@@ -1343,6 +1354,126 @@ async def get_season_leaderboard():
 async def get_week_leaderboard(week: int):
     """Get leaderboard for a specific week."""
     return _get_week_leaderboard_data(week)
+
+
+# ============== GitHub Webhook (Auto-Deploy) ==============
+# NOTE: This MUST be defined BEFORE the catch-all static file route
+
+def verify_github_signature(payload_body: bytes, signature_header: str) -> bool:
+    """Verify GitHub webhook signature using HMAC-SHA256."""
+    if not GITHUB_WEBHOOK_SECRET:
+        logging.warning("Webhook secret not configured - skipping verification")
+        return True  # Allow in development
+
+    if not signature_header:
+        return False
+
+    # GitHub sends: sha256=<hex-digest>
+    if not signature_header.startswith("sha256="):
+        return False
+
+    expected_signature = signature_header[7:]  # Remove "sha256=" prefix
+    computed_signature = hmac.new(
+        GITHUB_WEBHOOK_SECRET.encode('utf-8'),
+        payload_body,
+        hashlib.sha256
+    ).hexdigest()
+
+    return hmac.compare_digest(computed_signature, expected_signature)
+
+
+@app.post("/webhook/github")
+async def github_webhook(request: Request):
+    """
+    GitHub Webhook endpoint for auto-deployment.
+
+    When a push event is received:
+    1. Verify the webhook signature (HMAC-SHA256)
+    2. Run git pull to update the codebase
+    3. Create restart flag file for watcher to trigger server restart
+    """
+    # Get raw body for signature verification
+    body = await request.body()
+
+    # Verify signature
+    signature = request.headers.get("X-Hub-Signature-256", "")
+    if not verify_github_signature(body, signature):
+        logging.warning("GitHub webhook: Invalid signature")
+        raise HTTPException(403, "Invalid signature")
+
+    # Parse payload
+    try:
+        payload = json.loads(body)
+    except json.JSONDecodeError:
+        raise HTTPException(400, "Invalid JSON payload")
+
+    # Check if this is a push event
+    event = request.headers.get("X-GitHub-Event", "")
+    if event != "push":
+        return {"status": "ignored", "reason": f"Event type '{event}' not handled"}
+
+    # Get branch info
+    ref = payload.get("ref", "")
+    branch = ref.replace("refs/heads/", "") if ref.startswith("refs/heads/") else ref
+
+    # Only process pushes to main branch
+    if branch != "main":
+        return {"status": "ignored", "reason": f"Branch '{branch}' not main"}
+
+    # Log the push event
+    pusher = payload.get("pusher", {}).get("name", "unknown")
+    commits = payload.get("commits", [])
+    commit_count = len(commits)
+    logging.info(f"GitHub webhook: Push from {pusher} with {commit_count} commit(s) to {branch}")
+
+    # Run git pull
+    try:
+        result = subprocess.run(
+            ["git", "pull", "origin", "main"],
+            cwd=str(BASE_DIR),
+            capture_output=True,
+            text=True,
+            timeout=60
+        )
+
+        if result.returncode != 0:
+            logging.error(f"Git pull failed: {result.stderr}")
+            return JSONResponse(
+                status_code=500,
+                content={"status": "error", "message": "Git pull failed", "stderr": result.stderr}
+            )
+
+        logging.info(f"Git pull successful: {result.stdout.strip()}")
+
+    except subprocess.TimeoutExpired:
+        logging.error("Git pull timeout")
+        return JSONResponse(
+            status_code=500,
+            content={"status": "error", "message": "Git pull timeout"}
+        )
+    except Exception as e:
+        logging.error(f"Git pull exception: {e}")
+        return JSONResponse(
+            status_code=500,
+            content={"status": "error", "message": str(e)}
+        )
+
+    # Create restart flag file
+    try:
+        with open(RESTART_FLAG_FILE, 'w') as f:
+            f.write(datetime.now().isoformat())
+        logging.info(f"Restart flag created: {RESTART_FLAG_FILE}")
+    except Exception as e:
+        logging.error(f"Failed to create restart flag: {e}")
+
+    return {
+        "status": "ok",
+        "action": "pulled",
+        "branch": branch,
+        "pusher": pusher,
+        "commits": commit_count,
+        "restart_scheduled": True
+    }
 
 
 # ============== Static Files (Local Development Only) ==============
