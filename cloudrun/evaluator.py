@@ -111,16 +111,11 @@ def run_build_verification(code_dir: Path) -> dict:
     }
 
     try:
-        # Copy pre-installed uigen node_modules if available (speeds up npm install significantly)
-        uigen_base = Path("/app/uigen-base/node_modules")
-        if uigen_base.exists():
-            target_modules = code_dir / "node_modules"
-            if not target_modules.exists():
-                logger.info("Copying pre-installed uigen node_modules")
-                shutil.copytree(uigen_base, target_modules, symlinks=True)
-                logger.info("Pre-installed node_modules copied successfully")
+        # Don't copy pre-installed node_modules - npm binaries have hardcoded paths
+        # that break when copied to a different location. Just run npm install.
+        # The npm cache will still help with performance.
 
-        # npm install (will be much faster with pre-copied node_modules)
+        # npm install
         install_result = subprocess.run(
             ["npm", "install", "--cache", "/tmp/npm-cache"],
             cwd=str(code_dir),
@@ -134,6 +129,23 @@ def run_build_verification(code_dir: Path) -> dict:
             result["errors"].append(f"npm install failed: {install_result.stderr[:500]}")
             logger.warning(f"npm install failed: {install_result.stderr[:500]}")
             return result
+
+        # Run prisma generate if prisma schema exists
+        prisma_schema = code_dir / "prisma" / "schema.prisma"
+        if prisma_schema.exists():
+            logger.info("Running prisma generate")
+            try:
+                prisma_result = subprocess.run(
+                    ["npx", "prisma", "generate"],
+                    cwd=str(code_dir),
+                    capture_output=True,
+                    text=True,
+                    timeout=60
+                )
+                if prisma_result.returncode != 0:
+                    logger.warning(f"prisma generate warning: {prisma_result.stderr[:200]}")
+            except Exception as e:
+                logger.warning(f"prisma generate error: {e}")
 
         # npm run build
         build_result = subprocess.run(
