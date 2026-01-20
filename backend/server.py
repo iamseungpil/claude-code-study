@@ -24,6 +24,8 @@ from concurrent.futures import ThreadPoolExecutor
 # Load .env file if it exists
 from dotenv import load_dotenv
 load_dotenv()
+# Also load .env.webhook for webhook secrets (can be tracked in git)
+load_dotenv(Path(__file__).parent / ".env.webhook")
 
 import bcrypt
 import jwt
