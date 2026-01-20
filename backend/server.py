@@ -15,6 +15,8 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Optional
 from contextlib import asynccontextmanager
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
 
 # Load .env file if it exists
 from dotenv import load_dotenv
@@ -23,7 +25,7 @@ load_dotenv()
 import bcrypt
 import jwt
 import httpx
-from fastapi import FastAPI, HTTPException, BackgroundTasks, Depends, Header
+from fastapi import FastAPI, HTTPException, Depends, Header
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
@@ -903,23 +905,42 @@ def clone_github_repo(github_url: str, target_dir: Path) -> bool:
         return False
 
 
-def trigger_evaluation(week: int, participant_id: str):
-    """Trigger Claude Code evaluation in background."""
+# Thread pool for concurrent evaluations (prevents blocking)
+# Each evaluation runs in its own thread, allowing multiple concurrent evaluations
+_evaluation_executor = ThreadPoolExecutor(max_workers=10, thread_name_prefix="eval_")
+
+
+def _run_evaluation_sync(week: int, participant_id: str):
+    """Synchronous evaluation function (runs in thread pool)."""
     try:
+        logging.info(f"Starting evaluation for {participant_id} week{week}")
         subprocess.run(
-            ["python3", str(BASE_DIR / "backend" / "evaluator.py"), 
+            ["python3", str(BASE_DIR / "backend" / "evaluator.py"),
              "evaluate", str(week), participant_id],
             cwd=str(BASE_DIR),
             timeout=300
         )
+        logging.info(f"Completed evaluation for {participant_id} week{week}")
+    except subprocess.TimeoutExpired:
+        logging.error(f"Evaluation timeout for {participant_id} week{week}")
     except Exception as e:
-        print(f"Evaluation error: {e}")
+        logging.error(f"Evaluation error for {participant_id} week{week}: {e}")
+
+
+async def trigger_evaluation(week: int, participant_id: str):
+    """Trigger Claude Code evaluation asynchronously.
+
+    Uses ThreadPoolExecutor to run evaluations concurrently.
+    Multiple users submitting at the same time will not block each other.
+    """
+    loop = asyncio.get_event_loop()
+    # Schedule the evaluation to run in the thread pool
+    loop.run_in_executor(_evaluation_executor, _run_evaluation_sync, week, participant_id)
 
 
 @app.post("/api/submissions/submit")
 async def submit_solution(
     data: SubmissionRequest,
-    background_tasks: BackgroundTasks,
     current_user: Optional[dict] = Depends(get_current_user)
 ):
     """Submit a solution via GitHub URL. Requires authentication."""
@@ -1039,8 +1060,8 @@ async def submit_solution(
     except Exception as e:
         logging.warning(f"SQLite save failed: {e}")
 
-    # Trigger evaluation in background
-    background_tasks.add_task(trigger_evaluation, data.week, participant_id)
+    # Trigger evaluation in background (non-blocking, concurrent)
+    asyncio.create_task(trigger_evaluation(data.week, participant_id))
 
     return {
         "status": "submitted",

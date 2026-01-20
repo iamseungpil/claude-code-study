@@ -138,15 +138,11 @@ time_bonus = +10 (≤70%) | +5 (≤85%) | 0 (on time) | -5/5min (late)
 
 ## Evaluation System Notes
 
-### Build Verification (Required)
-The evaluation command (`/project:evaluate-submission`) MUST run:
-```bash
-cd submissions/weekN/{participant_id}
-npm install --cache /tmp/npm-cache
-npm run build
-```
-- Build failure = 50% penalty on stage scores
-- Build status recorded in `build_status` field of evaluation JSON
+### Evaluation Method: Code Analysis Only
+- **NO E2E/Playwright testing** - evaluation is done via Claude CLI code analysis
+- Claude reads source code and evaluates against rubric
+- No npm install/build required during evaluation
+- Faster and more reliable than E2E testing
 
 ### Evaluation Feedback Display
 - After submission, frontend polls `/api/evaluations/{week}/{participant_id}`
@@ -161,9 +157,10 @@ Frontend (Cloudflare Pages) → Cloudflare Tunnel → Local Backend (localhost:8
 ```
 
 ### Why Local Backend?
-- Local backend allows full Claude CLI evaluation with Playwright
+- Local backend runs Claude CLI for code-only evaluation
 - Cloudflare Tunnel provides secure remote access
 - No cold start delays
+- SQLite database for persistent storage
 
 ### Running the System
 ```bash

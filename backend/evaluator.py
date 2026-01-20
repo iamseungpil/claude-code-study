@@ -136,40 +136,6 @@ def load_submission_metadata(week: int, participant_id: str) -> dict:
     return {}
 
 
-def run_playwright_evaluation(week: int, participant_id: str) -> dict:
-    """Run Playwright-based evaluation for supported weeks.
-
-    Currently supports: Week 1 (UIGen Feature Sprint)
-
-    Args:
-        week: The week number
-        participant_id: The participant's ID
-
-    Returns:
-        Dict with Playwright evaluation results or None if not supported
-    """
-    if week != 1:
-        return None  # Playwright evaluation only for Week 1
-
-    try:
-        from playwright_evaluator import evaluate_submission_playwright
-
-        result = evaluate_submission_playwright(week, participant_id)
-
-        if result.get("status") == "completed":
-            return {
-                "playwright_scores": result.get("scores", {}).get("playwright", {}),
-                "claude_md_score": result.get("scores", {}).get("claude_md", 0),
-                "build_status": result.get("build_status"),
-                "rubric_total": result.get("scores", {}).get("rubric_total", 0)
-            }
-        else:
-            return {"error": result.get("error", "Playwright evaluation failed")}
-
-    except ImportError:
-        return {"error": "playwright_evaluator module not found"}
-    except Exception as e:
-        return {"error": f"Playwright evaluation error: {str(e)}"}
 
 
 def read_submission_code(submission_path: Path) -> dict:
@@ -426,7 +392,7 @@ def run_claude_evaluation(week: int, participant_id: str) -> dict:
         return {"error": str(e)}
 
 
-def evaluate_submission(week: int, participant_id: str, use_playwright: bool = False) -> dict:
+def evaluate_submission(week: int, participant_id: str) -> dict:
     """Complete evaluation: rubric score + time rank bonus.
 
     Scoring:
@@ -436,7 +402,6 @@ def evaluate_submission(week: int, participant_id: str, use_playwright: bool = F
     Args:
         week: The week number
         participant_id: The participant's ID
-        use_playwright: Whether to use Playwright evaluation (default: False, use code-only)
     """
 
     # Load metadata for time calculation
@@ -449,42 +414,7 @@ def evaluate_submission(week: int, participant_id: str, use_playwright: bool = F
     time_rank = get_submission_rank(week, participant_id)
     time_rank_bonus = calculate_time_rank_bonus(time_rank)
 
-    # Optional: Try Playwright evaluation for Week 1 (if explicitly requested)
-    if use_playwright and week == 1:
-        print(f"Running Playwright evaluation for {participant_id}...")
-        playwright_result = run_playwright_evaluation(week, participant_id)
-
-        if playwright_result and "error" not in playwright_result:
-            # Use Playwright results
-            rubric_score = playwright_result.get("rubric_total", 0)
-            total_score = rubric_score + time_rank_bonus
-
-            result = {
-                "participant": participant_id,
-                "week": week,
-                "status": "completed",
-                "evaluation_method": "playwright",
-                "scores": {
-                    "rubric": rubric_score,
-                    "time_rank": time_rank,
-                    "time_rank_bonus": time_rank_bonus,
-                    "total": total_score
-                },
-                "breakdown": {
-                    "playwright": playwright_result.get("playwright_scores", {}),
-                    "claude_md": playwright_result.get("claude_md_score", 0),
-                    "build_status": playwright_result.get("build_status", "unknown")
-                },
-                "feedback": "Evaluated using Playwright E2E tests",
-                "elapsed_minutes": elapsed_minutes,
-                "evaluated_at": datetime.now().isoformat()
-            }
-
-            # Save result
-            save_evaluation(week, participant_id, result)
-            return result
-
-    # Default: Code-only evaluation (Claude reads code and evaluates)
+    # Code-only evaluation (Claude reads code and evaluates)
     print(f"Running code-only evaluation for {participant_id}...")
     claude_result = run_code_only_evaluation(week, participant_id)
 
@@ -718,9 +648,7 @@ if __name__ == "__main__":
 
     if len(sys.argv) < 2:
         print("Usage:")
-        print("  python evaluator.py evaluate <week> <participant_id> [--playwright]")
-        print("  python evaluator.py evaluate-code <week> <participant_id>  # Code-only (default)")
-        print("  python evaluator.py evaluate-playwright <week> <participant_id>")
+        print("  python evaluator.py evaluate <week> <participant_id>")
         print("  python evaluator.py evaluate-all <week>")
         print("  python evaluator.py recalculate-ranks <week>")
         print("  python evaluator.py leaderboard <week>")
@@ -731,21 +659,7 @@ if __name__ == "__main__":
     if command == "evaluate" and len(sys.argv) >= 4:
         week = int(sys.argv[2])
         participant_id = sys.argv[3]
-        use_playwright = "--playwright" in sys.argv
-        result = evaluate_submission(week, participant_id, use_playwright=use_playwright)
-        print(json.dumps(result, indent=2))
-
-    elif command == "evaluate-code" and len(sys.argv) >= 4:
-        # Explicit code-only evaluation
-        week = int(sys.argv[2])
-        participant_id = sys.argv[3]
-        result = run_code_only_evaluation(week, participant_id)
-        print(json.dumps(result, indent=2))
-
-    elif command == "evaluate-playwright" and len(sys.argv) >= 4:
-        week = int(sys.argv[2])
-        participant_id = sys.argv[3]
-        result = run_playwright_evaluation(week, participant_id)
+        result = evaluate_submission(week, participant_id)
         print(json.dumps(result, indent=2))
 
     elif command == "evaluate-all" and len(sys.argv) >= 3:
