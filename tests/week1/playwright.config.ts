@@ -36,7 +36,7 @@ export default defineConfig({
     // Site tests - test login, challenge flow on deployed site
     {
       name: 'site-tests',
-      testMatch: /site\.spec\.ts/,
+      testMatch: /(site|registration)\.spec\.ts/,
       use: {
         ...devices['Desktop Chrome'],
         baseURL: process.env.SITE_URL || 'https://claude-code-study.pages.dev/frontend/',

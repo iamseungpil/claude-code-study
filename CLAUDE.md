@@ -256,3 +256,39 @@ cloudflared tunnel --url http://localhost:8003
 2. New submission is appended to `submission_history`
 3. Evaluation runs on latest submission
 4. Time rank bonus is recalculated based on latest submission time
+
+## E2E Testing with Playwright (2026-01-20)
+
+### Test Setup
+- **Location**: `tests/week1/`
+- **Framework**: Playwright (TypeScript)
+- **Config**: `playwright.config.ts`
+
+### Running Tests
+```bash
+cd tests/week1
+npm install
+npx playwright install chromium
+npx playwright test registration.spec.ts --project=site-tests
+```
+
+### Test Files
+- `site.spec.ts` - General site functionality tests
+- `registration.spec.ts` - User registration and challenge participation tests
+- `uigen.spec.ts` - UIGen project evaluation tests
+
+### E2E Test Results (2026-01-20)
+- **Registration Test**: PASSED (user `iamseungpil` already exists)
+- **Login Test**: PASSED
+- **Challenge Page Navigation**: PASSED
+- **Challenge Submission**: PASSED
+
+### Current Tunnel URL
+- **URL**: `https://focal-logo-col-home.trycloudflare.com`
+- **Protocol**: HTTP/2 (more stable than QUIC on Windows)
+- **Note**: Tunnel URL changes on each restart. Update `frontend/config.js` accordingly.
+
+### Cloudflare Tunnel Tips (Windows)
+- Use `--protocol http2` flag for more stable connections
+- QUIC protocol may timeout on some networks
+- Example: `cloudflared tunnel --url http://localhost:8003 --protocol http2`
