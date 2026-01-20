@@ -470,41 +470,19 @@ def save_evaluation(week: int, participant_id: str, result: dict):
 
     print(f"Saved JSON: {output_path}")
 
-    # Save to SQLite database
-    try:
-        scores = result.get("scores", {})
-        submission_num = get_submission_count(participant_id, week)
-        if submission_num == 0:
-            submission_num = 1
-
-        update_submission_evaluation(
-            user_id=participant_id,
-            week=week,
-            submission_number=submission_num,
-            rubric_score=scores.get("rubric", 0),
-            time_rank=scores.get("time_rank", 999),
-            time_rank_bonus=scores.get("time_rank_bonus", 0),
-            total_score=scores.get("total", 0),
-            feedback=result.get("feedback"),
-            breakdown=result.get("breakdown"),
-            strengths=result.get("strengths"),
-            improvements=result.get("improvements"),
-            status=result.get("status", "completed")
-        )
-        print(f"Saved to SQLite: {participant_id} week{week}")
-    except Exception as e:
-        print(f"Warning: SQLite save failed: {e}")
-
-    # Also update metadata.json to store evaluation in submission_history
+    # First, update metadata.json to get the correct submission_number
     metadata_path = SUBMISSIONS_DIR / f"week{week}" / participant_id / "metadata.json"
+    submission_num = 1  # Default
+
     if metadata_path.exists():
         try:
             with open(metadata_path, 'r') as f:
                 metadata = json.load(f)
 
-            # Find the latest submission and add evaluation to it
+            # Get submission_number from metadata.json (source of truth)
             history = metadata.get("submission_history", [])
             if history:
+                submission_num = len(history)  # Latest submission number
                 # Add evaluation to the latest submission entry
                 latest_submission = history[-1]
                 latest_submission["evaluation"] = {
@@ -523,6 +501,27 @@ def save_evaluation(week: int, participant_id: str, result: dict):
                 print(f"Updated submission history: {metadata_path}")
         except Exception as e:
             print(f"Warning: Failed to update metadata.json: {e}")
+
+    # Save to SQLite database with correct submission_number
+    try:
+        scores = result.get("scores", {})
+        update_submission_evaluation(
+            user_id=participant_id,
+            week=week,
+            submission_number=submission_num,
+            rubric_score=scores.get("rubric", 0),
+            time_rank=scores.get("time_rank", 999),
+            time_rank_bonus=scores.get("time_rank_bonus", 0),
+            total_score=scores.get("total", 0),
+            feedback=result.get("feedback"),
+            breakdown=result.get("breakdown"),
+            strengths=result.get("strengths"),
+            improvements=result.get("improvements"),
+            status=result.get("status", "completed")
+        )
+        print(f"Saved to SQLite: {participant_id} week{week} try{submission_num}")
+    except Exception as e:
+        print(f"Warning: SQLite save failed: {e}")
 
 
 def get_pending_submissions(week: int) -> list:
