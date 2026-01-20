@@ -443,6 +443,55 @@ async def admin_delete_user(user_id: str, admin: dict = Depends(require_admin)):
     return {"status": "deleted", "user_id": user_id}
 
 
+@app.post("/api/admin/evaluate/{week}/{participant_id}")
+async def admin_trigger_evaluation(
+    week: int,
+    participant_id: str,
+    admin: dict = Depends(require_admin)
+):
+    """Admin manually triggers evaluation for a participant (synchronous)."""
+    if not 1 <= week <= 5:
+        raise HTTPException(400, "Week must be between 1 and 5")
+
+    # Get submission to find github_url
+    submissions = db.list_submissions(week)
+    submission = next(
+        (s for s in submissions if s.get("participant_id") == participant_id),
+        None
+    )
+
+    if not submission:
+        raise HTTPException(404, f"No submission found for {participant_id} in week {week}")
+
+    github_url = submission.get("current_submission", {}).get("github_url")
+    if not github_url:
+        raise HTTPException(400, "No GitHub URL found in submission")
+
+    logger.info(f"Admin triggered evaluation: week={week}, participant={participant_id}")
+
+    # Run evaluation synchronously (may take several minutes)
+    try:
+        from evaluator import evaluate_submission
+        result = evaluate_submission(week, participant_id, github_url)
+
+        if result.get("status") == "completed":
+            return {
+                "status": "success",
+                "message": f"Evaluation completed for {participant_id}",
+                "scores": result.get("scores"),
+                "result": result
+            }
+        else:
+            return {
+                "status": "error",
+                "message": f"Evaluation failed: {result.get('error')}",
+                "result": result
+            }
+    except Exception as e:
+        logger.error(f"Admin evaluation error: {e}")
+        raise HTTPException(500, f"Evaluation error: {str(e)}")
+
+
 # ============== Challenge Status ==============
 
 @app.get("/api/challenges/status")
