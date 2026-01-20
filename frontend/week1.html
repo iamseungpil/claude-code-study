@@ -1086,16 +1086,10 @@ useEffect(() =&gt; {
                     <h3 class="text-xl font-bold text-accent mb-4">Evaluation Complete!</h3>
 
                     <!-- Score Summary -->
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <div class="grid grid-cols-3 gap-4 mb-6">
                         <div class="text-center p-4 bg-dark-900/50 rounded-xl">
                             <div class="text-3xl font-bold text-white">${evalData.scores?.total || evalData.rubric_score || '-'}</div>
                             <div class="text-sm text-gray-400">Total Score</div>
-                        </div>
-                        <div class="text-center p-4 bg-dark-900/50 rounded-xl">
-                            <div class="text-2xl font-bold ${evalData.build_status?.npm_build === 'pass' ? 'text-green-400' : 'text-red-400'}">
-                                ${evalData.build_status?.npm_build === 'pass' ? 'PASS' : 'FAIL'}
-                            </div>
-                            <div class="text-sm text-gray-400">Build Status</div>
                         </div>
                         <div class="text-center p-4 bg-dark-900/50 rounded-xl">
                             <div class="text-2xl font-bold text-white">${evalData.scores?.rubric || '-'}</div>
@@ -1113,19 +1107,19 @@ useEffect(() =&gt; {
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
                             <div class="flex justify-between p-2 bg-dark-900/30 rounded">
                                 <span class="text-gray-400">Stage 1</span>
-                                <span class="text-white">${evalData.breakdown?.stage_1_clear_all || 0}/20</span>
+                                <span class="text-white">${evalData.breakdown?.playwright?.stage_1_clear_all || evalData.breakdown?.stage_1_clear_all || 0}/20</span>
                             </div>
                             <div class="flex justify-between p-2 bg-dark-900/30 rounded">
                                 <span class="text-gray-400">Stage 2</span>
-                                <span class="text-white">${evalData.breakdown?.stage_2_download_zip || 0}/25</span>
+                                <span class="text-white">${evalData.breakdown?.playwright?.stage_2_download_zip || evalData.breakdown?.stage_2_download_zip || 0}/25</span>
                             </div>
                             <div class="flex justify-between p-2 bg-dark-900/30 rounded">
                                 <span class="text-gray-400">Stage 3</span>
-                                <span class="text-white">${evalData.breakdown?.stage_3_keyboard || 0}/20</span>
+                                <span class="text-white">${evalData.breakdown?.playwright?.stage_3_keyboard || evalData.breakdown?.stage_3_keyboard || 0}/25</span>
                             </div>
                             <div class="flex justify-between p-2 bg-dark-900/30 rounded">
                                 <span class="text-gray-400">CLAUDE.md</span>
-                                <span class="text-white">${evalData.breakdown?.claude_md_quality || 0}/15</span>
+                                <span class="text-white">${evalData.breakdown?.claude_md || evalData.breakdown?.claude_md_quality || 0}/10</span>
                             </div>
                         </div>
                     </div>
