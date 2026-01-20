@@ -587,7 +587,7 @@ def evaluate_submission_playwright(
 
 
 def save_evaluation(week: int, participant_id: str, result: Dict[str, Any]):
-    """Save evaluation result to JSON file.
+    """Save evaluation result to JSON file and update submission history.
 
     Args:
         week: Week number
@@ -602,6 +602,35 @@ def save_evaluation(week: int, participant_id: str, result: Dict[str, Any]):
         json.dump(result, f, indent=2, ensure_ascii=False)
 
     print(f"Saved: {output_path}")
+
+    # Also update metadata.json to store evaluation in submission_history
+    metadata_path = SUBMISSIONS_DIR / f"week{week}" / participant_id / "metadata.json"
+    if metadata_path.exists():
+        try:
+            with open(metadata_path, 'r') as f:
+                metadata = json.load(f)
+
+            # Find the latest submission and add evaluation to it
+            history = metadata.get("submission_history", [])
+            if history:
+                # Add evaluation to the latest submission entry
+                latest_submission = history[-1]
+                latest_submission["evaluation"] = {
+                    "rubric": result.get("scores", {}).get("rubric"),
+                    "time_rank": result.get("scores", {}).get("time_rank"),
+                    "time_rank_bonus": result.get("scores", {}).get("time_rank_bonus"),
+                    "total": result.get("scores", {}).get("total"),
+                    "status": result.get("status"),
+                    "evaluated_at": result.get("evaluated_at")
+                }
+                metadata["submission_history"] = history
+
+                with open(metadata_path, 'w') as f:
+                    json.dump(metadata, f, indent=2, ensure_ascii=False)
+
+                print(f"Updated submission history: {metadata_path}")
+        except Exception as e:
+            print(f"Warning: Failed to update metadata.json: {e}")
 
 
 def main():

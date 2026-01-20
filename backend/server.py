@@ -1040,7 +1040,11 @@ async def list_submissions(week: int):
 
 @app.get("/api/submissions/{week}/{participant_id}/history")
 async def get_submission_history(week: int, participant_id: str):
-    """Get submission history for a specific participant."""
+    """Get submission history for a specific participant.
+
+    Each submission entry may have embedded evaluation data (new format).
+    For backward compatibility, also checks eval file for latest submission.
+    """
     submission_dir = SUBMISSIONS_DIR / f"week{week}" / participant_id
     metadata_file = submission_dir / "metadata.json"
 
@@ -1062,17 +1066,20 @@ async def get_submission_history(week: int, participant_id: str):
             "elapsed_minutes": metadata.get("elapsed_minutes")
         }]
 
-    # Add evaluation scores to history if available
-    eval_file = EVALUATIONS_DIR / f"week{week}" / f"{participant_id}.json"
-    if eval_file.exists():
-        with open(eval_file) as f:
-            eval_data = json.load(f)
-            # Add latest evaluation to the most recent submission
-            if history:
+    # For backward compatibility: if latest submission doesn't have embedded evaluation,
+    # try to read from eval file
+    if history and not history[-1].get("evaluation"):
+        eval_file = EVALUATIONS_DIR / f"week{week}" / f"{participant_id}.json"
+        if eval_file.exists():
+            with open(eval_file) as f:
+                eval_data = json.load(f)
+                # Add latest evaluation to the most recent submission
                 history[-1]["evaluation"] = {
                     "total": eval_data.get("scores", {}).get("total"),
                     "rubric": eval_data.get("scores", {}).get("rubric"),
+                    "time_rank": eval_data.get("scores", {}).get("time_rank"),
                     "time_rank_bonus": eval_data.get("scores", {}).get("time_rank_bonus"),
+                    "status": eval_data.get("status"),
                     "evaluated_at": eval_data.get("evaluated_at")
                 }
 

@@ -722,21 +722,23 @@
                 card.className = `p-4 rounded-xl ${isLatest ? 'bg-accent/10 border border-accent/30' : 'bg-dark-800/50 border border-white/5'}`;
 
                 let scoreHtml = '';
-                if (submission.evaluation && isLatest) {
-                    const scores = submission.evaluation.scores;
+                const evalData = submission.evaluation;
+                if (evalData && evalData.total !== undefined && evalData.total !== null) {
                     scoreHtml = `
                         <div class="mt-3 pt-3 border-t border-white/10">
                             <div class="flex justify-between items-center">
                                 <span class="text-gray-400 text-sm">Score</span>
-                                <span class="font-bold text-lg ${scores.total >= 80 ? 'text-green-400' : scores.total >= 60 ? 'text-accent' : 'text-amber-400'}">
-                                    ${scores.total} pts
+                                <span class="font-bold text-lg ${evalData.total >= 80 ? 'text-green-400' : evalData.total >= 60 ? 'text-accent' : 'text-amber-400'}">
+                                    ${evalData.total} pts
                                 </span>
                             </div>
                             <div class="text-xs text-gray-500 mt-1">
-                                Rubric: ${scores.rubric} + Time Bonus: ${scores.time_rank_bonus}
+                                Rubric: ${evalData.rubric || 0} + Time Bonus: ${evalData.time_rank_bonus || 0}
                             </div>
                         </div>
                     `;
+                } else if (isLatest) {
+                    scoreHtml = '<div class="mt-3 pt-3 border-t border-white/10 text-sm text-amber-400">⏳ Evaluating...</div>';
                 }
 
                 card.innerHTML = `
