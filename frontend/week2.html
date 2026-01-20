@@ -770,6 +770,17 @@ main().catch(err => {
                 </form>
 
                 <div id="statusMessage" class="mt-6 text-center hidden"></div>
+
+                <!-- Submission History -->
+                <div id="submissionHistory" class="mt-8 hidden">
+                    <div class="border-t border-white/10 pt-6">
+                        <h3 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                            <span>📋</span> Submission History
+                        </h3>
+                        <div id="submissionHistoryList" class="space-y-3">
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
     </main>
@@ -891,6 +902,9 @@ main().catch(err => {
 
             // Check challenge status - will redirect if not started
             await loadPersonalStatus();
+
+            // Load submission history
+            await loadSubmissionHistory();
         });
 
         function updateTimer() {
@@ -994,7 +1008,8 @@ main().catch(err => {
                     })
                 });
 
-                if (timerInterval) clearInterval(timerInterval);
+                // Timer continues running after submit (don't stop it)
+                // if (timerInterval) clearInterval(timerInterval);
 
                 if (response.ok) {
                     const data = await response.json();
@@ -1025,6 +1040,9 @@ main().catch(err => {
 
                     // Keep button enabled for resubmission
                     document.getElementById('submitBtn').innerHTML = '🔄 Resubmit';
+
+                    // Refresh submission history
+                    await loadSubmissionHistory();
                 } else {
                     const error = await response.json();
                     // If authentication error, redirect to login
@@ -1047,6 +1065,83 @@ main().catch(err => {
             el.textContent = message;
             el.className = `mt-6 text-center text-lg font-medium ${colorClass}`;
             el.classList.remove('hidden');
+        }
+
+        // Submission History Functions
+        async function loadSubmissionHistory() {
+            if (!currentUser) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/api/submissions/${WEEK}/${currentUser.user_id}/history`);
+                if (response.ok) {
+                    const data = await response.json();
+                    displaySubmissionHistory(data.submission_history || []);
+                }
+            } catch (error) {
+                console.error('Failed to load submission history:', error);
+            }
+        }
+
+        function displaySubmissionHistory(history) {
+            const container = document.getElementById('submissionHistory');
+            const list = document.getElementById('submissionHistoryList');
+
+            if (!history || history.length === 0) {
+                container.classList.add('hidden');
+                return;
+            }
+
+            container.classList.remove('hidden');
+            list.innerHTML = '';
+
+            const ordinals = ['1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th', '10th'];
+
+            history.forEach((submission, index) => {
+                const isLatest = index === history.length - 1;
+                const ordinal = ordinals[index] || `${index + 1}th`;
+                const submittedAt = new Date(submission.submitted_at);
+                const timeStr = submittedAt.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+                const dateStr = submittedAt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+                const card = document.createElement('div');
+                card.className = `p-4 rounded-xl ${isLatest ? 'bg-purple-500/10 border border-purple-500/30' : 'bg-dark-800/50 border border-white/5'}`;
+
+                let scoreHtml = '';
+                if (submission.evaluation && isLatest) {
+                    const scores = submission.evaluation.scores;
+                    scoreHtml = `
+                        <div class="mt-3 pt-3 border-t border-white/10">
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-400 text-sm">Score</span>
+                                <span class="font-bold text-lg ${scores.total >= 80 ? 'text-green-400' : scores.total >= 60 ? 'text-purple-400' : 'text-amber-400'}">
+                                    ${scores.total} pts
+                                </span>
+                            </div>
+                            <div class="text-xs text-gray-500 mt-1">
+                                Rubric: ${scores.rubric} + Time Bonus: ${scores.time_rank_bonus}
+                            </div>
+                        </div>
+                    `;
+                }
+
+                card.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="font-semibold ${isLatest ? 'text-purple-400' : 'text-gray-300'}">${ordinal} Try</span>
+                                ${isLatest ? '<span class="text-xs bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded-full">Latest</span>' : ''}
+                            </div>
+                            <div class="text-sm text-gray-500 mt-1">${dateStr} at ${timeStr}</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="font-mono text-lg ${isLatest ? 'text-white' : 'text-gray-400'}">${submission.elapsed_minutes?.toFixed(1) || '-'} min</div>
+                        </div>
+                    </div>
+                    ${scoreHtml}
+                `;
+
+                list.appendChild(card);
+            });
         }
     </script>
 </body>
