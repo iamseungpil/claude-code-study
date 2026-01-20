@@ -200,3 +200,20 @@ cloudflared tunnel --url http://localhost:8003
 - Generate: `openssl rand -hex 32`
 - The backend loads `.env` automatically using python-dotenv
 - `.env` is gitignored - never commit secrets!
+
+### Issue 9: Cloudflare Pages Redirect Loop (2026-01-20)
+- **Cause**: Two conflicting `_redirects` files in the repository
+  - Root `/_redirects`: `/index.html` → `/frontend/index.html` (301)
+  - Frontend `/frontend/_redirects`: `/frontend/*` → `/index.html` (301)
+- **Symptom**: "ERR_TOO_MANY_REDIRECTS" when accessing claude-code-study.pages.dev
+- **Solution**: Delete the root `_redirects` file, keep only `frontend/_redirects`
+- **IMPORTANT**: Cloudflare Pages build output is set to `frontend/` directory
+  - Files are served at root: `/index.html`, `/week1.html`, etc.
+  - The `frontend/_redirects` becomes `/_redirects` after deployment
+  - NEVER create a root `_redirects` file - it will conflict!
+
+### Cloudflare Pages Configuration (IMPORTANT)
+- **Build output directory**: `frontend`
+- **Files served at**: Root paths (`/index.html`, `/week1.html`, etc.)
+- **Only ONE `_redirects` file**: `frontend/_redirects`
+- **DO NOT** create `_redirects` at repository root
