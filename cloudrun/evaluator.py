@@ -53,6 +53,73 @@ def calculate_time_rank_bonus(rank: int) -> int:
     return TIME_RANK_POINTS.get(rank, DEFAULT_TIME_RANK_POINTS)
 
 
+def read_submission_code(code_dir: Path) -> dict:
+    """Read key code files for evaluation (code-only mode, no npm/E2E).
+
+    This function reads source code files directly for Claude evaluation
+    without running npm install or E2E tests - saves memory and time.
+
+    Args:
+        code_dir: Path to the cloned submission directory
+
+    Returns:
+        dict with files, claude_md, package_json, and structure
+    """
+    result = {
+        "files": {},
+        "claude_md": None,
+        "package_json": None,
+        "structure": []
+    }
+
+    try:
+        # Read CLAUDE.md (memory-driven development check)
+        claude_md = code_dir / "CLAUDE.md"
+        if claude_md.exists():
+            result["claude_md"] = claude_md.read_text()[:5000]
+
+        # Read package.json
+        pkg = code_dir / "package.json"
+        if pkg.exists():
+            result["package_json"] = json.loads(pkg.read_text())
+
+        # Read key source files (app/, src/, components/, pages/)
+        patterns = [
+            "app/**/*.tsx", "src/**/*.tsx", "components/**/*.tsx",
+            "pages/**/*.tsx", "app/**/*.ts", "src/**/*.ts",
+            "app/**/*.jsx", "src/**/*.jsx", "components/**/*.jsx",
+            "pages/**/*.jsx", "app/**/*.js", "src/**/*.js"
+        ]
+        for pattern in patterns:
+            for f in code_dir.glob(pattern):
+                # Skip node_modules
+                if "node_modules" in str(f):
+                    continue
+                rel_path = str(f.relative_to(code_dir))
+                try:
+                    content = f.read_text()
+                    if len(content) < 10000:  # Skip huge files
+                        result["files"][rel_path] = content
+                except Exception as e:
+                    logger.warning(f"Failed to read {rel_path}: {e}")
+
+        # Get directory structure (exclude node_modules, .git, etc.)
+        exclude_dirs = {".git", "node_modules", ".next", "dist", "build", "__pycache__"}
+        structure = []
+        for p in code_dir.rglob("*"):
+            if p.is_file():
+                # Skip excluded directories
+                if any(exc in str(p) for exc in exclude_dirs):
+                    continue
+                structure.append(str(p.relative_to(code_dir)))
+        result["structure"] = structure[:100]  # Limit to 100 files
+
+    except Exception as e:
+        logger.error(f"Error reading submission code: {e}")
+
+    return result
+
+
 def validate_github_url(url: str) -> bool:
     """
     Validate GitHub URL format to prevent command injection.
@@ -690,14 +757,139 @@ Return ONLY a JSON object with this structure:
         return {"error": str(e)}
 
 
+def run_claude_evaluation_code_only(code_dir: Path, week: int,
+                                     participant_id: str, code_data: dict) -> dict:
+    """Evaluate submission by reading code only (no npm/E2E).
+
+    This function evaluates submissions based on code analysis alone,
+    without running npm install, npm build, or E2E tests. This saves
+    memory and works within Cloud Run free tier constraints.
+
+    Args:
+        code_dir: Path to the cloned submission directory
+        week: Week number
+        participant_id: Participant ID
+        code_data: Dict from read_submission_code() with files, claude_md, etc.
+
+    Returns:
+        dict with rubric_score, breakdown, feedback, strengths, improvements
+    """
+    rubric_path = RUBRICS_DIR / f"week{week}_rubric.md"
+
+    if not rubric_path.exists():
+        return {"error": f"Rubric not found: {rubric_path}"}
+
+    # Read rubric content
+    with open(rubric_path) as f:
+        rubric_content = f.read()
+
+    # Format code files for Claude
+    code_summary = []
+    for path, content in list(code_data.get("files", {}).items())[:20]:  # Limit to 20 files
+        # Truncate very long files
+        truncated = content[:5000] + "...(truncated)" if len(content) > 5000 else content
+        code_summary.append(f"### {path}\n```tsx\n{truncated}\n```")
+
+    # Format project structure
+    structure_str = "\n".join(code_data.get("structure", [])[:50])
+
+    # Format CLAUDE.md content
+    claude_md_content = code_data.get("claude_md", "No CLAUDE.md found")
+
+    # Create evaluation prompt
+    prompt = f"""You are evaluating a Week {week} submission for Claude Code Study.
+
+## Evaluation Mode: Code Analysis Only
+(No build/E2E tests due to resource constraints - evaluate based on code review)
+
+## CLAUDE.md (Memory-Driven Development)
+{claude_md_content}
+
+## Project Structure
+{structure_str}
+
+## Source Code Files
+{chr(10).join(code_summary)}
+
+## Rubric
+{rubric_content}
+
+## Instructions
+1. Analyze the code structure and implementation
+2. Check if CLAUDE.md documents the project properly
+3. Evaluate feature completeness based on code patterns
+4. Score according to rubric (max 80 points)
+5. Deduct points if code has obvious bugs or missing features
+6. Be fair - without E2E tests, focus on code quality and completeness
+
+## Output Format
+Return ONLY valid JSON:
+{{
+    "rubric_score": <0-80>,
+    "breakdown": {{"stage1": <n>, "stage2": <n>, "stage3": <n>, "stage4": <n>}},
+    "feedback": "<feedback>",
+    "strengths": ["<s1>", "<s2>"],
+    "improvements": ["<i1>", "<i2>"]
+}}"""
+
+    try:
+        api_key = os.environ.get("ANTHROPIC_API_KEY", "")
+        if not api_key:
+            logger.error("ANTHROPIC_API_KEY not set")
+            return {"error": "ANTHROPIC_API_KEY environment variable not set"}
+
+        logger.info("Running Claude Code CLI evaluation (code-only mode)")
+        result = subprocess.run(
+            ["claude", "-p", prompt, "--output-format", "json"],
+            cwd=str(code_dir),
+            capture_output=True,
+            text=True,
+            timeout=300,
+            env={
+                **os.environ,
+                "ANTHROPIC_API_KEY": api_key,
+                "CI": "true",
+                "TERM": "dumb"
+            }
+        )
+
+        output = result.stdout.strip()
+        stderr = result.stderr.strip()
+
+        if result.returncode != 0:
+            logger.error(f"Claude CLI failed with code {result.returncode}")
+            logger.error(f"stderr: {stderr[:500]}")
+            return {"error": f"Claude CLI failed: {stderr[:300]}"}
+
+        # Find JSON in output
+        json_start = output.find('{')
+        json_end = output.rfind('}') + 1
+
+        if json_start >= 0 and json_end > json_start:
+            return json.loads(output[json_start:json_end])
+        else:
+            logger.error(f"No JSON in Claude output: {output[:500]}")
+            return {"error": "No JSON found in Claude output", "raw": output[:500]}
+
+    except subprocess.TimeoutExpired:
+        return {"error": "Evaluation timed out"}
+    except json.JSONDecodeError as e:
+        return {"error": f"JSON parse error: {e}"}
+    except Exception as e:
+        return {"error": str(e)}
+
+
 def evaluate_submission(week: int, participant_id: str, github_url: str) -> dict:
-    """Complete evaluation: clone, build verify, E2E test, Claude eval, time rank bonus."""
+    """Complete evaluation: clone, read code, Claude eval, time rank bonus.
+
+    CODE-ONLY MODE: Skips npm install, npm build, and E2E tests to save memory.
+    This allows evaluation to run within Cloud Run free tier (512Mi-2Gi).
+    """
 
     # Create unique temp directory
     session_id = str(uuid.uuid4())[:8]
     work_dir = TEMP_DIR / "submissions" / session_id
     code_dir = work_dir / "code"
-    dev_server = None
 
     try:
         # 1. Clone repository
@@ -711,43 +903,42 @@ def evaluate_submission(week: int, participant_id: str, github_url: str) -> dict
                 "evaluated_at": datetime.now(timezone.utc).isoformat()
             }
 
-        # 2. Run build verification
-        logger.info("Running build verification")
-        build_result = run_build_verification(code_dir)
+        # 2. SKIP build verification - code-only mode
+        build_result = {
+            "npm_install": None,
+            "npm_build": None,
+            "success": None,
+            "skipped": True,
+            "reason": "Code-only evaluation mode (no npm/E2E)"
+        }
+        logger.info("Skipping build verification (code-only mode)")
 
-        # 3. Run E2E tests (only if build succeeded)
-        # Strategy: Try MCP-based tests first, fallback to traditional Playwright tests
-        e2e_result = {"ran": False, "passed": 0, "failed": 0, "total": 0, "test_results": [], "method": "none"}
+        # 3. SKIP E2E tests - code-only mode
+        e2e_result = {
+            "ran": False,
+            "skipped": True,
+            "reason": "Code-only evaluation mode (no npm/E2E)",
+            "method": "code_only"
+        }
+        logger.info("Skipping E2E tests (code-only mode)")
 
-        if build_result["success"]:
-            logger.info("Starting dev server for E2E tests")
-            dev_server = start_dev_server(code_dir, port=3000)
+        # 4. Read code files directly
+        logger.info("Reading submission code files")
+        code_data = read_submission_code(code_dir)
+        logger.info(f"Read {len(code_data.get('files', {}))} source files")
 
-            if dev_server:
-                # Try MCP-based E2E tests first (more intelligent, flexible testing)
-                logger.info("Attempting E2E tests with Playwright MCP")
-                e2e_result = run_e2e_tests_with_mcp(code_dir, week, port=3000)
-
-                # Fallback to traditional Playwright tests if MCP failed
-                if not e2e_result.get("ran") or e2e_result.get("errors"):
-                    logger.warning(f"MCP tests failed, falling back to traditional Playwright: {e2e_result.get('errors', [])}")
-                    e2e_result = run_e2e_tests(code_dir, week, port=3000)
-                    e2e_result["method"] = "playwright"
-                else:
-                    logger.info(f"MCP tests succeeded: {e2e_result['passed']}/{e2e_result['total']} passed")
-            else:
-                e2e_result["errors"] = ["Failed to start dev server"]
-
-        # 4. Get submission metadata and calculate time rank
+        # 5. Get submission metadata and calculate time rank
         metadata = db.get_submission_metadata(week, participant_id)
         elapsed_minutes = metadata.get("elapsed_minutes") if metadata else None
 
         time_rank = db.get_submission_rank(week, participant_id)
         time_rank_bonus = calculate_time_rank_bonus(time_rank)
 
-        # 5. Run Claude evaluation
-        logger.info("Running Claude evaluation")
-        claude_result = run_claude_evaluation(code_dir, week, participant_id, build_result, e2e_result)
+        # 6. Run Claude evaluation (code-only mode)
+        logger.info("Running Claude evaluation (code-only mode)")
+        claude_result = run_claude_evaluation_code_only(
+            code_dir, week, participant_id, code_data
+        )
 
         if "error" in claude_result:
             return {
@@ -760,20 +951,15 @@ def evaluate_submission(week: int, participant_id: str, github_url: str) -> dict
                 "evaluated_at": datetime.now(timezone.utc).isoformat()
             }
 
-        # 6. Calculate final score
+        # 7. Calculate final score (no build penalty since we didn't build)
         rubric_score = claude_result.get("rubric_score", 0)
-
-        # Apply build failure penalty (50% of rubric score)
-        if not build_result["success"]:
-            rubric_score = int(rubric_score * 0.5)
-            logger.info(f"Build failed, applying 50% penalty: {rubric_score}")
-
         total_score = rubric_score + time_rank_bonus
 
         result = {
             "participant": participant_id,
             "week": week,
             "status": "completed",
+            "evaluation_mode": "code_only",
             "scores": {
                 "rubric": rubric_score,
                 "time_rank": time_rank,
@@ -781,13 +967,11 @@ def evaluate_submission(week: int, participant_id: str, github_url: str) -> dict
                 "total": total_score
             },
             "build_status": build_result,
-            "e2e_status": {
-                "ran": e2e_result.get("ran", False),
-                "passed": e2e_result.get("passed", 0),
-                "failed": e2e_result.get("failed", 0),
-                "total": e2e_result.get("total", 0),
-                "test_results": e2e_result.get("test_results", []),
-                "method": e2e_result.get("method", "unknown")  # 'mcp' or 'playwright'
+            "e2e_status": e2e_result,
+            "code_analysis": {
+                "files_read": len(code_data.get("files", {})),
+                "has_claude_md": code_data.get("claude_md") is not None,
+                "structure_count": len(code_data.get("structure", []))
             },
             "breakdown": claude_result.get("breakdown", {}),
             "feedback": claude_result.get("feedback", ""),
@@ -797,18 +981,14 @@ def evaluate_submission(week: int, participant_id: str, github_url: str) -> dict
             "evaluated_at": datetime.now(timezone.utc).isoformat()
         }
 
-        # 7. Save to Firestore
+        # 8. Save to Firestore
         db.save_evaluation(week, participant_id, result)
 
         logger.info(f"Evaluation complete: {participant_id} - Total: {total_score}")
         return result
 
     finally:
-        # 8. Stop dev server
-        if dev_server:
-            stop_dev_server(dev_server)
-
-        # 9. Cleanup temp directory (DELETE REPO)
+        # Cleanup temp directory
         if work_dir.exists():
             try:
                 shutil.rmtree(work_dir)
