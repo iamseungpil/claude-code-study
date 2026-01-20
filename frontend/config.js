@@ -23,7 +23,7 @@
     // Backend API URL (Google Cloud Run)
     // Production: https://claude-code-study-api-240377751675.asia-northeast3.run.app
     // Leave empty for local development (auto-detected)
-    const CONFIGURED_API_BASE = 'https://claude-code-study-api-240377751675.asia-northeast3.run.app';
+    const CONFIGURED_API_BASE = 'https://measuring-strikes-clothing-stewart.trycloudflare.com';
 
     // ============================================================
     // API Base URL Detection Logic
