@@ -29,6 +29,21 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, field_validator
 
+# Import SQLite database module
+from database import (
+    init_db,
+    create_user as db_create_user,
+    get_user as db_get_user,
+    get_user_by_email as db_get_user_by_email,
+    create_submission as db_create_submission,
+    get_submission as db_get_submission,
+    get_submission_history as db_get_submission_history,
+    get_submission_count as db_get_submission_count,
+    get_week_leaderboard as db_get_week_leaderboard,
+    get_season_leaderboard as db_get_season_leaderboard,
+    get_time_rank_by_elapsed
+)
+
 # JWT Configuration
 JWT_SECRET = os.environ.get("JWT_SECRET")
 if not JWT_SECRET:
@@ -150,6 +165,10 @@ async def lifespan(app: FastAPI):
     SUBMISSIONS_DIR.mkdir(parents=True, exist_ok=True)
     EVALUATIONS_DIR.mkdir(parents=True, exist_ok=True)
     DATA_DIR.mkdir(parents=True, exist_ok=True)
+
+    # Initialize SQLite database
+    init_db()
+    logging.info("SQLite database initialized")
 
     # Initialize participants.json if not exists
     participants_file = DATA_DIR / "participants.json"
@@ -1003,6 +1022,22 @@ async def submit_solution(
 
     with open(metadata_file, 'w') as f:
         json.dump(metadata, f, indent=2)
+
+    # Save to SQLite database
+    try:
+        db_create_submission(
+            user_id=participant_id,
+            week=data.week,
+            submission_number=submission_number,
+            github_url=data.github_url,
+            submitted_at=submission_time.isoformat(),
+            elapsed_seconds=round(elapsed_seconds, 1),
+            elapsed_minutes=round(elapsed_minutes, 1),
+            personal_start_time=user_personal["started_at"]
+        )
+        logging.info(f"Saved submission to SQLite: {participant_id} week{data.week} try{submission_number}")
+    except Exception as e:
+        logging.warning(f"SQLite save failed: {e}")
 
     # Trigger evaluation in background
     background_tasks.add_task(trigger_evaluation, data.week, participant_id)

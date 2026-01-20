@@ -4,8 +4,8 @@ Claude Code Study Evaluation System
 Evaluates submissions using time tracking + Claude Code AI evaluation
 
 Scoring System:
-- Rubric Score: 80 points max (evaluated by Claude)
-- Time Rank Bonus: 20 points max (calculated based on submission order)
+- Rubric Score: 80-90 points max (evaluated by Claude, varies by week)
+- Time Rank Bonus: 20 points max (calculated based on elapsed time)
   - 1st: +20, 2nd: +17, 3rd: +14, 4th: +11, 5th: +8, 6th+: +5
 """
 
@@ -15,6 +15,16 @@ import os
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
+
+# Import SQLite database module
+from database import (
+    init_db,
+    get_time_rank_by_elapsed,
+    create_submission,
+    update_submission_evaluation,
+    get_submission,
+    get_submission_count
+)
 
 # Configuration
 BASE_DIR = Path(__file__).parent.parent
@@ -32,15 +42,24 @@ TIME_LIMITS = {
     5: 75,   # Week 5: Final project
 }
 
-# Time rank bonus points (based on submission order)
+# Time rank bonus points (based on elapsed time - shorter = better)
 TIME_RANK_POINTS = {
-    1: 20,   # 1st place
+    1: 20,   # 1st place (shortest elapsed time)
     2: 17,   # 2nd place
     3: 14,   # 3rd place
     4: 11,   # 4th place
     5: 8,    # 5th place
 }
 DEFAULT_TIME_RANK_POINTS = 5  # 6th place and beyond
+
+# Maximum rubric scores per week (rubric_score + time_bonus = 100)
+MAX_RUBRIC_SCORES = {
+    1: 80,   # Week 1: 80 + 20 time bonus = 100
+    2: 80,   # Week 2: 80 + 20 time bonus = 100
+    3: 90,   # Week 3: 90 + 10 time bonus = 100
+    4: 90,   # Week 4: 90 + 10 time bonus = 100
+    5: 90,   # Week 5: 90 + 10 time bonus = 100
+}
 
 
 def calculate_time_rank_bonus(rank: int) -> int:
@@ -56,21 +75,33 @@ def calculate_time_rank_bonus(rank: int) -> int:
 
 
 def get_submission_rank(week: int, participant_id: str) -> int:
-    """Get the submission rank for a participant based on submission time.
+    """Get the submission rank based on elapsed time (shorter = better).
+
+    Uses SQLite database to calculate rank based on elapsed_minutes.
+    Only considers the latest submission for each participant.
 
     Args:
         week: The week number
         participant_id: The participant's ID
 
     Returns:
-        The rank (1-based, where 1 = first to submit)
+        The rank (1-based, where 1 = shortest elapsed time)
     """
+    # Try SQLite first
+    try:
+        rank = get_time_rank_by_elapsed(week, participant_id)
+        if rank != 999:
+            return rank
+    except Exception as e:
+        print(f"SQLite rank query failed: {e}, falling back to JSON")
+
+    # Fallback to JSON files if SQLite fails
     submissions_dir = SUBMISSIONS_DIR / f"week{week}"
 
     if not submissions_dir.exists():
-        return 999  # Default high rank if no submissions
+        return 999
 
-    # Collect all submission times
+    # Collect all submissions with elapsed_minutes
     submissions = []
     for participant_dir in submissions_dir.iterdir():
         if participant_dir.is_dir():
@@ -78,16 +109,17 @@ def get_submission_rank(week: int, participant_id: str) -> int:
             if metadata_file.exists():
                 with open(metadata_file) as f:
                     meta = json.load(f)
-                    if "submitted_at" in meta:
+                    # Use elapsed_minutes for ranking (shorter = better)
+                    if "elapsed_minutes" in meta:
                         submissions.append({
                             "participant_id": participant_dir.name,
-                            "submitted_at": meta["submitted_at"]
+                            "elapsed_minutes": meta["elapsed_minutes"]
                         })
 
-    # Sort by submission time (earliest first)
-    submissions.sort(key=lambda x: x["submitted_at"])
+    # Sort by elapsed time (shortest first = rank 1)
+    submissions.sort(key=lambda x: x["elapsed_minutes"])
 
-    # Find the rank for the given participant
+    # Find rank for the given participant
     for rank, sub in enumerate(submissions, start=1):
         if sub["participant_id"] == participant_id:
             return rank
@@ -259,6 +291,9 @@ def run_code_only_evaluation(week: int, participant_id: str) -> dict:
     if len(total_code) > 50000:
         total_code = total_code[:50000] + "\n\n... (truncated)"
 
+    # Get max rubric score for this week
+    max_rubric_score = MAX_RUBRIC_SCORES.get(week, 80)
+
     # Build evaluation prompt
     prompt = f"""You are evaluating a Week {week} submission for Claude Code Study.
 
@@ -274,31 +309,21 @@ Evaluate based on code review. DO NOT run any commands.
 ## Source Code Files
 {total_code}
 
-## Rubric
+## Rubric (MUST follow this scoring criteria strictly)
 {rubric_content}
 
-## Instructions
-1. Analyze the code structure and implementation
-2. Check each stage's requirements against the code
-3. Evaluate CLAUDE.md quality (learnings, structure)
-4. Score according to rubric (max 80 points)
-
-**Scoring Guide:**
-- Stage 1 (Clear All): Look for Trash2 icon, Dialog component, reset() call (20 points)
-- Stage 2 (Download ZIP): Look for JSZip, getAllFiles(), download logic (25 points)
-- Stage 3 (Keyboard): Look for Cmd+K handler, CommandPalette component (20 points)
-- CLAUDE.md: Learnings documented, structured well (15 points)
+## IMPORTANT Instructions
+1. Read the rubric carefully - it contains ALL scoring criteria
+2. Score EACH category according to the rubric breakdown
+3. Maximum rubric score is {max_rubric_score} points for Week {week}
+4. The rubric file contains JSON output examples - follow that format exactly
+5. feedback should be 2-3 sentences in Korean
 
 ## Output Format
 Return ONLY valid JSON (no markdown, no explanation):
 {{
-    "rubric_score": <0-80>,
-    "breakdown": {{
-        "stage_1_clear_all": <0-20>,
-        "stage_2_download_zip": <0-25>,
-        "stage_3_keyboard": <0-20>,
-        "claude_md_quality": <0-15>
-    }},
+    "rubric_score": <0-{max_rubric_score}>,
+    "breakdown": {{ /* categories from rubric */ }},
     "feedback": "<2-3 sentence summary in Korean>",
     "strengths": ["<strength 1>", "<strength 2>"],
     "improvements": ["<improvement 1>", "<improvement 2>"]
@@ -504,8 +529,8 @@ def evaluate_submission(week: int, participant_id: str, use_playwright: bool = F
 
 
 def save_evaluation(week: int, participant_id: str, result: dict):
-    """Save evaluation result to JSON file and update submission history."""
-    # Save to evaluation JSON file (for quick lookup)
+    """Save evaluation result to JSON file, SQLite, and update submission history."""
+    # Save to evaluation JSON file (for quick lookup - backward compatibility)
     output_dir = EVALUATIONS_DIR / f"week{week}"
     output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -513,7 +538,32 @@ def save_evaluation(week: int, participant_id: str, result: dict):
     with open(output_path, 'w') as f:
         json.dump(result, f, indent=2, ensure_ascii=False)
 
-    print(f"Saved: {output_path}")
+    print(f"Saved JSON: {output_path}")
+
+    # Save to SQLite database
+    try:
+        scores = result.get("scores", {})
+        submission_num = get_submission_count(participant_id, week)
+        if submission_num == 0:
+            submission_num = 1
+
+        update_submission_evaluation(
+            user_id=participant_id,
+            week=week,
+            submission_number=submission_num,
+            rubric_score=scores.get("rubric", 0),
+            time_rank=scores.get("time_rank", 999),
+            time_rank_bonus=scores.get("time_rank_bonus", 0),
+            total_score=scores.get("total", 0),
+            feedback=result.get("feedback"),
+            breakdown=result.get("breakdown"),
+            strengths=result.get("strengths"),
+            improvements=result.get("improvements"),
+            status=result.get("status", "completed")
+        )
+        print(f"Saved to SQLite: {participant_id} week{week}")
+    except Exception as e:
+        print(f"Warning: SQLite save failed: {e}")
 
     # Also update metadata.json to store evaluation in submission_history
     metadata_path = SUBMISSIONS_DIR / f"week{week}" / participant_id / "metadata.json"
