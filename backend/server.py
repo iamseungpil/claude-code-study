@@ -850,9 +850,12 @@ def clone_github_repo(github_url: str, target_dir: Path) -> bool:
         # Remove existing if any
         if target_dir.exists():
             shutil.rmtree(target_dir)
-        
+
         target_dir.mkdir(parents=True, exist_ok=True)
-        
+
+        print(f"[Clone] Attempting to clone: {github_url}")
+        print(f"[Clone] Target directory: {target_dir}")
+
         # Clone
         result = subprocess.run(
             ["git", "clone", "--depth", "1", github_url, str(target_dir)],
@@ -860,10 +863,20 @@ def clone_github_repo(github_url: str, target_dir: Path) -> bool:
             text=True,
             timeout=60
         )
-        
-        return result.returncode == 0
+
+        if result.returncode != 0:
+            print(f"[Clone] FAILED - returncode: {result.returncode}")
+            print(f"[Clone] stderr: {result.stderr}")
+            print(f"[Clone] stdout: {result.stdout}")
+            return False
+
+        print(f"[Clone] SUCCESS")
+        return True
+    except subprocess.TimeoutExpired:
+        print(f"[Clone] TIMEOUT - exceeded 60 seconds")
+        return False
     except Exception as e:
-        print(f"Clone error: {e}")
+        print(f"[Clone] EXCEPTION: {type(e).__name__}: {e}")
         return False
 
 
@@ -1019,11 +1032,14 @@ def _get_week_leaderboard_data(week: int) -> list:
         with open(eval_file) as f:
             data = json.load(f)
             if data.get("status") == "completed":
-                scores = data["scores"]
+                scores = data.get("scores", {})
+                # Skip entries without valid scores
+                if not scores or "total" not in scores:
+                    continue
                 results.append({
-                    "participant_id": data["participant"],
-                    "total": scores["total"],
-                    "rubric": scores["rubric"],
+                    "participant_id": data.get("participant") or data.get("participant_id"),
+                    "total": scores.get("total", 0),
+                    "rubric": scores.get("rubric", 0),
                     "time_rank": scores.get("time_rank", 0),
                     "time_rank_bonus": scores.get("time_rank_bonus", scores.get("time_bonus", 0)),
                     "evaluated_at": data.get("evaluated_at")

@@ -152,3 +152,43 @@ npm run build
 - After submission, frontend polls `/api/evaluations/{week}/{participant_id}`
 - Displays score breakdown, feedback, strengths, improvements
 - Polling interval: 10 seconds, max 30 attempts (5 minutes)
+
+## Current Deployment Setup (2026-01-20)
+
+**IMPORTANT**: The system is currently running with **Local Backend + Cloudflare Tunnel**, NOT Cloud Run.
+
+### Architecture
+```
+Frontend (Cloudflare Pages) → Cloudflare Tunnel → Local Backend (localhost:8003)
+```
+
+### Why Local Backend?
+- Cloud Run free tier has memory/timeout limits
+- Local backend allows full Claude CLI evaluation
+- Cloudflare Tunnel provides secure remote access
+
+### Running the System
+```bash
+# 1. Start local backend
+cd /Users/iamseungpil/LSP/claude-code-study
+python backend/server.py
+
+# 2. Start Cloudflare Tunnel (in another terminal)
+cloudflared tunnel --url http://localhost:8003
+
+# 3. Update frontend/config.js with the tunnel URL
+```
+
+### Data Storage
+- **Local**: `data/`, `submissions/`, `evaluations/` directories
+- **Cloudflare Pages**: Serves static frontend files only
+- Submissions are cloned to `submissions/weekN/participant_id/code/`
+
+### Troubleshooting
+- Check backend logs: `tail -f /tmp/backend.log`
+- Restart backend: `pkill -f "python backend/server.py" && python backend/server.py`
+
+### Challenge Page Access Rules (IMPORTANT)
+- **Non-started challenges (week 2-5)**: Redirecting to index.html is CORRECT behavior
+- Users should NOT be able to access challenge pages before admin starts them
+- Only fix if a STARTED challenge is not accessible

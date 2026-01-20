@@ -1,6 +1,25 @@
 # Cloudflare Pages - Disable SPA fallback
 # Force serve actual HTML files with 200! (forced rewrite)
 
+# Redirect /frontend/* paths to root (in case of wrong URL access)
+/frontend/index.html    /index.html         301
+/frontend/index        /index.html         301
+/frontend/week1.html   /week1.html         301
+/frontend/week1        /week1.html         301
+/frontend/week2.html   /week2.html         301
+/frontend/week2        /week2.html         301
+/frontend/week3.html   /week3.html         301
+/frontend/week3        /week3.html         301
+/frontend/week4.html   /week4.html         301
+/frontend/week4        /week4.html         301
+/frontend/week5.html   /week5.html         301
+/frontend/week5        /week5.html         301
+/frontend/leaderboard.html /leaderboard.html 301
+/frontend/leaderboard  /leaderboard.html   301
+/frontend/admin.html   /admin.html         301
+/frontend/admin        /admin.html         301
+/frontend/*            /index.html         301
+
 /admin.html         /admin.html         200!
 /leaderboard.html   /leaderboard.html   200!
 /week1.html         /week1.html         200!
