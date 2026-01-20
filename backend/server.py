@@ -869,12 +869,47 @@ async def get_my_challenge_status(
 
 # ============== Submissions ==============
 
+def force_remove_directory(path: Path) -> bool:
+    """Forcefully remove a directory, handling Windows permission issues."""
+    import stat
+
+    def on_rm_error(func, path, exc_info):
+        """Error handler for shutil.rmtree on Windows."""
+        # Try to remove read-only attribute and retry
+        try:
+            os.chmod(path, stat.S_IWRITE)
+            func(path)
+        except Exception as e:
+            print(f"[Cleanup] Failed to remove {path}: {e}")
+
+    try:
+        if path.exists():
+            shutil.rmtree(path, onerror=on_rm_error)
+        return True
+    except Exception as e:
+        print(f"[Cleanup] Error removing directory {path}: {e}")
+        # Last resort: try using system command
+        try:
+            import platform
+            if platform.system() == 'Windows':
+                subprocess.run(['cmd', '/c', 'rmdir', '/s', '/q', str(path)],
+                             capture_output=True, timeout=30)
+            else:
+                subprocess.run(['rm', '-rf', str(path)],
+                             capture_output=True, timeout=30)
+            return not path.exists()
+        except Exception as e2:
+            print(f"[Cleanup] System command also failed: {e2}")
+            return False
+
+
 def clone_github_repo(github_url: str, target_dir: Path) -> bool:
     """Clone a GitHub repository."""
     try:
-        # Remove existing if any
+        # Remove existing if any (with force for Windows)
         if target_dir.exists():
-            shutil.rmtree(target_dir)
+            if not force_remove_directory(target_dir):
+                print(f"[Clone] Warning: Could not fully remove existing directory")
 
         target_dir.mkdir(parents=True, exist_ok=True)
 

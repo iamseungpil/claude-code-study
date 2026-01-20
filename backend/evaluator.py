@@ -162,7 +162,7 @@ def read_submission_code(submission_path: Path) -> dict:
     # Read CLAUDE.md
     for claude_path in [code_dir / "CLAUDE.md", submission_path / "CLAUDE.md"]:
         if claude_path.exists():
-            content = claude_path.read_text()
+            content = claude_path.read_text(encoding='utf-8')
             result["claude_md"] = content[:8000]  # Limit size
             break
 
@@ -170,7 +170,7 @@ def read_submission_code(submission_path: Path) -> dict:
     pkg_path = code_dir / "package.json"
     if pkg_path.exists():
         try:
-            result["package_json"] = json.loads(pkg_path.read_text())
+            result["package_json"] = json.loads(pkg_path.read_text(encoding='utf-8'))
         except json.JSONDecodeError:
             pass
 
@@ -192,7 +192,7 @@ def read_submission_code(submission_path: Path) -> dict:
                 continue
             rel_path = str(f.relative_to(code_dir))
             try:
-                content = f.read_text()
+                content = f.read_text(encoding='utf-8')
                 if len(content) < 15000:  # Skip huge files
                     result["files"][rel_path] = content
             except Exception:
@@ -241,7 +241,7 @@ def run_code_only_evaluation(week: int, participant_id: str) -> dict:
         return {"error": "No source files found in submission"}
 
     # Read rubric
-    rubric_content = rubric_path.read_text()
+    rubric_content = rubric_path.read_text(encoding='utf-8')
 
     # Format code files for Claude
     code_summary = []
@@ -298,15 +298,21 @@ Return ONLY valid JSON (no markdown, no explanation):
     # Run Claude CLI
     try:
         print("Running Claude code analysis...")
+
+        # Pass prompt via stdin to avoid command line length limits
         result = subprocess.run(
-            ["claude", "-p", prompt, "--output-format", "json"],
+            "claude --output-format json -p -",
+            input=prompt,
             capture_output=True,
             text=True,
             timeout=180,  # 3 minute timeout
-            env={**os.environ, "CI": "true"}
+            env={**os.environ, "CI": "true"},
+            shell=True,  # Required on Windows to find npm-installed commands
+            encoding='utf-8',
+            errors='replace'  # Handle encoding errors gracefully
         )
 
-        output = result.stdout.strip()
+        output = (result.stdout or "").strip()
 
         # Try to parse JSON from output
         # Claude with --output-format json returns JSON directly
