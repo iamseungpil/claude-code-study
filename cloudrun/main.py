@@ -122,9 +122,11 @@ ALLOWED_ORIGINS = [
     "http://127.0.0.1:8003",
     "http://localhost:5500",
     "http://127.0.0.1:5500",
+    # Cloudflare Pages production URL
+    "https://claude-code-study.pages.dev",
 ]
 
-# Add Cloudflare Pages URL if configured
+# Add Cloudflare Pages URL if configured (for additional environments)
 CLOUDFLARE_PAGES_URL = os.environ.get("CLOUDFLARE_PAGES_URL")
 if CLOUDFLARE_PAGES_URL:
     ALLOWED_ORIGINS.append(CLOUDFLARE_PAGES_URL.rstrip("/"))
