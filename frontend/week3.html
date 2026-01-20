@@ -89,7 +89,17 @@
             </div>
         </section>
 
-        <section id="stagesSection" class="mb-16">
+        <!-- Message shown before timer starts -->
+        <section id="beforeTimerMessage" class="mb-16">
+            <div class="card rounded-2xl p-8 text-center border-2 border-dashed border-accent/30">
+                <div class="text-4xl mb-4">🔒</div>
+                <h3 class="text-xl font-bold text-white mb-2">Challenge Details Locked</h3>
+                <p class="text-gray-400 mb-4">Start your timer to reveal the challenge requirements, scoring rubric, and submission form.</p>
+                <p class="text-sm text-gray-500">Your time will be recorded for the leaderboard ranking.</p>
+            </div>
+        </section>
+
+        <section id="stagesSection" class="mb-16 hidden">
             <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-4">WHAT TO DO</h2>
             <div class="space-y-4">
                 <div class="card rounded-2xl p-6 flex gap-5">
@@ -180,7 +190,7 @@
             </div>
         </section>
 
-        <section id="scoringSection" class="mb-16">
+        <section id="scoringSection" class="mb-16 hidden">
             <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-4">SCORING RUBRIC</h2>
             <div class="card rounded-2xl overflow-hidden">
                 <table class="w-full">
@@ -408,6 +418,10 @@
         }
 
         function showChallengeForm() {
+            // Hide the "Challenge Details Locked" message
+            const beforeTimerMsg = document.getElementById('beforeTimerMessage');
+            if (beforeTimerMsg) beforeTimerMsg.classList.add('hidden');
+
             // Show hidden sections
             ['stagesSection', 'learningSection', 'deliverablesSection', 'scoringSection'].forEach(id => {
                 const el = document.getElementById(id);
