@@ -212,8 +212,22 @@ cloudflared tunnel --url http://localhost:8003
   - The `frontend/_redirects` becomes `/_redirects` after deployment
   - NEVER create a root `_redirects` file - it will conflict!
 
+### Issue 10: Cloudflare Pages Pretty URLs Conflict (2026-01-20)
+- **Cause**: Cloudflare Pages "Pretty URLs" feature auto-redirects `.html` requests to clean URLs
+  - `_redirects` rules with `200` status caused redirect loop when combined with Pretty URLs
+  - Example: `/leaderboard → /leaderboard.html 200` + Pretty URLs = loop
+- **Symptom**: HTML pages return 308 redirects to themselves or 404 errors
+- **Solution**:
+  1. Use forced rewrites (`200!`) instead of normal rewrites (`200`) in `_redirects`
+  2. Update all internal links to use clean URLs (e.g., `href="leaderboard"` not `href="leaderboard.html"`)
+- **Files Modified**:
+  - `frontend/_redirects` - Changed all `200` to `200!`
+  - All HTML files - Updated internal links to clean URLs
+
 ### Cloudflare Pages Configuration (IMPORTANT)
 - **Build output directory**: `frontend`
 - **Files served at**: Root paths (`/index.html`, `/week1.html`, etc.)
 - **Only ONE `_redirects` file**: `frontend/_redirects`
 - **DO NOT** create `_redirects` at repository root
+- **Use forced rewrites** (`200!`) to avoid Pretty URLs conflict
+- **Use clean URLs** in all internal links (no `.html` extension)
