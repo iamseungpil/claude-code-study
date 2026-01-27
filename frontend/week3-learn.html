@@ -191,10 +191,10 @@
             </div>
 
             <h1 class="text-4xl md:text-5xl font-bold mb-4 tracking-tight">
-                Skills + MCP Basics
+                Skills Mastery
             </h1>
             <p class="text-xl text-gray-400 mb-8 max-w-2xl">
-                Learn to create custom Skills for workflow automation and connect Claude to external tools via MCP.
+                Learn to create custom Skills for workflow automation with slash commands and skill discovery.
             </p>
 
             <!-- Progress Tracker -->
@@ -372,14 +372,14 @@ User: "/survey-writer"</code></pre>
                     </div>
                 </div>
 
-                <!-- Lesson 3: MCP Basics -->
+                <!-- Lesson 3: Skill Arguments & Parameters -->
                 <div id="lesson3" class="lesson-card rounded-2xl overflow-hidden">
                     <div class="lesson-header p-6 flex items-center justify-between" onclick="toggleLesson(3)">
                         <div class="flex items-center gap-4">
                             <div class="w-12 h-12 rounded-xl bg-amber-500/20 flex items-center justify-center text-2xl">3</div>
                             <div>
-                                <h3 class="font-bold text-xl">MCP Basics</h3>
-                                <p class="text-gray-400 text-sm">Model Context Protocol concept and server connection</p>
+                                <h3 class="font-bold text-xl">Skill Arguments & Parameters</h3>
+                                <p class="text-gray-400 text-sm">Passing arguments to skills and dynamic behavior</p>
                             </div>
                         </div>
                         <div class="flex items-center gap-3">
@@ -392,47 +392,55 @@ User: "/survey-writer"</code></pre>
                     <div class="lesson-content">
                         <div class="px-6 pb-6 space-y-6">
                             <div class="tip-box">
-                                <p class="text-pink-200 font-medium">Model Context Protocol (MCP)</p>
-                                <p class="text-sm mt-1 text-gray-300">MCP is an open protocol that standardizes how AI assistants connect to external data sources and tools. Think of it as a "USB for AI" - a universal way to plug in capabilities.</p>
+                                <p class="text-pink-200 font-medium">Dynamic Skills</p>
+                                <p class="text-sm mt-1 text-gray-300">Skills can accept arguments to customize their behavior. This makes skills reusable across different contexts.</p>
                             </div>
 
-                            <h4 class="font-bold text-lg text-accent">Why MCP Matters</h4>
-                            <p class="text-gray-300">Before MCP, every AI integration required custom code. MCP provides a standard interface for:</p>
-                            <ul class="list-disc list-inside space-y-2 ml-4 text-gray-300">
-                                <li><span class="text-accent">Tools</span> - Functions the AI can call (search, database queries, API calls)</li>
-                                <li><span class="text-accent">Resources</span> - Data the AI can read (files, databases, web content)</li>
-                                <li><span class="text-accent">Prompts</span> - Pre-defined prompt templates for specific tasks</li>
-                            </ul>
-
-                            <h4 class="font-bold text-lg mt-6 text-accent">Adding an MCP Server</h4>
+                            <h4 class="font-bold text-lg text-accent">Passing Arguments to Skills</h4>
                             <div class="code-block">
                                 <div class="code-block-header">Terminal</div>
-                                <pre><code class="text-green-400 text-sm"><span class="code-comment"># Add MCP server using claude mcp add command</span>
-claude mcp add semantic-scholar
+                                <pre><code class="text-green-400 text-sm"><span class="code-comment"># Invoke skill with arguments</span>
+/commit -m "fix: resolve login bug"
 
-<span class="code-comment"># Or add with specific package</span>
-claude mcp add semantic-scholar -- npx -y @anthropic-ai/mcp-server-semantic-scholar
+<span class="code-comment"># Skill with file argument</span>
+/review-pr 123
 
-<span class="code-comment"># View connected MCP servers</span>
-/mcp</code></pre>
+<span class="code-comment"># Custom skill with parameters</span>
+/generate-tests src/utils.ts</code></pre>
                             </div>
 
-                            <h4 class="font-bold text-lg mt-6 text-accent">MCP Architecture</h4>
+                            <h4 class="font-bold text-lg mt-6 text-accent">Accessing Arguments in SKILL.md</h4>
                             <div class="code-block">
-                                <div class="code-block-header">Architecture Diagram</div>
-                                <pre><code class="text-green-400 text-sm">+-------------------------------------------------------------+
-|                      Claude Code (Host)                      |
-|                                                              |
-|   +--------------+    +--------------+    +--------------+   |
-|   | MCP Client   |    | MCP Client   |    | MCP Client   |   |
-|   +------+-------+    +------+-------+    +------+-------+   |
-+----------+-----------------+-----------------+---------------+
-           |                 |                 |
-           v                 v                 v
-    +--------------+  +--------------+  +--------------+
-    | Semantic     |  |   GitHub     |  |   Custom     |
-    | Scholar      |  |   Server     |  |   Server     |
-    +--------------+  +--------------+  +--------------+</code></pre>
+                                <div class="code-block-header">.claude/skills/test-generator/SKILL.md</div>
+                                <pre><code class="text-green-400 text-sm">---
+name: generate-tests
+description: Generate unit tests for a file
+user-invocable: true
+---
+
+<span class="code-comment"># Test Generator</span>
+
+When invoked with a file path argument:
+1. Read the specified file
+2. Analyze the functions and classes
+3. Generate comprehensive unit tests
+4. Write tests to __tests__/ directory
+
+<span class="code-comment">## Example Usage</span>
+/generate-tests src/utils.ts
+<span class="code-comment"># Generates: src/__tests__/utils.test.ts</span></code></pre>
+                            </div>
+
+                            <h4 class="font-bold text-lg mt-6 text-accent">Skill Context Variables</h4>
+                            <div class="grid md:grid-cols-2 gap-4 mt-4">
+                                <div class="card rounded-xl p-4">
+                                    <h5 class="font-semibold text-accent mb-2">$ARGUMENTS</h5>
+                                    <p class="text-sm text-gray-400">All arguments passed after the skill name</p>
+                                </div>
+                                <div class="card rounded-xl p-4">
+                                    <h5 class="font-semibold text-accent mb-2">$CWD</h5>
+                                    <p class="text-sm text-gray-400">Current working directory</p>
+                                </div>
                             </div>
 
                             <button onclick="completeLesson(3)" class="btn-secondary px-6 py-3 rounded-xl text-sm font-medium">
@@ -442,14 +450,14 @@ claude mcp add semantic-scholar -- npx -y @anthropic-ai/mcp-server-semantic-scho
                     </div>
                 </div>
 
-                <!-- Lesson 4: Semantic Scholar MCP -->
+                <!-- Lesson 4: Advanced Skill Patterns -->
                 <div id="lesson4" class="lesson-card rounded-2xl overflow-hidden">
                     <div class="lesson-header p-6 flex items-center justify-between" onclick="toggleLesson(4)">
                         <div class="flex items-center gap-4">
                             <div class="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center text-2xl">4</div>
                             <div>
-                                <h3 class="font-bold text-xl">Semantic Scholar MCP</h3>
-                                <p class="text-gray-400 text-sm">Academic paper search and retrieval</p>
+                                <h3 class="font-bold text-xl">Advanced Skill Patterns</h3>
+                                <p class="text-gray-400 text-sm">Tool restrictions, model selection, and skill chaining</p>
                             </div>
                         </div>
                         <div class="flex items-center gap-3">
@@ -461,65 +469,51 @@ claude mcp add semantic-scholar -- npx -y @anthropic-ai/mcp-server-semantic-scho
                     </div>
                     <div class="lesson-content">
                         <div class="px-6 pb-6 space-y-6">
-                            <h4 class="font-bold text-lg text-accent">Setting Up Semantic Scholar MCP</h4>
+                            <h4 class="font-bold text-lg text-accent">Tool Restrictions</h4>
+                            <p class="text-gray-300">Limit which tools a skill can use for security and focus:</p>
                             <div class="code-block">
-                                <div class="code-block-header">.claude/settings.local.json</div>
-                                <pre><code class="text-green-400 text-sm">{
-  <span class="code-string">"mcpServers"</span>: {
-    <span class="code-string">"semantic-scholar"</span>: {
-      <span class="code-string">"command"</span>: <span class="code-string">"npx"</span>,
-      <span class="code-string">"args"</span>: [<span class="code-string">"-y"</span>, <span class="code-string">"@anthropic-ai/mcp-server-semantic-scholar"</span>],
-      <span class="code-string">"env"</span>: {
-        <span class="code-string">"SEMANTIC_SCHOLAR_API_KEY"</span>: <span class="code-string">"${SEMANTIC_SCHOLAR_API_KEY}"</span>
-      }
-    }
-  }
-}</code></pre>
+                                <div class="code-block-header">SKILL.md with allowed-tools</div>
+                                <pre><code class="text-green-400 text-sm">---
+name: safe-reader
+description: Read-only file analysis
+allowed-tools: [Read, Glob, Grep]  <span class="code-comment"># No Write/Edit/Bash</span>
+user-invocable: true
+---
+
+<span class="code-comment"># Safe Reader</span>
+This skill can only READ files, never modify them.
+Useful for code review and analysis tasks.</code></pre>
                             </div>
 
-                            <h4 class="font-bold text-lg mt-6 text-accent">Available Tools</h4>
-                            <div class="grid md:grid-cols-2 gap-4 mt-4">
+                            <h4 class="font-bold text-lg mt-6 text-accent">Model Selection</h4>
+                            <p class="text-gray-300">Choose the right model for your skill's needs:</p>
+                            <div class="grid md:grid-cols-3 gap-4 mt-4">
                                 <div class="card rounded-xl p-4">
-                                    <h5 class="font-semibold text-accent mb-2">search_papers</h5>
-                                    <p class="text-sm text-gray-400">Search for papers by keywords, get titles, abstracts, and citations.</p>
+                                    <h5 class="font-semibold text-accent mb-2">model: haiku</h5>
+                                    <p class="text-sm text-gray-400">Fast, cheap. Good for simple transformations.</p>
                                 </div>
                                 <div class="card rounded-xl p-4">
-                                    <h5 class="font-semibold text-accent mb-2">get_paper_details</h5>
-                                    <p class="text-sm text-gray-400">Get full details of a specific paper by ID.</p>
+                                    <h5 class="font-semibold text-accent mb-2">model: sonnet</h5>
+                                    <p class="text-sm text-gray-400">Balanced. Default for most tasks.</p>
                                 </div>
                                 <div class="card rounded-xl p-4">
-                                    <h5 class="font-semibold text-accent mb-2">get_citations</h5>
-                                    <p class="text-sm text-gray-400">Get papers that cite a specific paper.</p>
-                                </div>
-                                <div class="card rounded-xl p-4">
-                                    <h5 class="font-semibold text-accent mb-2">get_references</h5>
-                                    <p class="text-sm text-gray-400">Get papers referenced by a specific paper.</p>
+                                    <h5 class="font-semibold text-accent mb-2">model: opus</h5>
+                                    <p class="text-sm text-gray-400">Most capable. Complex reasoning tasks.</p>
                                 </div>
                             </div>
 
-                            <h4 class="font-bold text-lg mt-6 text-accent">Usage Example</h4>
+                            <h4 class="font-bold text-lg mt-6 text-accent">Skill Chaining Example</h4>
                             <div class="code-block">
-                                <div class="code-block-header">Claude Conversation</div>
-                                <pre><code class="text-green-400 text-sm">User: "Search for papers about large language model alignment"
+                                <div class="code-block-header">Workflow</div>
+                                <pre><code class="text-green-400 text-sm"><span class="code-comment"># Step 1: Generate code</span>
+/generate-component Button
 
-Claude: [Uses semantic-scholar.search_papers tool]
-<span class="code-comment"># Returns: List of papers with titles, authors, abstracts</span>
+<span class="code-comment"># Step 2: Generate tests for it</span>
+/generate-tests src/components/Button.tsx
 
-User: "Get details and citations for the first paper"
-
-Claude: [Uses semantic-scholar.get_paper_details]
-Claude: [Uses semantic-scholar.get_citations]
-<span class="code-comment"># Returns: Full paper details and citing papers</span></code></pre>
-                            </div>
-
-                            <div class="warning-box">
-                                <div class="flex items-start gap-3">
-                                    <span class="text-xl">Warning</span>
-                                    <div>
-                                        <p class="text-amber-200 font-medium">API Key Security</p>
-                                        <p class="text-sm mt-1 text-gray-300">Store your API key as an environment variable. Never commit <code class="bg-dark-800 px-2 py-1 rounded text-xs">settings.local.json</code> to git.</p>
-                                    </div>
-                                </div>
+<span class="code-comment"># Step 3: Review and commit</span>
+/review-pr
+/commit</code></pre>
                             </div>
 
                             <button onclick="completeLesson(4)" class="btn-secondary px-6 py-3 rounded-xl text-sm font-medium">
@@ -529,14 +523,14 @@ Claude: [Uses semantic-scholar.get_citations]
                     </div>
                 </div>
 
-                <!-- Lesson 5: Skills + MCP Workflow -->
+                <!-- Lesson 5: Skills in Practice -->
                 <div id="lesson5" class="lesson-card rounded-2xl overflow-hidden">
                     <div class="lesson-header p-6 flex items-center justify-between" onclick="toggleLesson(5)">
                         <div class="flex items-center gap-4">
                             <div class="w-12 h-12 rounded-xl bg-pink-500/20 flex items-center justify-center text-2xl">5</div>
                             <div>
-                                <h3 class="font-bold text-xl">Skills + MCP Workflow</h3>
-                                <p class="text-gray-400 text-sm">Combining skills and MCP for powerful automation</p>
+                                <h3 class="font-bold text-xl">Skills in Practice</h3>
+                                <p class="text-gray-400 text-sm">Real-world skill examples and best practices</p>
                             </div>
                         </div>
                         <div class="flex items-center gap-3">
@@ -549,61 +543,77 @@ Claude: [Uses semantic-scholar.get_citations]
                     <div class="lesson-content">
                         <div class="px-6 pb-6 space-y-6">
                             <div class="tip-box">
-                                <p class="text-pink-200 font-medium">Power of Combination</p>
-                                <p class="text-sm mt-1 text-gray-300">Skills define HOW to do tasks, MCP provides WHAT tools to use. Combined, they create powerful automated workflows.</p>
+                                <p class="text-pink-200 font-medium">Real-World Skills</p>
+                                <p class="text-sm mt-1 text-gray-300">Skills are most powerful when they encode your team's best practices and automate repetitive workflows.</p>
                             </div>
 
-                            <h4 class="font-bold text-lg text-accent">Paper Survey Workflow Example</h4>
+                            <h4 class="font-bold text-lg text-accent">Example: Code Review Skill</h4>
                             <div class="code-block">
-                                <div class="code-block-header">Workflow</div>
-                                <pre><code class="text-green-400 text-sm"><span class="code-comment"># 1. MCP: Search papers</span>
-Claude uses semantic-scholar.search_papers("LLM alignment")
-  -> Returns 50 papers
+                                <div class="code-block-header">.claude/skills/code-review/SKILL.md</div>
+                                <pre><code class="text-green-400 text-sm">---
+name: code-review
+description: Review code changes following team standards
+allowed-tools: [Read, Glob, Grep]
+model: sonnet
+user-invocable: true
+---
 
-<span class="code-comment"># 2. MCP: Get details for top 10</span>
-Claude uses semantic-scholar.get_paper_details for each
-  -> Returns abstracts, citations, authors
+<span class="code-comment"># Code Review Skill</span>
 
-<span class="code-comment"># 3. Skill: Summarize papers</span>
-/survey-writer skill processes the data
-  -> Creates structured summaries
+Review the code changes and check for:
 
-<span class="code-comment"># 4. Skill: Write survey document</span>
-Skill creates survey.md with:
-  - Introduction
-  - Categorized papers
-  - Analysis and insights
-  - References (BibTeX)</code></pre>
+<span class="code-comment">## Security</span>
+- No hardcoded secrets
+- Input validation
+- SQL injection prevention
+
+<span class="code-comment">## Style</span>
+- Follows project conventions
+- Clear naming
+- Appropriate comments
+
+<span class="code-comment">## Output</span>
+Provide feedback as:
+1. Critical issues (must fix)
+2. Suggestions (nice to have)
+3. Questions (need clarification)</code></pre>
                             </div>
 
-                            <h4 class="font-bold text-lg mt-6 text-accent">Using Subagents for Parallel Work</h4>
-                            <p class="text-gray-300">Use subagents to parallelize paper analysis:</p>
+                            <h4 class="font-bold text-lg mt-6 text-accent">Example: Documentation Skill</h4>
                             <div class="code-block">
-                                <div class="code-block-header">Parallel Paper Analysis</div>
-                                <pre><code class="text-green-400 text-sm">User: "Analyze these 10 papers in parallel and summarize each"
+                                <div class="code-block-header">.claude/skills/doc-generator/SKILL.md</div>
+                                <pre><code class="text-green-400 text-sm">---
+name: doc-generator
+description: Generate documentation for functions
+user-invocable: true
+---
 
-<span class="code-comment"># Claude spawns multiple agents:</span>
-Agent 1 (Explore): Analyze paper 1-2
-Agent 2 (Explore): Analyze paper 3-4
-Agent 3 (Explore): Analyze paper 5-6
-Agent 4 (Explore): Analyze paper 7-8
-Agent 5 (Explore): Analyze paper 9-10
+<span class="code-comment"># Documentation Generator</span>
 
-<span class="code-comment"># All run simultaneously, then results are combined</span></code></pre>
+For each function in the specified file:
+1. Analyze the function signature
+2. Understand the implementation
+3. Generate JSDoc/docstring with:
+   - Description
+   - @param for each parameter
+   - @returns description
+   - @example usage</code></pre>
                             </div>
 
-                            <h4 class="font-bold text-lg mt-6 text-accent">Complete Survey Project Structure</h4>
+                            <h4 class="font-bold text-lg mt-6 text-accent">Skills Project Structure</h4>
                             <div class="code-block">
-                                <div class="code-block-header">Project Structure</div>
-                                <pre><code class="text-green-400 text-sm">paper-survey/
+                                <div class="code-block-header">Recommended Structure</div>
+                                <pre><code class="text-green-400 text-sm">my-project/
 +-- .claude/
-|   +-- settings.local.json    <span class="code-comment"># MCP: Semantic Scholar</span>
 |   +-- skills/
-|       +-- survey-writer/
-|           +-- SKILL.md       <span class="code-comment"># Custom survey skill</span>
-+-- survey.md                  <span class="code-comment"># Output: Survey document</span>
-+-- references.bib             <span class="code-comment"># Output: BibTeX references</span>
-+-- CLAUDE.md                  <span class="code-comment"># Project context</span></code></pre>
+|       +-- code-review/
+|       |   +-- SKILL.md
+|       +-- doc-generator/
+|       |   +-- SKILL.md
+|       +-- test-generator/
+|           +-- SKILL.md
++-- CLAUDE.md              <span class="code-comment"># Project context</span>
++-- src/                   <span class="code-comment"># Your code</span></code></pre>
                             </div>
 
                             <button onclick="completeLesson(5)" class="btn-secondary px-6 py-3 rounded-xl text-sm font-medium">
@@ -633,14 +643,14 @@ Agent 5 (Explore): Analyze paper 9-10
                 </details>
                 <details class="card rounded-xl p-4 cursor-pointer">
                     <summary class="font-bold text-white flex items-center justify-between">
-                        MCP (Model Context Protocol)
+                        SKILL.md
                         <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                         </svg>
                     </summary>
                     <p class="text-gray-400 text-sm mt-3">
-                        An open protocol for connecting AI assistants to external tools and data sources.
-                        MCP servers provide tools, resources, and prompts that Claude can use.
+                        The file that defines a skill. Contains YAML frontmatter (name, description, allowed-tools, model)
+                        followed by markdown instructions for Claude to follow.
                     </p>
                 </details>
                 <details class="card rounded-xl p-4 cursor-pointer">
@@ -667,6 +677,18 @@ Agent 5 (Explore): Analyze paper 9-10
                         When a request matches a skill's description, Claude applies that skill without explicit invocation.
                     </p>
                 </details>
+                <details class="card rounded-xl p-4 cursor-pointer">
+                    <summary class="font-bold text-white flex items-center justify-between">
+                        allowed-tools
+                        <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </summary>
+                    <p class="text-gray-400 text-sm mt-3">
+                        A SKILL.md frontmatter field that restricts which tools the skill can use.
+                        Example: <code class="bg-dark-800 px-1 rounded text-xs">allowed-tools: [Read, Glob]</code> prevents writing files.
+                    </p>
+                </details>
             </div>
         </section>
 
@@ -675,7 +697,7 @@ Agent 5 (Explore): Analyze paper 9-10
             <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-6">KNOWLEDGE CHECK</h2>
             <div class="card rounded-2xl p-8">
                 <div class="flex items-center justify-between mb-6">
-                    <h3 class="font-bold text-2xl">Quiz: Skills + MCP</h3>
+                    <h3 class="font-bold text-2xl">Quiz: Skills Mastery</h3>
                     <span id="quizProgress" class="text-sm text-gray-400">Question 1/10</span>
                 </div>
 
@@ -708,7 +730,7 @@ Agent 5 (Explore): Analyze paper 9-10
                 <div class="flex flex-col md:flex-row items-center justify-between gap-6">
                     <div>
                         <h3 class="text-2xl font-bold mb-2">Ready for the Challenge?</h3>
-                        <p class="text-gray-400">Use Skills and MCP to survey 10+ papers on your research topic.</p>
+                        <p class="text-gray-400">Create custom Skills to automate your development workflow.</p>
                     </div>
                     <a id="challengeBtn" href="week3" class="btn-primary px-8 py-4 rounded-xl font-bold text-lg flex items-center gap-3 whitespace-nowrap">
                         Start Challenge
@@ -787,29 +809,29 @@ Agent 5 (Explore): Analyze paper 9-10
                 correct: 2
             },
             {
-                question: "What does MCP stand for?",
-                options: ["Model Context Protocol", "Machine Code Processor", "Multi-Channel Protocol", "Model Compute Platform"],
-                correct: 0
-            },
-            {
-                question: "How do you add an MCP server to Claude Code?",
-                options: ["claude install mcp", "claude mcp add", "claude server add", "mcp install"],
+                question: "What is the purpose of the 'description' field in SKILL.md?",
+                options: ["Display in UI only", "Enable skill discovery by Claude", "Documentation purposes", "Version tracking"],
                 correct: 1
             },
             {
-                question: "Which command shows connected MCP servers?",
-                options: ["/servers", "/mcp", "/list", "/tools"],
+                question: "Which frontmatter field restricts tools a skill can use?",
+                options: ["tools", "allowed-tools", "restricted-tools", "tool-list"],
                 correct: 1
             },
             {
-                question: "What tool searches for academic papers in Semantic Scholar MCP?",
-                options: ["find_papers", "query_papers", "search_papers", "lookup_papers"],
+                question: "What model option provides the fastest skill execution?",
+                options: ["opus", "sonnet", "haiku", "default"],
                 correct: 2
             },
             {
-                question: "Where should you store MCP API keys?",
-                options: ["In the SKILL.md file", "In CLAUDE.md", "As environment variables", "In settings.json directly"],
-                correct: 2
+                question: "Which built-in slash command auto-generates commit messages?",
+                options: ["/git", "/commit", "/push", "/save"],
+                correct: 1
+            },
+            {
+                question: "Where should project-specific skills be stored?",
+                options: ["~/.claude/skills/", ".claude/skills/", "/etc/claude/skills/", "skills/"],
+                correct: 1
             },
             {
                 question: "Which skill location has the highest priority?",
@@ -822,9 +844,9 @@ Agent 5 (Explore): Analyze paper 9-10
                 correct: 1
             },
             {
-                question: "How can you parallelize paper analysis?",
-                options: ["Use multiple terminals", "Use subagents", "Run sequentially", "Use threads"],
-                correct: 1
+                question: "What happens when a skill has 'allowed-tools: [Read, Glob]'?",
+                options: ["Skill can only read and search files", "Skill can write files too", "Skill has no restrictions", "Skill is disabled"],
+                correct: 0
             }
         ];
 

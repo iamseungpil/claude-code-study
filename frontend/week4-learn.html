@@ -220,14 +220,14 @@
             <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-6">LESSONS</h2>
 
             <div class="space-y-4">
-                <!-- Lesson 1: Various MCP Servers Overview -->
+                <!-- Lesson 1: MCP Basics & Server Overview -->
                 <div id="lesson1" class="lesson-card rounded-2xl overflow-hidden">
                     <div class="lesson-header p-6 flex items-center justify-between" onclick="toggleLesson(1)">
                         <div class="flex items-center gap-4">
                             <div class="w-12 h-12 rounded-xl bg-accent/20 flex items-center justify-center text-2xl">1</div>
                             <div>
-                                <h3 class="font-bold text-xl">Various MCP Servers</h3>
-                                <p class="text-gray-400 text-sm">Notion, Playwright, GitHub, PostgreSQL, Slack</p>
+                                <h3 class="font-bold text-xl">MCP Basics & Server Overview</h3>
+                                <p class="text-gray-400 text-sm">What is MCP, adding servers, and the ecosystem</p>
                             </div>
                         </div>
                         <div class="flex items-center gap-3">
@@ -240,11 +240,24 @@
                     <div class="lesson-content">
                         <div class="px-6 pb-6 space-y-6">
                             <div class="tip-box">
-                                <p class="text-emerald-200 font-medium">MCP Server Ecosystem</p>
-                                <p class="text-sm mt-1 text-gray-300">MCP servers connect Claude to external services. Each server exposes tools that Claude can use to interact with that service.</p>
+                                <p class="text-emerald-200 font-medium">What is MCP?</p>
+                                <p class="text-sm mt-1 text-gray-300"><strong>MCP (Model Context Protocol)</strong> is a standard protocol that connects Claude to external services and tools. MCP servers expose capabilities that Claude can use seamlessly.</p>
                             </div>
 
-                            <h4 class="font-bold text-lg text-accent">Popular MCP Servers</h4>
+                            <h4 class="font-bold text-lg text-accent">Adding MCP Servers</h4>
+                            <div class="code-block">
+                                <div class="code-block-header">Terminal Commands</div>
+                                <pre><code class="text-green-400 text-sm"><span class="code-comment"># Add an MCP server</span>
+claude mcp add &lt;server-name&gt;
+
+<span class="code-comment"># View connected MCP servers</span>
+/mcp
+
+<span class="code-comment"># Example: Add Playwright for browser automation</span>
+claude mcp add playwright</code></pre>
+                            </div>
+
+                            <h4 class="font-bold text-lg mt-6 text-accent">Popular MCP Servers</h4>
                             <div class="space-y-4 mt-4">
                                 <div class="card rounded-xl p-4">
                                     <div class="flex items-center gap-3 mb-2">
@@ -616,6 +629,18 @@ Claude uses slack.send_message(channel="#dev")
             <div class="space-y-3">
                 <details class="card rounded-xl p-4 cursor-pointer">
                     <summary class="font-bold text-white flex items-center justify-between">
+                        MCP (Model Context Protocol)
+                        <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </summary>
+                    <p class="text-gray-400 text-sm mt-3">
+                        A standard protocol that connects Claude to external services and tools.
+                        Add servers with <code class="bg-dark-800 px-1 rounded text-xs">claude mcp add</code>, view with <code class="bg-dark-800 px-1 rounded text-xs">/mcp</code>.
+                    </p>
+                </details>
+                <details class="card rounded-xl p-4 cursor-pointer">
+                    <summary class="font-bold text-white flex items-center justify-between">
                         MCP Server
                         <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
@@ -794,8 +819,8 @@ Claude uses slack.send_message(channel="#dev")
                 correct: 2
             },
             {
-                question: "What Playwright MCP tool takes page screenshots?",
-                options: ["capture", "screenshot", "take_photo", "snap"],
+                question: "What does MCP stand for?",
+                options: ["Machine Code Processor", "Model Context Protocol", "Multi-Channel Protocol", "Model Compute Platform"],
                 correct: 1
             },
             {
