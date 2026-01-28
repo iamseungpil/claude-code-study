@@ -176,6 +176,7 @@ def read_submission_code(submission_path: Path) -> dict:
 
     # Read key source files
     patterns = [
+        # Week 1: React/Next.js components
         "src/components/**/*.tsx",
         "src/components/**/*.ts",
         "src/app/**/*.tsx",
@@ -184,6 +185,14 @@ def read_submission_code(submission_path: Path) -> dict:
         "src/lib/**/*.ts",
         "app/**/*.tsx",
         "components/**/*.tsx",
+        # Week 2: Hooks files
+        "hooks/**/*.js",
+        "hooks/**/*.ts",
+        ".claude/settings.json",
+        ".claude/settings.example.json",
+        # Week 3+: Skills and MCP
+        "scripts/**/*.js",
+        "scripts/**/*.ts",
     ]
 
     for pattern in patterns:
@@ -313,33 +322,57 @@ Return ONLY valid JSON (no markdown, no explanation):
         )
 
         output = (result.stdout or "").strip()
+        stderr = (result.stderr or "").strip()
+
+        # Debug logging
+        print(f"Claude CLI exit code: {result.returncode}")
+        if stderr:
+            print(f"Claude CLI stderr: {stderr[:500]}")
+        print(f"Claude CLI output length: {len(output)}")
+        print(f"Claude CLI output preview: {output[:300]}...")
 
         # Try to parse JSON from output
         # Claude with --output-format json returns JSON directly
         try:
             parsed = json.loads(output)
-            # Handle nested result structure
+            # Handle nested result structure from Claude CLI
             if "result" in parsed:
-                output = parsed["result"]
-                if isinstance(output, str):
-                    # Find JSON in the result string
-                    json_start = output.find('{')
-                    json_end = output.rfind('}') + 1
+                inner_result = parsed["result"]
+                if isinstance(inner_result, str):
+                    # The result might be a JSON string or plain text
+                    inner_result = inner_result.strip()
+                    # Find JSON object in the result string
+                    json_start = inner_result.find('{')
+                    json_end = inner_result.rfind('}') + 1
                     if json_start >= 0 and json_end > json_start:
-                        return json.loads(output[json_start:json_end])
-                elif isinstance(output, dict):
-                    return output
+                        try:
+                            return json.loads(inner_result[json_start:json_end])
+                        except json.JSONDecodeError as e:
+                            print(f"Failed to parse inner JSON: {e}")
+                            print(f"Inner result: {inner_result[:500]}")
+                            return {"error": f"Inner JSON parse error: {e}", "raw": inner_result[:500]}
+                    else:
+                        # Plain text response, not JSON
+                        return {"error": "Claude returned text instead of JSON", "raw": inner_result[:500]}
+                elif isinstance(inner_result, dict):
+                    return inner_result
             elif "rubric_score" in parsed:
                 return parsed
-        except json.JSONDecodeError:
-            pass
+            else:
+                return {"error": "Unexpected JSON structure", "raw": str(parsed)[:500]}
+        except json.JSONDecodeError as e:
+            print(f"Failed to parse outer JSON: {e}")
+            print(f"Raw output: {output[:500]}")
 
         # Fallback: find JSON in output
         json_start = output.find('{')
         json_end = output.rfind('}') + 1
 
         if json_start >= 0 and json_end > json_start:
-            return json.loads(output[json_start:json_end])
+            try:
+                return json.loads(output[json_start:json_end])
+            except json.JSONDecodeError as e:
+                return {"error": f"Fallback JSON parse error: {e}", "raw": output[json_start:json_start+500]}
         else:
             return {"error": "No valid JSON in Claude output", "raw": output[:500]}
 
