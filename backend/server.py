@@ -1056,7 +1056,7 @@ async def submit_solution(
     submission_number = 1
 
     if metadata_file.exists():
-        with open(metadata_file) as f:
+        with open(metadata_file, encoding='utf-8') as f:
             existing_metadata = json.load(f)
             existing_history = existing_metadata.get("submission_history", [])
             # If no history but has submitted_at, create first entry from existing data
@@ -1167,7 +1167,7 @@ async def list_submissions(week: int):
         if participant_dir.is_dir():
             metadata_file = participant_dir / "metadata.json"
             if metadata_file.exists():
-                with open(metadata_file) as f:
+                with open(metadata_file, encoding='utf-8') as f:
                     submissions.append(json.load(f))
     
     return submissions
@@ -1186,7 +1186,7 @@ async def get_submission_history(week: int, participant_id: str):
     if not metadata_file.exists():
         return {"submission_history": [], "total_submissions": 0}
 
-    with open(metadata_file) as f:
+    with open(metadata_file, encoding='utf-8') as f:
         metadata = json.load(f)
 
     history = metadata.get("submission_history", [])
@@ -1206,7 +1206,7 @@ async def get_submission_history(week: int, participant_id: str):
     if history and not history[-1].get("evaluation"):
         eval_file = EVALUATIONS_DIR / f"week{week}" / f"{participant_id}.json"
         if eval_file.exists():
-            with open(eval_file) as f:
+            with open(eval_file, encoding='utf-8') as f:
                 eval_data = json.load(f)
                 # Add latest evaluation to the most recent submission
                 history[-1]["evaluation"] = {
@@ -1234,8 +1234,8 @@ async def get_evaluation(week: int, participant_id: str):
     
     if not eval_file.exists():
         raise HTTPException(404, "Evaluation not found")
-    
-    with open(eval_file) as f:
+
+    with open(eval_file, encoding='utf-8') as f:
         return json.load(f)
 
 
@@ -1254,7 +1254,7 @@ def _get_week_leaderboard_data(week: int) -> list:
 
     results = []
     for eval_file in evaluations_dir.glob("*.json"):
-        with open(eval_file) as f:
+        with open(eval_file, encoding='utf-8') as f:
             data = json.load(f)
             if data.get("status") == "completed":
                 scores = data.get("scores", {})
@@ -1294,8 +1294,8 @@ def _get_week_leaderboard_data(week: int) -> list:
 async def get_season_leaderboard():
     """Get overall season leaderboard (all weeks combined)."""
     participants_file = DATA_DIR / "participants.json"
-    
-    with open(participants_file) as f:
+
+    with open(participants_file, encoding='utf-8') as f:
         db = json.load(f)
     
     # Calculate season points
