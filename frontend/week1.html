@@ -1163,7 +1163,7 @@ useEffect(() =&gt; {
                             </div>
                             <div class="flex justify-between p-2 bg-dark-900/30 rounded">
                                 <span class="text-gray-400">CLAUDE.md</span>
-                                <span class="text-white">${evalData.breakdown?.claude_md || evalData.breakdown?.claude_md_quality || 0}/10</span>
+                                <span class="text-white">${evalData.breakdown?.claude_md || evalData.breakdown?.claude_md_quality || evalData.breakdown?.documentation || 0}/15</span>
                             </div>
                         </div>
                     </div>
