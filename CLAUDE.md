@@ -237,6 +237,20 @@ cloudflared tunnel --url http://localhost:8003
   - Lines 110, 134, 507, 518, 537, 618, 647, 662
 - **Lesson**: Always explicitly specify encoding in Python file operations on Windows
 
+### Issue 13: Windows Encoding Error in Server API (2026-01-29)
+- **Cause**: `server.py` had 27 `open()` calls without `encoding='utf-8'` parameter
+  - Leaderboard API failed when reading evaluation files saved with Korean text
+- **Symptom**:
+  - `UnicodeDecodeError: 'cp949' codec can't decode byte 0xec` (read without encoding)
+  - `UnicodeDecodeError: 'utf-8' codec can't decode byte 0xb8` (file saved as cp949)
+- **Solution**:
+  1. Added `encoding='utf-8'` to all 27 `open()` calls in server.py
+  2. Converted existing cp949-encoded JSON files to UTF-8
+- **File Modified**: `backend/server.py`
+  - All challenges, users, participants, metadata, evaluation file operations
+- **Lesson**: Encoding must be consistent - both read AND write operations need UTF-8
+- **Fix Applied**: Used `sed` to batch update all file operations, then manually converted existing files
+
 ### Cloudflare Pages Configuration (IMPORTANT)
 - **Build output directory**: `frontend`
 - **Files served at**: Root paths (`/index.html`, `/week1.html`, etc.)
