@@ -307,15 +307,37 @@ npx playwright test registration.spec.ts --project=site-tests
 - **Challenge Page Navigation**: PASSED
 - **Challenge Submission**: PASSED
 
-### Current Tunnel URL
-- **URL**: `https://focal-logo-col-home.trycloudflare.com`
+### Current Tunnel URL (2026-01-29)
+- **URL**: `https://stage-present-dosage-unlike.trycloudflare.com`
 - **Protocol**: HTTP/2 (more stable than QUIC on Windows)
-- **Note**: Tunnel URL changes on each restart. Update `frontend/config.js` accordingly.
+- **Note**: Tunnel URL changes on each restart. Update `frontend/config.js` AND GitHub webhook!
+
+### Webhook Update Hook (IMPORTANT)
+- **Location**: `.claude/hooks/update-webhook.sh`
+- **Purpose**: Reminds you to update GitHub webhook when tunnel URL changes
+- **Usage**: `./.claude/hooks/update-webhook.sh`
+- **What it does**:
+  1. Reads current Cloudflare Tunnel URL from `cloudflared.log`
+  2. Compares with URL in `frontend/config.js`
+  3. Displays step-by-step instructions for updating GitHub webhook
+- **When to run**:
+  - After restarting cloudflared tunnel
+  - When seeing GitHub webhook connection errors
+  - Before pushing critical updates
+
+### GitHub Webhook Configuration
+- **Endpoint**: `https://[tunnel-url]/webhook/github`
+- **Current**: `https://stage-present-dosage-unlike.trycloudflare.com/webhook/github`
+- **Secret**: Stored in `backend/.env.webhook`
+- **Events**: Push events only
+- **Update manually at**: https://github.com/iamseungpil/claude-code-study/settings/hooks
+- **CRITICAL**: Must update webhook URL every time tunnel restarts (Quick Tunnels use random URLs)
 
 ### Cloudflare Tunnel Tips (Windows)
 - Use `--protocol http2` flag for more stable connections
 - QUIC protocol may timeout on some networks
 - Example: `cloudflared tunnel --url http://localhost:8003 --protocol http2`
+- **Production Tip**: Use Named Tunnels for stable URLs (no manual webhook updates needed)
 
 ### Auto-Deploy Test: 2026-01-20 22:18:11
 
