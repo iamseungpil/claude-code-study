@@ -191,10 +191,10 @@
             </div>
 
             <h1 class="text-4xl md:text-5xl font-bold mb-4 tracking-tight">
-                MCP Advanced
+                MCP & Advanced Automation
             </h1>
             <p class="text-xl text-gray-400 mb-8 max-w-2xl">
-                Master various MCP servers (Notion, Playwright, GitHub) and build powerful MVP applications.
+                Master MCP server integration, leverage subagents for parallel development, and automate workflows with custom commands and headless mode.
             </p>
 
             <!-- Progress Tracker -->
@@ -300,14 +300,14 @@ claude mcp add playwright</code></pre>
                     </div>
                 </div>
 
-                <!-- Lesson 2: Notion MCP Deep Dive -->
+                <!-- Lesson 2: MCP 실전 Patterns -->
                 <div id="lesson2" class="lesson-card rounded-2xl overflow-hidden">
                     <div class="lesson-header p-6 flex items-center justify-between" onclick="toggleLesson(2)">
                         <div class="flex items-center gap-4">
                             <div class="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center text-2xl">2</div>
                             <div>
-                                <h3 class="font-bold text-xl">Notion MCP Deep Dive</h3>
-                                <p class="text-gray-400 text-sm">Document and database operations</p>
+                                <h3 class="font-bold text-xl">MCP 실전 Patterns</h3>
+                                <p class="text-gray-400 text-sm">Multi-server setup and real-world workflows</p>
                             </div>
                         </div>
                         <div class="flex items-center gap-3">
@@ -319,7 +319,12 @@ claude mcp add playwright</code></pre>
                     </div>
                     <div class="lesson-content">
                         <div class="px-6 pb-6 space-y-6">
-                            <h4 class="font-bold text-lg text-accent">Notion MCP Setup</h4>
+                            <div class="tip-box">
+                                <p class="text-emerald-200 font-medium">MCP in Practice</p>
+                                <p class="text-sm mt-1 text-gray-300">Real-world projects often use multiple MCP servers together. Configure them in <code class="bg-dark-600 px-1 rounded text-xs">settings.local.json</code> and let Claude orchestrate data between services seamlessly.</p>
+                            </div>
+
+                            <h4 class="font-bold text-lg text-accent">Multi-Server Configuration</h4>
                             <div class="code-block">
                                 <div class="code-block-header">.claude/settings.local.json</div>
                                 <pre><code class="text-green-400 text-sm">{
@@ -327,54 +332,55 @@ claude mcp add playwright</code></pre>
     <span class="code-string">"notion"</span>: {
       <span class="code-string">"command"</span>: <span class="code-string">"npx"</span>,
       <span class="code-string">"args"</span>: [<span class="code-string">"-y"</span>, <span class="code-string">"@anthropic-ai/mcp-server-notion"</span>],
-      <span class="code-string">"env"</span>: {
-        <span class="code-string">"NOTION_API_KEY"</span>: <span class="code-string">"${NOTION_API_KEY}"</span>
-      }
+      <span class="code-string">"env"</span>: { <span class="code-string">"NOTION_API_KEY"</span>: <span class="code-string">"${NOTION_API_KEY}"</span> }
+    },
+    <span class="code-string">"playwright"</span>: {
+      <span class="code-string">"command"</span>: <span class="code-string">"npx"</span>,
+      <span class="code-string">"args"</span>: [<span class="code-string">"-y"</span>, <span class="code-string">"@anthropic-ai/mcp-server-playwright"</span>]
+    },
+    <span class="code-string">"github"</span>: {
+      <span class="code-string">"command"</span>: <span class="code-string">"npx"</span>,
+      <span class="code-string">"args"</span>: [<span class="code-string">"-y"</span>, <span class="code-string">"@modelcontextprotocol/server-github"</span>],
+      <span class="code-string">"env"</span>: { <span class="code-string">"GITHUB_TOKEN"</span>: <span class="code-string">"${GITHUB_TOKEN}"</span> }
     }
   }
 }</code></pre>
                             </div>
 
-                            <h4 class="font-bold text-lg mt-6 text-accent">Available Tools</h4>
-                            <div class="grid md:grid-cols-2 gap-4 mt-4">
+                            <h4 class="font-bold text-lg mt-6 text-accent">Quick Overview</h4>
+                            <div class="grid md:grid-cols-3 gap-4 mt-4">
                                 <div class="card rounded-xl p-4">
-                                    <h5 class="font-semibold text-accent mb-2">search_pages</h5>
-                                    <p class="text-sm text-gray-400">Search for pages in your workspace</p>
+                                    <h5 class="font-semibold text-accent mb-2">Notion MCP</h5>
+                                    <p class="text-sm text-gray-400">Database/page CRUD, workspace search, team documentation 관리</p>
                                 </div>
                                 <div class="card rounded-xl p-4">
-                                    <h5 class="font-semibold text-accent mb-2">get_page</h5>
-                                    <p class="text-sm text-gray-400">Retrieve a page's content and properties</p>
+                                    <h5 class="font-semibold text-accent mb-2">Playwright MCP</h5>
+                                    <p class="text-sm text-gray-400">Browser automation, web scraping, screenshot, E2E testing 지원</p>
                                 </div>
                                 <div class="card rounded-xl p-4">
-                                    <h5 class="font-semibold text-accent mb-2">create_page</h5>
-                                    <p class="text-sm text-gray-400">Create a new page or database entry</p>
-                                </div>
-                                <div class="card rounded-xl p-4">
-                                    <h5 class="font-semibold text-accent mb-2">update_page</h5>
-                                    <p class="text-sm text-gray-400">Update page content or properties</p>
-                                </div>
-                                <div class="card rounded-xl p-4">
-                                    <h5 class="font-semibold text-accent mb-2">query_database</h5>
-                                    <p class="text-sm text-gray-400">Query a database with filters and sorts</p>
-                                </div>
-                                <div class="card rounded-xl p-4">
-                                    <h5 class="font-semibold text-accent mb-2">add_database_entry</h5>
-                                    <p class="text-sm text-gray-400">Add a new entry to a database</p>
+                                    <h5 class="font-semibold text-accent mb-2">GitHub MCP</h5>
+                                    <p class="text-sm text-gray-400">Repos, PRs, issues, code search, review automation 처리</p>
                                 </div>
                             </div>
 
-                            <h4 class="font-bold text-lg mt-6 text-accent">Usage Example</h4>
+                            <h4 class="font-bold text-lg mt-6 text-accent">Multi-MCP Pipeline Example</h4>
                             <div class="code-block">
-                                <div class="code-block-header">Claude Conversation</div>
-                                <pre><code class="text-green-400 text-sm">User: "Create a project page in Notion for our MVP"
+                                <div class="code-block-header">Automated Workflow</div>
+                                <pre><code class="text-green-400 text-sm">User: "Check new GitHub issues, scrape competitor site, and update Notion board"
 
-Claude: [Uses notion.create_page tool]
-<span class="code-comment"># Creates: New page with project details</span>
+<span class="code-comment"># Step 1: GitHub MCP - Fetch new issues</span>
+Claude uses github.list_issues(state="open", since="yesterday")
+  -> Returns 5 new issues
 
-User: "Add tasks to our sprint database"
+<span class="code-comment"># Step 2: Playwright MCP - Scrape competitor data</span>
+Claude uses playwright.navigate("https://competitor.com/features")
+Claude uses playwright.get_text(".feature-list")
+  -> Extracts feature comparison data
 
-Claude: [Uses notion.add_database_entry tool]
-<span class="code-comment"># Creates: New entries in the database</span></code></pre>
+<span class="code-comment"># Step 3: Notion MCP - Update project board</span>
+Claude uses notion.add_database_entry for each issue
+Claude uses notion.update_page with competitor insights
+  -> Board updated with issues + market context</code></pre>
                             </div>
 
                             <button onclick="completeLesson(2)" class="btn-secondary px-6 py-3 rounded-xl text-sm font-medium">
@@ -384,14 +390,14 @@ Claude: [Uses notion.add_database_entry tool]
                     </div>
                 </div>
 
-                <!-- Lesson 3: Playwright MCP Deep Dive -->
+                <!-- Lesson 3: Subagents & Task Tool -->
                 <div id="lesson3" class="lesson-card rounded-2xl overflow-hidden">
                     <div class="lesson-header p-6 flex items-center justify-between" onclick="toggleLesson(3)">
                         <div class="flex items-center gap-4">
                             <div class="w-12 h-12 rounded-xl bg-amber-500/20 flex items-center justify-center text-2xl">3</div>
                             <div>
-                                <h3 class="font-bold text-xl">Playwright MCP Deep Dive</h3>
-                                <p class="text-gray-400 text-sm">Browser automation and web scraping</p>
+                                <h3 class="font-bold text-xl">Subagents & Task Tool</h3>
+                                <p class="text-gray-400 text-sm">Parallel development with specialized agents</p>
                             </div>
                         </div>
                         <div class="flex items-center gap-3">
@@ -403,55 +409,108 @@ Claude: [Uses notion.add_database_entry tool]
                     </div>
                     <div class="lesson-content">
                         <div class="px-6 pb-6 space-y-6">
-                            <h4 class="font-bold text-lg text-accent">Playwright MCP Setup</h4>
-                            <div class="code-block">
-                                <div class="code-block-header">.claude/settings.local.json</div>
-                                <pre><code class="text-green-400 text-sm">{
-  <span class="code-string">"mcpServers"</span>: {
-    <span class="code-string">"playwright"</span>: {
-      <span class="code-string">"command"</span>: <span class="code-string">"npx"</span>,
-      <span class="code-string">"args"</span>: [<span class="code-string">"-y"</span>, <span class="code-string">"@anthropic-ai/mcp-server-playwright"</span>]
-    }
-  }
-}</code></pre>
+                            <div class="tip-box">
+                                <p class="text-emerald-200 font-medium">Parallel Development with Subagents</p>
+                                <p class="text-sm mt-1 text-gray-300">Subagents enable assigning different roles for parallel work. Each subagent is an independent Claude instance that can explore, build, or plan simultaneously -- dramatically speeding up complex tasks like MVP development.</p>
                             </div>
 
-                            <h4 class="font-bold text-lg mt-6 text-accent">Available Tools</h4>
+                            <h4 class="font-bold text-lg text-accent">What are Subagents?</h4>
+                            <p class="text-gray-300 text-sm">Subagents are specialized Claude instances spawned via the <strong>Task tool</strong>. Each subagent runs independently with its own context and tools, allowing Claude to tackle multiple parts of a problem in parallel.</p>
+
+                            <h4 class="font-bold text-lg mt-6 text-accent">Subagent Types</h4>
                             <div class="grid md:grid-cols-2 gap-4 mt-4">
                                 <div class="card rounded-xl p-4">
-                                    <h5 class="font-semibold text-accent mb-2">navigate</h5>
-                                    <p class="text-sm text-gray-400">Navigate to a URL</p>
+                                    <h5 class="font-semibold text-accent mb-2">Explore</h5>
+                                    <p class="text-sm text-gray-400">Codebase search and file discovery. Uses Glob, Grep, Read tools to find patterns and answer structural questions.</p>
                                 </div>
                                 <div class="card rounded-xl p-4">
-                                    <h5 class="font-semibold text-accent mb-2">click</h5>
-                                    <p class="text-sm text-gray-400">Click on elements by selector</p>
+                                    <h5 class="font-semibold text-accent mb-2">Bash</h5>
+                                    <p class="text-sm text-gray-400">Command execution specialist. Git operations, running tests, package management, build scripts.</p>
                                 </div>
                                 <div class="card rounded-xl p-4">
-                                    <h5 class="font-semibold text-accent mb-2">fill</h5>
-                                    <p class="text-sm text-gray-400">Fill input fields with text</p>
+                                    <h5 class="font-semibold text-accent mb-2">Plan</h5>
+                                    <p class="text-sm text-gray-400">Architecture design and implementation planning. Identifies files to change, considers trade-offs, creates action plans.</p>
                                 </div>
                                 <div class="card rounded-xl p-4">
-                                    <h5 class="font-semibold text-accent mb-2">screenshot</h5>
-                                    <p class="text-sm text-gray-400">Take screenshots of pages</p>
-                                </div>
-                                <div class="card rounded-xl p-4">
-                                    <h5 class="font-semibold text-accent mb-2">get_text</h5>
-                                    <p class="text-sm text-gray-400">Extract text content from elements</p>
-                                </div>
-                                <div class="card rounded-xl p-4">
-                                    <h5 class="font-semibold text-accent mb-2">evaluate</h5>
-                                    <p class="text-sm text-gray-400">Run JavaScript in browser context</p>
+                                    <h5 class="font-semibold text-accent mb-2">General-Purpose</h5>
+                                    <p class="text-sm text-gray-400">Complex multi-step tasks. Research, code generation, analysis -- uses all available tools.</p>
                                 </div>
                             </div>
 
-                            <h4 class="font-bold text-lg mt-6 text-accent">Use Cases</h4>
-                            <div class="card rounded-xl p-4 mt-4">
-                                <ul class="space-y-2 text-sm text-gray-300">
-                                    <li><span class="text-accent font-bold">Web Scraping:</span> Extract data from websites</li>
-                                    <li><span class="text-accent font-bold">E2E Testing:</span> Automated UI testing</li>
-                                    <li><span class="text-accent font-bold">Screenshot:</span> Generate page screenshots/PDFs</li>
-                                    <li><span class="text-accent font-bold">Form Automation:</span> Fill and submit forms</li>
-                                </ul>
+                            <h4 class="font-bold text-lg mt-6 text-accent">Task Tool Usage</h4>
+                            <div class="code-block">
+                                <div class="code-block-header">Task Tool Example</div>
+                                <pre><code class="text-green-400 text-sm"><span class="code-comment"># Claude spawns a subagent using the Task tool</span>
+Task tool:
+  subagent_type: "Explore"
+  prompt: "Find all API endpoint definitions in the codebase.
+           Search for patterns like router.get, app.post,
+           @app.route, etc. Return a list of endpoints
+           with their file locations."
+
+<span class="code-comment"># The subagent works independently and returns results</span></code></pre>
+                            </div>
+
+                            <h4 class="font-bold text-lg mt-6 text-accent">Parallel Subagents</h4>
+                            <div class="code-block">
+                                <div class="code-block-header">Launching Multiple Agents Simultaneously</div>
+                                <pre><code class="text-green-400 text-sm"><span class="code-comment"># Send multiple Task tool calls in a single message</span>
+User: "Analyze this React app - check components,
+       find unused imports, and list all API calls"
+
+<span class="code-comment"># Claude spawns 3 agents simultaneously:</span>
+Agent 1 (Explore): Search for component definitions
+Agent 2 (Explore): Find unused imports with grep
+Agent 3 (Explore): Locate all fetch/axios calls
+
+<span class="code-comment"># All 3 run in parallel, results combined</span></code></pre>
+                            </div>
+
+                            <h4 class="font-bold text-lg mt-6 text-accent">Subagents for MVP Development</h4>
+                            <div class="tip-box">
+                                <p class="text-emerald-200 font-medium">MVP Parallel Roles</p>
+                                <p class="text-sm mt-1 text-gray-300">For MVP development, assign each subagent a different role: one plans architecture, another implements backend, another creates frontend, and another writes tests -- all working simultaneously.</p>
+                            </div>
+                            <div class="code-block mt-4">
+                                <div class="code-block-header">MVP Development with Parallel Tasks</div>
+                                <pre><code class="text-green-400 text-sm"><span class="code-comment"># Multiple Task tool calls sent in a single message:</span>
+
+<span class="code-comment"># Task 1: Architect</span>
+Task tool:
+  subagent_type: "Plan"
+  prompt: "Design the architecture for a todo-app MVP.
+           Define folder structure, data models, and API routes."
+
+<span class="code-comment"># Task 2: Backend Developer</span>
+Task tool:
+  subagent_type: "general-purpose"
+  prompt: "Implement the Express.js backend with REST API
+           for CRUD operations on todos."
+
+<span class="code-comment"># Task 3: Frontend Developer</span>
+Task tool:
+  subagent_type: "general-purpose"
+  prompt: "Create a React frontend with components for
+           listing, adding, and completing todos."
+
+<span class="code-comment"># Task 4: QA Engineer</span>
+Task tool:
+  subagent_type: "general-purpose"
+  prompt: "Write Jest tests for the API endpoints
+           and React component unit tests."</code></pre>
+                            </div>
+
+                            <h4 class="font-bold text-lg mt-6 text-accent">Background Agents</h4>
+                            <div class="code-block">
+                                <div class="code-block-header">run_in_background</div>
+                                <pre><code class="text-green-400 text-sm"><span class="code-comment"># For long-running tasks, use background execution</span>
+Task tool:
+  subagent_type: "general-purpose"
+  run_in_background: true
+  prompt: "Run the full test suite and report failures"
+
+<span class="code-comment"># Continue working while the agent runs</span>
+<span class="code-comment"># Results available when the agent completes</span></code></pre>
                             </div>
 
                             <button onclick="completeLesson(3)" class="btn-secondary px-6 py-3 rounded-xl text-sm font-medium">
@@ -461,14 +520,14 @@ Claude: [Uses notion.add_database_entry tool]
                     </div>
                 </div>
 
-                <!-- Lesson 4: MCP Combination Patterns -->
+                <!-- Lesson 4: Custom Commands -->
                 <div id="lesson4" class="lesson-card rounded-2xl overflow-hidden">
                     <div class="lesson-header p-6 flex items-center justify-between" onclick="toggleLesson(4)">
                         <div class="flex items-center gap-4">
                             <div class="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center text-2xl">4</div>
                             <div>
-                                <h3 class="font-bold text-xl">MCP Combination Patterns</h3>
-                                <p class="text-gray-400 text-sm">Building data pipelines with multiple MCPs</p>
+                                <h3 class="font-bold text-xl">Custom Commands</h3>
+                                <p class="text-gray-400 text-sm">Reusable slash commands for team workflows</p>
                             </div>
                         </div>
                         <div class="flex items-center gap-3">
@@ -481,50 +540,90 @@ Claude: [Uses notion.add_database_entry tool]
                     <div class="lesson-content">
                         <div class="px-6 pb-6 space-y-6">
                             <div class="tip-box">
-                                <p class="text-emerald-200 font-medium">Power of Multiple MCPs</p>
-                                <p class="text-sm mt-1 text-gray-300">Combine multiple MCP servers to build powerful automated workflows. Data flows from one service to another seamlessly.</p>
+                                <p class="text-emerald-200 font-medium">Reusable Commands</p>
+                                <p class="text-sm mt-1 text-gray-300">Custom commands let you automate repetitive workflows with a single slash command. Define them once, use them across sessions and share with your team.</p>
                             </div>
 
-                            <h4 class="font-bold text-lg text-accent">Example: Multi-MCP Setup</h4>
+                            <h4 class="font-bold text-lg text-accent">customCommands in settings.local.json</h4>
                             <div class="code-block">
                                 <div class="code-block-header">.claude/settings.local.json</div>
                                 <pre><code class="text-green-400 text-sm">{
-  <span class="code-string">"mcpServers"</span>: {
-    <span class="code-string">"github"</span>: {
-      <span class="code-string">"command"</span>: <span class="code-string">"npx"</span>,
-      <span class="code-string">"args"</span>: [<span class="code-string">"-y"</span>, <span class="code-string">"@modelcontextprotocol/server-github"</span>],
-      <span class="code-string">"env"</span>: { <span class="code-string">"GITHUB_TOKEN"</span>: <span class="code-string">"${GITHUB_TOKEN}"</span> }
+  <span class="code-string">"customCommands"</span>: {
+    <span class="code-string">"test"</span>: {
+      <span class="code-string">"description"</span>: <span class="code-string">"Run tests and fix failures"</span>,
+      <span class="code-string">"prompt"</span>: <span class="code-string">"Run npm test. If any tests fail, analyze the failures and fix them."</span>
     },
-    <span class="code-string">"notion"</span>: {
-      <span class="code-string">"command"</span>: <span class="code-string">"npx"</span>,
-      <span class="code-string">"args"</span>: [<span class="code-string">"-y"</span>, <span class="code-string">"@anthropic-ai/mcp-server-notion"</span>],
-      <span class="code-string">"env"</span>: { <span class="code-string">"NOTION_API_KEY"</span>: <span class="code-string">"${NOTION_API_KEY}"</span> }
+    <span class="code-string">"docs"</span>: {
+      <span class="code-string">"description"</span>: <span class="code-string">"Generate documentation"</span>,
+      <span class="code-string">"prompt"</span>: <span class="code-string">"Generate JSDoc comments for all functions in the current file."</span>
     },
-    <span class="code-string">"slack"</span>: {
-      <span class="code-string">"command"</span>: <span class="code-string">"npx"</span>,
-      <span class="code-string">"args"</span>: [<span class="code-string">"-y"</span>, <span class="code-string">"@anthropic-ai/mcp-server-slack"</span>],
-      <span class="code-string">"env"</span>: { <span class="code-string">"SLACK_TOKEN"</span>: <span class="code-string">"${SLACK_TOKEN}"</span> }
+    <span class="code-string">"security"</span>: {
+      <span class="code-string">"description"</span>: <span class="code-string">"Security audit"</span>,
+      <span class="code-string">"prompt"</span>: <span class="code-string">"Scan the codebase for common security vulnerabilities (OWASP Top 10). Report findings."</span>
     }
   }
 }</code></pre>
                             </div>
 
-                            <h4 class="font-bold text-lg mt-6 text-accent">Workflow Example: Issue Tracking Pipeline</h4>
+                            <h4 class="font-bold text-lg mt-6 text-accent">CLAUDE.md Project-Level Commands</h4>
+                            <p class="text-gray-300 text-sm">Define project-specific commands in CLAUDE.md for team consistency. These are shared via your repository:</p>
+                            <div class="code-block mt-4">
+                                <div class="code-block-header">CLAUDE.md</div>
+                                <pre><code class="text-green-400 text-sm"><span class="code-comment">## Custom Commands</span>
+
+<span class="code-comment">### /deploy</span>
+Deploy to staging environment:
+1. Run tests
+2. Build the application
+3. Deploy to staging server
+4. Run smoke tests
+
+<span class="code-comment">### /review-pr [PR_NUMBER]</span>
+Review a pull request:
+1. Fetch the PR diff
+2. Analyze for bugs, security issues, code style
+3. Post review comments</code></pre>
+                            </div>
+
+                            <h4 class="font-bold text-lg mt-6 text-accent">Command Parameters ($ARGUMENTS)</h4>
                             <div class="code-block">
-                                <div class="code-block-header">Automated Workflow</div>
-                                <pre><code class="text-green-400 text-sm">User: "Check new GitHub issues and update Notion board"
+                                <div class="code-block-header">Parameterized Commands</div>
+                                <pre><code class="text-green-400 text-sm">{
+  <span class="code-string">"customCommands"</span>: {
+    <span class="code-string">"refactor"</span>: {
+      <span class="code-string">"description"</span>: <span class="code-string">"Refactor a file"</span>,
+      <span class="code-string">"prompt"</span>: <span class="code-string">"Refactor $ARGUMENTS to improve readability and performance."</span>
+    },
+    <span class="code-string">"explain"</span>: {
+      <span class="code-string">"description"</span>: <span class="code-string">"Explain code"</span>,
+      <span class="code-string">"prompt"</span>: <span class="code-string">"Explain how $ARGUMENTS works in detail."</span>
+    }
+  }
+}
 
-<span class="code-comment"># 1. GitHub MCP: Fetch new issues</span>
-Claude uses github.list_issues(state="open", since="yesterday")
-  -> Returns 5 new issues
+<span class="code-comment"># Usage:</span>
+<span class="code-comment"># /refactor src/utils/parser.ts</span>
+<span class="code-comment"># /explain src/auth/jwt.ts</span></code></pre>
+                            </div>
 
-<span class="code-comment"># 2. Notion MCP: Add to project board</span>
-Claude uses notion.add_database_entry for each issue
-  -> Creates cards in Notion database
-
-<span class="code-comment"># 3. Slack MCP: Notify team</span>
-Claude uses slack.send_message(channel="#dev")
-  -> Posts summary to Slack channel</code></pre>
+                            <h4 class="font-bold text-lg mt-6 text-accent">Best Practices</h4>
+                            <div class="grid md:grid-cols-2 gap-4 mt-4">
+                                <div class="card rounded-xl p-4">
+                                    <h5 class="font-semibold text-accent mb-2">Naming Conventions</h5>
+                                    <p class="text-sm text-gray-400">Use short, descriptive names: /test, /deploy, /docs. Consistent naming helps team adoption.</p>
+                                </div>
+                                <div class="card rounded-xl p-4">
+                                    <h5 class="font-semibold text-accent mb-2">Documentation</h5>
+                                    <p class="text-sm text-gray-400">Always include a description field. Clear docs make commands discoverable via /help.</p>
+                                </div>
+                                <div class="card rounded-xl p-4">
+                                    <h5 class="font-semibold text-accent mb-2">Error Handling</h5>
+                                    <p class="text-sm text-gray-400">Include "if X fails, then Y" logic in prompts. Anticipate edge cases in your commands.</p>
+                                </div>
+                                <div class="card rounded-xl p-4">
+                                    <h5 class="font-semibold text-accent mb-2">Sharing</h5>
+                                    <p class="text-sm text-gray-400">Commit CLAUDE.md commands to your repo. Use settings.local.json for personal commands.</p>
+                                </div>
                             </div>
 
                             <button onclick="completeLesson(4)" class="btn-secondary px-6 py-3 rounded-xl text-sm font-medium">
@@ -534,14 +633,14 @@ Claude uses slack.send_message(channel="#dev")
                     </div>
                 </div>
 
-                <!-- Lesson 5: MVP Development Strategy -->
+                <!-- Lesson 5: Headless Mode -->
                 <div id="lesson5" class="lesson-card rounded-2xl overflow-hidden">
                     <div class="lesson-header p-6 flex items-center justify-between" onclick="toggleLesson(5)">
                         <div class="flex items-center gap-4">
                             <div class="w-12 h-12 rounded-xl bg-pink-500/20 flex items-center justify-center text-2xl">5</div>
                             <div>
-                                <h3 class="font-bold text-xl">MVP Development Strategy</h3>
-                                <p class="text-gray-400 text-sm">Rapid prototyping with MCP and Skills</p>
+                                <h3 class="font-bold text-xl">Headless Mode</h3>
+                                <p class="text-gray-400 text-sm">Non-interactive automation and CI/CD</p>
                             </div>
                         </div>
                         <div class="flex items-center gap-3">
@@ -554,64 +653,124 @@ Claude uses slack.send_message(channel="#dev")
                     <div class="lesson-content">
                         <div class="px-6 pb-6 space-y-6">
                             <div class="tip-box">
-                                <p class="text-emerald-200 font-medium">MVP Development with Claude Code</p>
-                                <p class="text-sm mt-1 text-gray-300">Use MCP servers for rapid prototyping. Focus on core features first, leverage external services to minimize custom code.</p>
+                                <p class="text-emerald-200 font-medium">Non-Interactive Automation</p>
+                                <p class="text-sm mt-1 text-gray-300">Headless mode runs Claude without human interaction -- perfect for scripts, CI/CD pipelines, and automated workflows where no terminal UI is needed.</p>
                             </div>
 
-                            <h4 class="font-bold text-lg text-accent">MVP Development Approach</h4>
-                            <div class="card rounded-xl p-4 mt-4">
-                                <ol class="space-y-3 text-sm text-gray-300">
-                                    <li><span class="text-accent font-bold">1. Define Core Features:</span> Identify 3 must-have features</li>
-                                    <li><span class="text-accent font-bold">2. Choose MCP Servers:</span> Select 2+ servers that enable your features</li>
-                                    <li><span class="text-accent font-bold">3. Create Skills:</span> Build skills to orchestrate MCP tools</li>
-                                    <li><span class="text-accent font-bold">4. Prototype Fast:</span> Use /commit and /review for rapid iteration</li>
-                                    <li><span class="text-accent font-bold">5. Test & Iterate:</span> Get feedback early, improve continuously</li>
-                                </ol>
-                            </div>
-
-                            <h4 class="font-bold text-lg mt-6 text-accent">Example MVP: Discord Bot</h4>
+                            <h4 class="font-bold text-lg text-accent">Basic Headless Command</h4>
                             <div class="code-block">
-                                <div class="code-block-header">Project Structure</div>
-                                <pre><code class="text-green-400 text-sm">discord-bot-mvp/
-+-- .claude/
-|   +-- settings.local.json  <span class="code-comment"># MCP: GitHub, Notion</span>
-|   +-- skills/
-|       +-- issue-tracker/
-|           +-- SKILL.md     <span class="code-comment"># Issue tracking automation</span>
-+-- src/
-|   +-- bot.js               <span class="code-comment"># Discord bot code</span>
-|   +-- commands/            <span class="code-comment"># Bot commands</span>
-+-- CLAUDE.md                <span class="code-comment"># Project context</span>
-+-- package.json</code></pre>
+                                <div class="code-block-header">Terminal</div>
+                                <pre><code class="text-green-400 text-sm"><span class="code-comment"># Run Claude non-interactively with JSON output</span>
+claude -p "List all TypeScript files" --output-format json
+
+<span class="code-comment"># Simple text output</span>
+claude -p "Generate a README for this project"
+
+<span class="code-comment"># With a specific model</span>
+claude -p "Quick code analysis" --model haiku</code></pre>
                             </div>
 
-                            <h4 class="font-bold text-lg mt-6 text-accent">Core Features Checklist</h4>
-                            <div class="grid md:grid-cols-3 gap-4 mt-4">
-                                <div class="card rounded-xl p-4 text-center">
-                                    <div class="text-3xl mb-2">Feature 1</div>
-                                    <p class="text-sm text-gray-400">User Input</p>
-                                    <p class="text-xs text-accent mt-1">(Required)</p>
+                            <h4 class="font-bold text-lg mt-6 text-accent">Key Flags</h4>
+                            <div class="grid md:grid-cols-2 gap-4 mt-4">
+                                <div class="card rounded-xl p-4">
+                                    <h5 class="font-semibold text-accent mb-1"><code class="text-sm">--print (-p)</code></h5>
+                                    <p class="text-sm text-gray-400">Non-interactive mode. Send a prompt and get the response to stdout.</p>
                                 </div>
-                                <div class="card rounded-xl p-4 text-center">
-                                    <div class="text-3xl mb-2">Feature 2</div>
-                                    <p class="text-sm text-gray-400">Data Processing</p>
-                                    <p class="text-xs text-accent mt-1">(Required)</p>
+                                <div class="card rounded-xl p-4">
+                                    <h5 class="font-semibold text-accent mb-1"><code class="text-sm">--output-format</code></h5>
+                                    <p class="text-sm text-gray-400">Output format: text, json, or stream-json. JSON returns structured data.</p>
                                 </div>
-                                <div class="card rounded-xl p-4 text-center">
-                                    <div class="text-3xl mb-2">Feature 3</div>
-                                    <p class="text-sm text-gray-400">Output/Result</p>
-                                    <p class="text-xs text-accent mt-1">(Required)</p>
+                                <div class="card rounded-xl p-4">
+                                    <h5 class="font-semibold text-accent mb-1"><code class="text-sm">--model</code></h5>
+                                    <p class="text-sm text-gray-400">Choose the Claude model: opus, sonnet, haiku.</p>
+                                </div>
+                                <div class="card rounded-xl p-4">
+                                    <h5 class="font-semibold text-accent mb-1"><code class="text-sm">--yes</code></h5>
+                                    <p class="text-sm text-gray-400">Auto-accept all permission requests. Required for fully automated pipelines.</p>
+                                </div>
+                                <div class="card rounded-xl p-4 md:col-span-2">
+                                    <h5 class="font-semibold text-accent mb-1"><code class="text-sm">--allowedTools</code></h5>
+                                    <p class="text-sm text-gray-400">Restrict which tools Claude can use. Example: <code class="text-xs bg-dark-600 px-1 rounded">--allowedTools "Read,Grep,Glob"</code> for read-only analysis.</p>
                                 </div>
                             </div>
 
                             <div class="warning-box mt-6">
                                 <div class="flex items-start gap-3">
-                                    <span class="text-xl">Tip</span>
+                                    <span class="text-xl">Warning</span>
                                     <div>
-                                        <p class="text-amber-200 font-medium">Keep It Simple</p>
-                                        <p class="text-sm mt-1 text-gray-300">MVP means Minimum Viable Product. Focus on proving your concept works, not building everything at once.</p>
+                                        <p class="text-amber-200 font-medium">Security & Permissions</p>
+                                        <p class="text-sm mt-1 text-gray-300">Using <code class="bg-dark-600 px-1 rounded text-xs">--yes</code> auto-approves all tool calls including file writes and command execution. Always use <code class="bg-dark-600 px-1 rounded text-xs">--allowedTools</code> to restrict capabilities in automated pipelines.</p>
                                     </div>
                                 </div>
+                            </div>
+
+                            <h4 class="font-bold text-lg mt-6 text-accent">Scripting Examples</h4>
+                            <div class="space-y-4 mt-4">
+                                <div class="code-block">
+                                    <div class="code-block-header">Code Analysis Script</div>
+                                    <pre><code class="text-green-400 text-sm"><span class="code-comment">#!/bin/bash</span>
+<span class="code-comment"># analyze.sh - Get code quality report</span>
+
+report=$(claude -p "Analyze src/ for code quality issues. \
+  Output as JSON." \
+  --output-format json \
+  --allowedTools "Read,Grep,Glob")
+
+echo "$report" > quality-report.json</code></pre>
+                                </div>
+
+                                <div class="code-block">
+                                    <div class="code-block-header">Batch Processing</div>
+                                    <pre><code class="text-green-400 text-sm"><span class="code-comment">#!/bin/bash</span>
+<span class="code-comment"># Process multiple files</span>
+
+for file in src/*.ts; do
+  claude -p "Add JSDoc comments to $file" \
+    --yes --allowedTools "Read,Edit"
+done</code></pre>
+                                </div>
+
+                                <div class="code-block">
+                                    <div class="code-block-header">Pre-commit Hook</div>
+                                    <pre><code class="text-green-400 text-sm"><span class="code-comment">#!/bin/bash</span>
+<span class="code-comment"># .git/hooks/pre-commit</span>
+
+files=$(git diff --cached --name-only)
+result=$(claude -p "Review these files for issues: $files" \
+  --allowedTools "Read")
+
+if echo "$result" | grep -q "CRITICAL"; then
+  echo "Critical issues found:"
+  echo "$result"
+  exit 1
+fi</code></pre>
+                                </div>
+                            </div>
+
+                            <h4 class="font-bold text-lg mt-6 text-accent">CI/CD Integration</h4>
+                            <div class="code-block">
+                                <div class="code-block-header">.github/workflows/claude-review.yml</div>
+                                <pre><code class="text-green-400 text-sm">name: Claude Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Claude Code
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Review PR
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          claude -p "Review this PR and comment on any issues" \
+            --output-format json --yes</code></pre>
                             </div>
 
                             <button onclick="completeLesson(5)" class="btn-secondary px-6 py-3 rounded-xl text-sm font-medium">
@@ -629,59 +788,58 @@ Claude uses slack.send_message(channel="#dev")
             <div class="space-y-3">
                 <details class="card rounded-xl p-4 cursor-pointer">
                     <summary class="font-bold text-white flex items-center justify-between">
-                        MCP (Model Context Protocol)
-                        <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                        </svg>
-                    </summary>
-                    <p class="text-gray-400 text-sm mt-3">
-                        A standard protocol that connects Claude to external services and tools.
-                        Add servers with <code class="bg-dark-800 px-1 rounded text-xs">claude mcp add</code>, view with <code class="bg-dark-800 px-1 rounded text-xs">/mcp</code>.
-                    </p>
-                </details>
-                <details class="card rounded-xl p-4 cursor-pointer">
-                    <summary class="font-bold text-white flex items-center justify-between">
                         MCP Server
                         <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                         </svg>
                     </summary>
                     <p class="text-gray-400 text-sm mt-3">
-                        A service that implements MCP protocol to connect Claude to external tools.
-                        Examples: Notion MCP, Playwright MCP, GitHub MCP.
+                        External service connected via Model Context Protocol. MCP servers expose tools, resources, and capabilities that Claude can use seamlessly.
+                        Add servers with <code class="bg-dark-800 px-1 rounded text-xs">claude mcp add</code>, view with <code class="bg-dark-800 px-1 rounded text-xs">/mcp</code>.
                     </p>
                 </details>
                 <details class="card rounded-xl p-4 cursor-pointer">
                     <summary class="font-bold text-white flex items-center justify-between">
-                        Data Pipeline
+                        Subagent
                         <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                         </svg>
                     </summary>
                     <p class="text-gray-400 text-sm mt-3">
-                        A workflow where data flows through multiple services. With MCP, Claude orchestrates data between different servers automatically.
+                        Independent Claude instance spawned via the Task tool for parallel work. Types include Explore, Bash, Plan, and General-Purpose, each optimized for different tasks.
                     </p>
                 </details>
                 <details class="card rounded-xl p-4 cursor-pointer">
                     <summary class="font-bold text-white flex items-center justify-between">
-                        MVP (Minimum Viable Product)
+                        Task Tool
                         <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                         </svg>
                     </summary>
                     <p class="text-gray-400 text-sm mt-3">
-                        A product with just enough features to satisfy early customers and provide feedback for future development.
+                        The tool used to create subagents with specific types and prompts. Multiple Task tool calls can be sent in a single message for parallel execution.
                     </p>
                 </details>
                 <details class="card rounded-xl p-4 cursor-pointer">
                     <summary class="font-bold text-white flex items-center justify-between">
-                        Browser Automation
+                        Custom Commands
                         <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                         </svg>
                     </summary>
                     <p class="text-gray-400 text-sm mt-3">
-                        Controlling a web browser programmatically. Playwright MCP enables Claude to navigate pages, click buttons, fill forms, and extract data.
+                        Reusable slash commands defined in <code class="bg-dark-800 px-1 rounded text-xs">settings.local.json</code> or <code class="bg-dark-800 px-1 rounded text-xs">CLAUDE.md</code>. Automate repetitive workflows and share them with your team.
+                    </p>
+                </details>
+                <details class="card rounded-xl p-4 cursor-pointer">
+                    <summary class="font-bold text-white flex items-center justify-between">
+                        Headless Mode
+                        <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </summary>
+                    <p class="text-gray-400 text-sm mt-3">
+                        Non-interactive Claude execution for automation and CI/CD. Use <code class="bg-dark-800 px-1 rounded text-xs">claude -p "prompt"</code> to run without a terminal UI. Supports JSON output and tool restrictions.
                     </p>
                 </details>
             </div>
@@ -692,7 +850,7 @@ Claude uses slack.send_message(channel="#dev")
             <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-6">KNOWLEDGE CHECK</h2>
             <div class="card rounded-2xl p-8">
                 <div class="flex items-center justify-between mb-6">
-                    <h3 class="font-bold text-2xl">Quiz: MCP Advanced</h3>
+                    <h3 class="font-bold text-2xl">Quiz: MCP & Advanced Automation</h3>
                     <span id="quizProgress" class="text-sm text-gray-400">Question 1/10</span>
                 </div>
 
@@ -725,7 +883,7 @@ Claude uses slack.send_message(channel="#dev")
                 <div class="flex flex-col md:flex-row items-center justify-between gap-6">
                     <div>
                         <h3 class="text-2xl font-bold mb-2">Ready for the Challenge?</h3>
-                        <p class="text-gray-400">Build an MVP with 2+ MCP servers and 3 core features.</p>
+                        <p class="text-gray-400">Build an MVP using MCP servers, subagents, and advanced automation techniques.</p>
                     </div>
                     <a id="challengeBtn" href="week4" class="btn-primary px-8 py-4 rounded-xl font-bold text-lg flex items-center gap-3 whitespace-nowrap">
                         Start Challenge
@@ -794,54 +952,54 @@ Claude uses slack.send_message(channel="#dev")
         // Quiz Data
         const quizQuestions = [
             {
-                question: "Which MCP server is used for browser automation?",
-                options: ["Notion MCP", "GitHub MCP", "Playwright MCP", "PostgreSQL MCP"],
-                correct: 2
-            },
-            {
                 question: "What command adds an MCP server to Claude Code?",
                 options: ["claude install mcp", "claude mcp add", "mcp install", "claude add server"],
                 correct: 1
             },
             {
-                question: "What is the Notion MCP used for?",
-                options: ["Database queries", "Document/database CRUD operations", "Browser automation", "Git operations"],
-                correct: 1
-            },
-            {
-                question: "Which MCP server would you use to query a PostgreSQL database?",
-                options: ["Notion MCP", "postgres MCP", "GitHub MCP", "Slack MCP"],
-                correct: 1
-            },
-            {
-                question: "What environment variable is needed for GitHub MCP?",
-                options: ["GITHUB_API_KEY", "GH_TOKEN", "GITHUB_TOKEN", "GITHUB_SECRET"],
+                question: "Which MCP server enables browser automation?",
+                options: ["Notion MCP", "GitHub MCP", "Playwright MCP", "PostgreSQL MCP"],
                 correct: 2
             },
             {
-                question: "What does MCP stand for?",
-                options: ["Machine Code Processor", "Model Context Protocol", "Multi-Channel Protocol", "Model Compute Platform"],
+                question: "What is a subagent in Claude Code?",
+                options: ["A plugin that adds new UI elements", "An independent Claude instance spawned via the Task tool for parallel work", "A configuration file for MCP servers", "A special model variant"],
                 correct: 1
             },
             {
-                question: "How many core features should an MVP have minimum?",
-                options: ["1", "3", "5", "10"],
-                correct: 1
-            },
-            {
-                question: "Which file stores MCP server configurations?",
-                options: ["mcp.json", ".claude/settings.local.json", "package.json", "mcp.config.js"],
-                correct: 1
-            },
-            {
-                question: "What does MVP stand for?",
-                options: ["Maximum Value Product", "Minimum Viable Product", "Most Valuable Player", "Model Version Protocol"],
-                correct: 1
-            },
-            {
-                question: "Which is a benefit of combining multiple MCP servers?",
-                options: ["Slower execution", "More complex setup", "Automated data pipelines", "Higher costs"],
+                question: "Which subagent type is best for finding files and searching code?",
+                options: ["Bash", "Plan", "Explore", "General-Purpose"],
                 correct: 2
+            },
+            {
+                question: "What parameter runs a subagent in the background?",
+                options: ["async: true", "background: true", "run_in_background: true", "detach: true"],
+                correct: 2
+            },
+            {
+                question: "Where are custom commands defined?",
+                options: ["package.json", "settings.local.json or CLAUDE.md", ".env file", "tsconfig.json"],
+                correct: 1
+            },
+            {
+                question: "What flag enables headless (non-interactive) mode?",
+                options: ["--silent", "--batch", "-p or --print", "--background"],
+                correct: 2
+            },
+            {
+                question: "Which output format returns structured data from headless mode?",
+                options: ["text", "json", "xml", "csv"],
+                correct: 1
+            },
+            {
+                question: "What flag auto-accepts all permission requests in headless mode?",
+                options: ["--auto", "--approve", "--yes", "--force"],
+                correct: 2
+            },
+            {
+                question: "How do you run multiple subagents in parallel?",
+                options: ["Use the --parallel flag", "Send multiple Task tool calls in a single message", "Run claude in multiple terminals", "Use the /parallel command"],
+                correct: 1
             }
         ];
 

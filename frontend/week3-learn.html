@@ -191,10 +191,10 @@
             </div>
 
             <h1 class="text-4xl md:text-5xl font-bold mb-4 tracking-tight">
-                Skills Mastery
+                Skills & MCP Basics
             </h1>
             <p class="text-xl text-gray-400 mb-8 max-w-2xl">
-                Learn to create custom Skills for workflow automation with slash commands and skill discovery.
+                Learn to create custom Skills, understand MCP (Model Context Protocol) basics, and master model selection for optimal performance.
             </p>
 
             <!-- Progress Tracker -->
@@ -372,14 +372,14 @@ User: "/survey-writer"</code></pre>
                     </div>
                 </div>
 
-                <!-- Lesson 3: Skill Arguments & Parameters -->
+                <!-- Lesson 3: MCP 기초 -->
                 <div id="lesson3" class="lesson-card rounded-2xl overflow-hidden">
                     <div class="lesson-header p-6 flex items-center justify-between" onclick="toggleLesson(3)">
                         <div class="flex items-center gap-4">
                             <div class="w-12 h-12 rounded-xl bg-amber-500/20 flex items-center justify-center text-2xl">3</div>
                             <div>
-                                <h3 class="font-bold text-xl">Skill Arguments & Parameters</h3>
-                                <p class="text-gray-400 text-sm">Passing arguments to skills and dynamic behavior</p>
+                                <h3 class="font-bold text-xl">MCP 기초</h3>
+                                <p class="text-gray-400 text-sm">Model Context Protocol의 개념과 기본 사용법</p>
                             </div>
                         </div>
                         <div class="flex items-center gap-3">
@@ -392,55 +392,77 @@ User: "/survey-writer"</code></pre>
                     <div class="lesson-content">
                         <div class="px-6 pb-6 space-y-6">
                             <div class="tip-box">
-                                <p class="text-pink-200 font-medium">Dynamic Skills</p>
-                                <p class="text-sm mt-1 text-gray-300">Skills can accept arguments to customize their behavior. This makes skills reusable across different contexts.</p>
+                                <p class="text-pink-200 font-medium">Model Context Protocol (MCP)</p>
+                                <p class="text-sm mt-1 text-gray-300">MCP is an open protocol that standardizes how AI assistants connect to external data sources and tools. Think of it as a "USB for AI" - a universal way to plug in capabilities.</p>
                             </div>
 
-                            <h4 class="font-bold text-lg text-accent">Passing Arguments to Skills</h4>
+                            <h4 class="font-bold text-lg text-accent">MCP Architecture</h4>
                             <div class="code-block">
-                                <div class="code-block-header">Terminal</div>
-                                <pre><code class="text-green-400 text-sm"><span class="code-comment"># Invoke skill with arguments</span>
-/commit -m "fix: resolve login bug"
-
-<span class="code-comment"># Skill with file argument</span>
-/review-pr 123
-
-<span class="code-comment"># Custom skill with parameters</span>
-/generate-tests src/utils.ts</code></pre>
+                                <div class="code-block-header">MCP Architecture Diagram</div>
+                                <pre><code class="text-green-400 text-sm">┌─────────────────────────────────────────────────────────────┐
+│                      Claude Code (Host)                      │
+│                                                              │
+│   ┌─────────────┐    ┌─────────────┐    ┌─────────────┐    │
+│   │ MCP Client  │    │ MCP Client  │    │ MCP Client  │    │
+│   └──────┬──────┘    └──────┬──────┘    └──────┬──────┘    │
+└──────────┼──────────────────┼──────────────────┼────────────┘
+           │                  │                  │
+           ▼                  ▼                  ▼
+    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
+    │ Filesystem  │    │  Database   │    │   Custom    │
+    │   Server    │    │   Server    │    │   Server    │
+    └─────────────┘    └─────────────┘    └─────────────┘</code></pre>
                             </div>
 
-                            <h4 class="font-bold text-lg mt-6 text-accent">Accessing Arguments in SKILL.md</h4>
-                            <div class="code-block">
-                                <div class="code-block-header">.claude/skills/test-generator/SKILL.md</div>
-                                <pre><code class="text-green-400 text-sm">---
-name: generate-tests
-description: Generate unit tests for a file
-user-invocable: true
----
+                            <h4 class="font-bold text-lg mt-6 text-accent">Why MCP Matters</h4>
+                            <p class="text-gray-300">Before MCP, every AI integration required custom code. MCP provides a standard interface for:</p>
+                            <ul class="list-disc list-inside space-y-2 ml-4 text-gray-300">
+                                <li><span class="text-accent">Tools</span> - Functions the AI can call (search, database queries, API calls)</li>
+                                <li><span class="text-accent">Resources</span> - Data the AI can read (files, databases, web content)</li>
+                                <li><span class="text-accent">Prompts</span> - Pre-defined prompt templates for specific tasks</li>
+                            </ul>
 
-<span class="code-comment"># Test Generator</span>
-
-When invoked with a file path argument:
-1. Read the specified file
-2. Analyze the functions and classes
-3. Generate comprehensive unit tests
-4. Write tests to __tests__/ directory
-
-<span class="code-comment">## Example Usage</span>
-/generate-tests src/utils.ts
-<span class="code-comment"># Generates: src/__tests__/utils.test.ts</span></code></pre>
-                            </div>
-
-                            <h4 class="font-bold text-lg mt-6 text-accent">Skill Context Variables</h4>
+                            <h4 class="font-bold text-lg mt-6 text-accent">Built-in MCP Capabilities</h4>
                             <div class="grid md:grid-cols-2 gap-4 mt-4">
                                 <div class="card rounded-xl p-4">
-                                    <h5 class="font-semibold text-accent mb-2">$ARGUMENTS</h5>
-                                    <p class="text-sm text-gray-400">All arguments passed after the skill name</p>
+                                    <h5 class="font-semibold text-accent mb-2">Tools</h5>
+                                    <p class="text-sm text-gray-400">Functions the AI can call - search, database queries, API calls, shell commands.</p>
                                 </div>
                                 <div class="card rounded-xl p-4">
-                                    <h5 class="font-semibold text-accent mb-2">$CWD</h5>
-                                    <p class="text-sm text-gray-400">Current working directory</p>
+                                    <h5 class="font-semibold text-accent mb-2">Resources</h5>
+                                    <p class="text-sm text-gray-400">Data the AI can read - files, databases, web content, project context.</p>
                                 </div>
+                                <div class="card rounded-xl p-4">
+                                    <h5 class="font-semibold text-accent mb-2">Prompts</h5>
+                                    <p class="text-sm text-gray-400">Pre-defined prompt templates for specific tasks and workflows.</p>
+                                </div>
+                                <div class="card rounded-xl p-4">
+                                    <h5 class="font-semibold text-accent mb-2">Sampling</h5>
+                                    <p class="text-sm text-gray-400">Server-initiated AI interactions for automated decision-making.</p>
+                                </div>
+                            </div>
+
+                            <h4 class="font-bold text-lg mt-6 text-accent">Checking MCP Status</h4>
+                            <div class="code-block">
+                                <div class="code-block-header">/mcp command</div>
+                                <pre><code class="text-green-400 text-sm"><span class="code-comment"># In Claude Code, check connected MCP servers</span>
+> /mcp
+
+Connected MCP Servers:
+- filesystem (built-in)
+- Fetch (built-in)
+- postgres (custom) - 5 tools available
+- slack (custom) - 3 tools available</code></pre>
+                            </div>
+
+                            <h4 class="font-bold text-lg mt-6 text-accent">Adding MCP Servers</h4>
+                            <div class="code-block">
+                                <div class="code-block-header">Terminal</div>
+                                <pre><code class="text-green-400 text-sm"><span class="code-comment"># Add an MCP server to Claude Code</span>
+claude mcp add postgres -- npx -y @modelcontextprotocol/server-postgres
+
+<span class="code-comment"># Add with environment variables</span>
+claude mcp add slack -- npx -y @anthropic-ai/mcp-server-slack</code></pre>
                             </div>
 
                             <button onclick="completeLesson(3)" class="btn-secondary px-6 py-3 rounded-xl text-sm font-medium">
@@ -450,14 +472,14 @@ When invoked with a file path argument:
                     </div>
                 </div>
 
-                <!-- Lesson 4: Advanced Skill Patterns -->
+                <!-- Lesson 4: Model Selection -->
                 <div id="lesson4" class="lesson-card rounded-2xl overflow-hidden">
                     <div class="lesson-header p-6 flex items-center justify-between" onclick="toggleLesson(4)">
                         <div class="flex items-center gap-4">
                             <div class="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center text-2xl">4</div>
                             <div>
-                                <h3 class="font-bold text-xl">Advanced Skill Patterns</h3>
-                                <p class="text-gray-400 text-sm">Tool restrictions, model selection, and skill chaining</p>
+                                <h3 class="font-bold text-xl">Model Selection</h3>
+                                <p class="text-gray-400 text-sm">Opus, Sonnet, Haiku 모델 선택과 Thinking Mode</p>
                             </div>
                         </div>
                         <div class="flex items-center gap-3">
@@ -469,51 +491,58 @@ When invoked with a file path argument:
                     </div>
                     <div class="lesson-content">
                         <div class="px-6 pb-6 space-y-6">
-                            <h4 class="font-bold text-lg text-accent">Tool Restrictions</h4>
-                            <p class="text-gray-300">Limit which tools a skill can use for security and focus:</p>
-                            <div class="code-block">
-                                <div class="code-block-header">SKILL.md with allowed-tools</div>
-                                <pre><code class="text-green-400 text-sm">---
-name: safe-reader
-description: Read-only file analysis
-allowed-tools: [Read, Glob, Grep]  <span class="code-comment"># No Write/Edit/Bash</span>
-user-invocable: true
----
-
-<span class="code-comment"># Safe Reader</span>
-This skill can only READ files, never modify them.
-Useful for code review and analysis tasks.</code></pre>
+                            <div class="tip-box">
+                                <p class="text-pink-200 font-medium">Choosing the Right Model</p>
+                                <p class="text-sm mt-1 text-gray-300">Claude Code can use different Claude models for different tasks. Choose based on speed vs capability trade-offs.</p>
                             </div>
 
-                            <h4 class="font-bold text-lg mt-6 text-accent">Model Selection</h4>
-                            <p class="text-gray-300">Choose the right model for your skill's needs:</p>
+                            <h4 class="font-bold text-lg text-accent">The --model Flag</h4>
+                            <div class="code-block">
+                                <div class="code-block-header">Terminal</div>
+                                <pre><code class="text-green-400 text-sm"><span class="code-comment"># Start Claude Code with a specific model</span>
+claude --model claude-sonnet-4-20250514
+
+<span class="code-comment"># Or use model aliases</span>
+claude --model opus    <span class="code-comment"># Most capable, slower</span>
+claude --model sonnet  <span class="code-comment"># Balanced (default)</span>
+claude --model haiku   <span class="code-comment"># Fastest, simpler tasks</span></code></pre>
+                            </div>
+
+                            <h4 class="font-bold text-lg mt-6 text-accent">Model Comparison</h4>
                             <div class="grid md:grid-cols-3 gap-4 mt-4">
                                 <div class="card rounded-xl p-4">
-                                    <h5 class="font-semibold text-accent mb-2">model: haiku</h5>
-                                    <p class="text-sm text-gray-400">Fast, cheap. Good for simple transformations.</p>
+                                    <h5 class="font-semibold text-accent mb-2">Opus</h5>
+                                    <p class="text-sm text-gray-400">Most capable. Complex reasoning, architecture design, difficult bugs. Slower and highest cost.</p>
                                 </div>
                                 <div class="card rounded-xl p-4">
-                                    <h5 class="font-semibold text-accent mb-2">model: sonnet</h5>
-                                    <p class="text-sm text-gray-400">Balanced. Default for most tasks.</p>
+                                    <h5 class="font-semibold text-accent mb-2">Sonnet</h5>
+                                    <p class="text-sm text-gray-400">Balanced default. General development, most tasks. Medium speed and cost.</p>
                                 </div>
                                 <div class="card rounded-xl p-4">
-                                    <h5 class="font-semibold text-accent mb-2">model: opus</h5>
-                                    <p class="text-sm text-gray-400">Most capable. Complex reasoning tasks.</p>
+                                    <h5 class="font-semibold text-accent mb-2">Haiku</h5>
+                                    <p class="text-sm text-gray-400">Fastest and cheapest. Quick edits, simple tasks, exploration. Lowest capability.</p>
                                 </div>
                             </div>
 
-                            <h4 class="font-bold text-lg mt-6 text-accent">Skill Chaining Example</h4>
+                            <h4 class="font-bold text-lg mt-6 text-accent">Thinking Modes</h4>
+                            <p class="text-gray-300">For complex tasks, you can request extended thinking:</p>
                             <div class="code-block">
-                                <div class="code-block-header">Workflow</div>
-                                <pre><code class="text-green-400 text-sm"><span class="code-comment"># Step 1: Generate code</span>
-/generate-component Button
+                                <div class="code-block-header">Thinking Keywords</div>
+                                <pre><code class="text-green-400 text-sm"><span class="code-comment"># Request extended reasoning</span>
+User: "think harder about how to optimize this database query"
 
-<span class="code-comment"># Step 2: Generate tests for it</span>
-/generate-tests src/components/Button.tsx
+<span class="code-comment"># Maximum reasoning capacity</span>
+User: "ultrathink about the architecture for this system"</code></pre>
+                            </div>
 
-<span class="code-comment"># Step 3: Review and commit</span>
-/review-pr
-/commit</code></pre>
+                            <h4 class="font-bold text-lg mt-6 text-accent">Practical Guidelines</h4>
+                            <div class="card rounded-xl p-4 mt-4">
+                                <ol class="space-y-3 text-sm text-gray-300">
+                                    <li><span class="text-accent font-bold">1.</span> <strong class="text-white">Start with Sonnet</strong> - Default model handles most tasks well. Switch only when needed.</li>
+                                    <li><span class="text-accent font-bold">2.</span> <strong class="text-white">Use Haiku for exploration</strong> - Cost-effective for search and simple operations.</li>
+                                    <li><span class="text-accent font-bold">3.</span> <strong class="text-white">Escalate to Opus</strong> - Complex debugging, architecture design, or when Sonnet struggles.</li>
+                                    <li><span class="text-accent font-bold">4.</span> <strong class="text-white">Combine with Thinking Modes</strong> - "ultrathink" + Opus for maximum capability on critical decisions.</li>
+                                </ol>
                             </div>
 
                             <button onclick="completeLesson(4)" class="btn-secondary px-6 py-3 rounded-xl text-sm font-medium">
@@ -689,6 +718,30 @@ For each function in the specified file:
                         Example: <code class="bg-dark-800 px-1 rounded text-xs">allowed-tools: [Read, Glob]</code> prevents writing files.
                     </p>
                 </details>
+                <details class="card rounded-xl p-4 cursor-pointer">
+                    <summary class="font-bold text-white flex items-center justify-between">
+                        MCP (Model Context Protocol)
+                        <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </summary>
+                    <p class="text-gray-400 text-sm mt-3">
+                        Protocol for connecting AI to external tools and data.
+                        Acts as a "USB for AI" - a universal standard for plugging in capabilities like databases, APIs, and services.
+                    </p>
+                </details>
+                <details class="card rounded-xl p-4 cursor-pointer">
+                    <summary class="font-bold text-white flex items-center justify-between">
+                        Model Selection
+                        <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </summary>
+                    <p class="text-gray-400 text-sm mt-3">
+                        Choosing between Opus, Sonnet, Haiku for different tasks.
+                        Use <code class="bg-dark-800 px-1 rounded text-xs">--model</code> flag or <code class="bg-dark-800 px-1 rounded text-xs">/model</code> command to switch models based on task complexity.
+                    </p>
+                </details>
             </div>
         </section>
 
@@ -697,7 +750,7 @@ For each function in the specified file:
             <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-6">KNOWLEDGE CHECK</h2>
             <div class="card rounded-2xl p-8">
                 <div class="flex items-center justify-between mb-6">
-                    <h3 class="font-bold text-2xl">Quiz: Skills Mastery</h3>
+                    <h3 class="font-bold text-2xl">Quiz: Skills & MCP Basics</h3>
                     <span id="quizProgress" class="text-sm text-gray-400">Question 1/10</span>
                 </div>
 
@@ -730,7 +783,7 @@ For each function in the specified file:
                 <div class="flex flex-col md:flex-row items-center justify-between gap-6">
                     <div>
                         <h3 class="text-2xl font-bold mb-2">Ready for the Challenge?</h3>
-                        <p class="text-gray-400">Create custom Skills to automate your development workflow.</p>
+                        <p class="text-gray-400">Master Skills, MCP basics, and model selection for your development workflow.</p>
                     </div>
                     <a id="challengeBtn" href="week3" class="btn-primary px-8 py-4 rounded-xl font-bold text-lg flex items-center gap-3 whitespace-nowrap">
                         Start Challenge
@@ -809,24 +862,24 @@ For each function in the specified file:
                 correct: 2
             },
             {
+                question: "What does MCP stand for?",
+                options: ["Machine Code Processor", "Model Context Protocol", "Multi-Channel Protocol", "Model Compute Platform"],
+                correct: 1
+            },
+            {
+                question: "Which command shows connected MCP servers?",
+                options: ["/servers", "/mcp", "/list-tools", "/connections"],
+                correct: 1
+            },
+            {
                 question: "What is the purpose of the 'description' field in SKILL.md?",
                 options: ["Display in UI only", "Enable skill discovery by Claude", "Documentation purposes", "Version tracking"],
                 correct: 1
             },
             {
-                question: "Which frontmatter field restricts tools a skill can use?",
-                options: ["tools", "allowed-tools", "restricted-tools", "tool-list"],
-                correct: 1
-            },
-            {
-                question: "What model option provides the fastest skill execution?",
-                options: ["opus", "sonnet", "haiku", "default"],
+                question: "Which model is fastest for simple tasks?",
+                options: ["Opus", "Sonnet", "Haiku", "Claude Pro"],
                 correct: 2
-            },
-            {
-                question: "Which built-in slash command auto-generates commit messages?",
-                options: ["/git", "/commit", "/push", "/save"],
-                correct: 1
             },
             {
                 question: "Where should project-specific skills be stored?",
@@ -834,19 +887,19 @@ For each function in the specified file:
                 correct: 1
             },
             {
-                question: "Which skill location has the highest priority?",
-                options: ["Global skills", "User skills (~/.claude)", "Project skills (.claude)", "All equal"],
-                correct: 2
-            },
-            {
-                question: "What enables Claude to automatically use a skill without explicit invocation?",
-                options: ["The name field", "The description field", "The model field", "The priority field"],
+                question: "What does the 'ultrathink' keyword enable?",
+                options: ["Faster response time", "Extended thinking mode for complex reasoning", "Multi-model processing", "Background task execution"],
                 correct: 1
             },
             {
-                question: "What happens when a skill has 'allowed-tools: [Read, Glob]'?",
-                options: ["Skill can only read and search files", "Skill can write files too", "Skill has no restrictions", "Skill is disabled"],
+                question: "What does 'allowed-tools: [Read, Glob]' restrict in a skill?",
+                options: ["The skill can only read and search files", "The skill runs faster", "The skill uses less tokens", "The skill requires admin access"],
                 correct: 0
+            },
+            {
+                question: "Which command adds an MCP server to Claude Code?",
+                options: ["claude install mcp", "claude mcp add", "claude add-server", "claude mcp install"],
+                correct: 1
             }
         ];
 
