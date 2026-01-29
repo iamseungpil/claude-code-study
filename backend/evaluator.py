@@ -107,7 +107,7 @@ def get_submission_rank(week: int, participant_id: str) -> int:
         if participant_dir.is_dir():
             metadata_file = participant_dir / "metadata.json"
             if metadata_file.exists():
-                with open(metadata_file) as f:
+                with open(metadata_file, encoding='utf-8') as f:
                     meta = json.load(f)
                     # Use elapsed_minutes for ranking (shorter = better)
                     if "elapsed_minutes" in meta:
@@ -131,7 +131,7 @@ def load_submission_metadata(week: int, participant_id: str) -> dict:
     """Load submission metadata (start_time, end_time)."""
     meta_path = SUBMISSIONS_DIR / f"week{week}" / participant_id / "metadata.json"
     if meta_path.exists():
-        with open(meta_path) as f:
+        with open(meta_path, encoding='utf-8') as f:
             return json.load(f)
     return {}
 
@@ -504,7 +504,7 @@ def save_evaluation(week: int, participant_id: str, result: dict):
     output_dir.mkdir(parents=True, exist_ok=True)
 
     output_path = output_dir / f"{participant_id}.json"
-    with open(output_path, 'w') as f:
+    with open(output_path, 'w', encoding='utf-8') as f:
         json.dump(result, f, indent=2, ensure_ascii=False)
 
     print(f"Saved JSON: {output_path}")
@@ -515,7 +515,7 @@ def save_evaluation(week: int, participant_id: str, result: dict):
 
     if metadata_path.exists():
         try:
-            with open(metadata_path, 'r') as f:
+            with open(metadata_path, 'r', encoding='utf-8') as f:
                 metadata = json.load(f)
 
             # Get submission_number from metadata.json (source of truth)
@@ -534,7 +534,7 @@ def save_evaluation(week: int, participant_id: str, result: dict):
                 }
                 metadata["submission_history"] = history
 
-                with open(metadata_path, 'w') as f:
+                with open(metadata_path, 'w', encoding='utf-8') as f:
                     json.dump(metadata, f, indent=2, ensure_ascii=False)
 
                 print(f"Updated submission history: {metadata_path}")
@@ -615,7 +615,7 @@ def recalculate_time_ranks(week: int):
     # Get all evaluations
     evaluations = []
     for eval_file in evaluations_dir.glob("*.json"):
-        with open(eval_file) as f:
+        with open(eval_file, encoding='utf-8') as f:
             data = json.load(f)
             if data.get("status") == "completed":
                 evaluations.append({
@@ -644,7 +644,7 @@ def recalculate_time_ranks(week: int):
             del data["scores"]["time_bonus"]
 
         # Save updated evaluation
-        with open(eval_info["file"], 'w') as f:
+        with open(eval_info["file"], 'w', encoding='utf-8') as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
 
         print(f"  {participant_id}: Rank #{time_rank} (+{time_rank_bonus}) = {data['scores']['total']}")
@@ -659,7 +659,7 @@ def generate_leaderboard(week: int) -> list:
 
     results = []
     for eval_file in evaluations_dir.glob("*.json"):
-        with open(eval_file) as f:
+        with open(eval_file, encoding='utf-8') as f:
             data = json.load(f)
             if data.get("status") == "completed":
                 scores = data["scores"]
