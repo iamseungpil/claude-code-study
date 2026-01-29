@@ -61,7 +61,7 @@
             transition: max-height 0.4s ease;
         }
         .lesson-content.open {
-            max-height: 5000px;
+            max-height: 8000px;
         }
 
         .chevron {
@@ -191,10 +191,10 @@
             </div>
 
             <h1 class="text-4xl md:text-5xl font-bold mb-4 tracking-tight">
-                Final Project & Best Practices
+                Final Project & Overall Review
             </h1>
             <p class="text-xl text-gray-400 mb-8 max-w-2xl">
-                Integrate all skills learned over 5 weeks into a comprehensive final project with production-ready practices.
+                Review all 5 weeks of learning, master CI/CD integration, and prepare for your final project demo.
             </p>
 
             <!-- Progress Tracker -->
@@ -220,14 +220,14 @@
             <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-6">LESSONS</h2>
 
             <div class="space-y-4">
-                <!-- Lesson 1: Skills Integration -->
+                <!-- Lesson 1: Overall Review -->
                 <div id="lesson1" class="lesson-card rounded-2xl overflow-hidden">
                     <div class="lesson-header p-6 flex items-center justify-between" onclick="toggleLesson(1)">
                         <div class="flex items-center gap-4">
                             <div class="w-12 h-12 rounded-xl bg-accent/20 flex items-center justify-center text-2xl">1</div>
                             <div>
-                                <h3 class="font-bold text-xl">Skills Integration</h3>
-                                <p class="text-gray-400 text-sm">Integrating all features learned over 5 weeks</p>
+                                <h3 class="font-bold text-xl">Overall Review</h3>
+                                <p class="text-gray-400 text-sm">5-week curriculum recap and key concepts</p>
                             </div>
                         </div>
                         <div class="flex items-center gap-3">
@@ -241,124 +241,96 @@
                         <div class="px-6 pb-6 space-y-6">
                             <div class="tip-box">
                                 <p class="text-rose-200 font-medium">Bringing It All Together</p>
-                                <p class="text-sm mt-1 text-gray-300">Your final project should demonstrate mastery of all Claude Code features learned over 5 weeks. This lesson reviews how to combine them effectively.</p>
+                                <p class="text-sm mt-1 text-gray-300">Your final project should demonstrate mastery of all Claude Code features learned over 5 weeks. This lesson reviews the key concepts from each week.</p>
                             </div>
 
                             <h4 class="font-bold text-lg text-accent">5-Week Skills Recap</h4>
                             <div class="grid md:grid-cols-2 gap-4 mt-4">
-                                <div class="bg-dark-700 rounded-xl p-4 border-l-4 border-violet-500">
+                                <div class="card rounded-xl p-4 border-l-4 border-violet-500">
                                     <h5 class="font-semibold text-violet-400 mb-2">Week 1: Fundamentals</h5>
                                     <ul class="text-sm space-y-1 text-gray-300">
                                         <li>- /init & CLAUDE.md</li>
                                         <li>- Plan Mode (Shift+Tab x2)</li>
                                         <li>- @ file references</li>
+                                        <li>- Thinking modes (ultrathink)</li>
                                         <li>- Context management</li>
                                     </ul>
                                 </div>
-                                <div class="bg-dark-700 rounded-xl p-4 border-l-4 border-blue-500">
-                                    <h5 class="font-semibold text-blue-400 mb-2">Week 2: Hooks</h5>
+                                <div class="card rounded-xl p-4 border-l-4 border-blue-500">
+                                    <h5 class="font-semibold text-blue-400 mb-2">Week 2: Hooks & Automation</h5>
                                     <ul class="text-sm space-y-1 text-gray-300">
-                                        <li>- PreToolUse / PostToolUse</li>
+                                        <li>- PreToolUse / PostToolUse hooks</li>
                                         <li>- Hook matchers & exit codes</li>
                                         <li>- stdin JSON parsing</li>
                                         <li>- TypeScript validation hooks</li>
+                                        <li>- Query duplication prevention</li>
                                     </ul>
                                 </div>
-                                <div class="bg-dark-700 rounded-xl p-4 border-l-4 border-pink-500">
-                                    <h5 class="font-semibold text-pink-400 mb-2">Week 3: Skills + MCP Basics</h5>
+                                <div class="card rounded-xl p-4 border-l-4 border-amber-500">
+                                    <h5 class="font-semibold text-amber-400 mb-2">Week 3: Skills & MCP Basics</h5>
                                     <ul class="text-sm space-y-1 text-gray-300">
-                                        <li>- SKILL.md & custom skills</li>
-                                        <li>- Slash commands (/commit)</li>
-                                        <li>- MCP basics & Semantic Scholar</li>
-                                        <li>- Skills + MCP workflow</li>
+                                        <li>- SKILL.md & skill discovery</li>
+                                        <li>- Custom Skills creation</li>
+                                        <li>- MCP (Model Context Protocol)</li>
+                                        <li>- Model Selection (--model)</li>
+                                        <li>- Thinking modes (ultrathink)</li>
                                     </ul>
                                 </div>
-                                <div class="bg-dark-700 rounded-xl p-4 border-l-4 border-emerald-500">
-                                    <h5 class="font-semibold text-emerald-400 mb-2">Week 4: MCP Advanced</h5>
+                                <div class="card rounded-xl p-4 border-l-4 border-emerald-500">
+                                    <h5 class="font-semibold text-emerald-400 mb-2">Week 4: MCP & Advanced Automation</h5>
                                     <ul class="text-sm space-y-1 text-gray-300">
-                                        <li>- Notion, Playwright, GitHub MCP</li>
-                                        <li>- Multi-MCP data pipelines</li>
-                                        <li>- MVP development strategy</li>
-                                        <li>- Rapid prototyping</li>
+                                        <li>- MCP server integration</li>
+                                        <li>- Subagents & Task tool</li>
+                                        <li>- Custom Commands ($ARGUMENTS)</li>
+                                        <li>- Headless mode (claude -p)</li>
+                                        <li>- CI/CD integration</li>
                                     </ul>
                                 </div>
                             </div>
 
-                            <h4 class="font-bold text-lg mt-8 text-accent">Integration Patterns</h4>
-                            <div class="space-y-4 mt-4">
-                                <div class="code-block">
-                                    <div class="code-block-header">Pattern 1: Full Development Workflow</div>
-                                    <pre><code class="text-green-400 text-sm"><span class="code-comment"># 1. Initialize project with context</span>
-> /init
-> <span class="code-comment"># Add project conventions to CLAUDE.md</span>
-
-<span class="code-comment"># 2. Plan the feature</span>
-> Shift+Tab x2 (Plan Mode)
-> "Design user authentication system"
-
-<span class="code-comment"># 3. Implement with hooks for validation</span>
-<span class="code-comment"># (PreToolUse hooks check for code quality)</span>
-
-<span class="code-comment"># 4. Use subagents for parallel tasks</span>
-> "Test auth while I work on the API"
-
-<span class="code-comment"># 5. Commit and create PR</span>
-> /commit
-> /pr</code></pre>
-                                </div>
-                                <div class="code-block">
-                                    <div class="code-block-header">Pattern 2: Research to Implementation</div>
-                                    <pre><code class="text-green-400 text-sm"><span class="code-comment"># 1. Research with MCP tools</span>
-> "Fetch the latest React patterns from the docs"
-  [Uses WebFetch MCP]
-
-<span class="code-comment"># 2. Analyze with ultrathink</span>
-> "ultrathink about the best approach for our use case"
-
-<span class="code-comment"># 3. Plan implementation</span>
-> Shift+Tab x2
-> "Create implementation plan based on research"
-
-<span class="code-comment"># 4. Execute with subagents</span>
-> "Implement components in parallel"
-  [Spawns multiple Explore/Edit agents]</code></pre>
-                                </div>
-                            </div>
-
-                            <h4 class="font-bold text-lg mt-8 text-accent">Project Architecture Example</h4>
+                            <h4 class="font-bold text-lg mt-6 text-accent">Key Concepts Map</h4>
                             <div class="code-block">
-                                <div class="code-block-header">Project Structure</div>
-                                <pre><code class="text-green-400 text-sm">my-project/
-├── .claude/
-│   ├── settings.local.json    <span class="code-comment"># MCP servers, hooks config</span>
-│   └── skills/
-│       └── my-skill/SKILL.md
-├── hooks/
-│   ├── pre_write.js           <span class="code-comment"># Code quality checks</span>
-│   └── post_edit.js           <span class="code-comment"># TypeScript validation</span>
-├── CLAUDE.md                  <span class="code-comment"># Project context & conventions</span>
-├── .github/
-│   └── workflows/
-│       └── claude-review.yml  <span class="code-comment"># CI/CD with Claude</span>
-└── src/
-    └── ...</code></pre>
+                                <div class="code-block-header">Feature Relationships</div>
+                                <pre><code class="text-green-400 text-sm">CLAUDE.md (Week 1)
+  ├── Project context & conventions
+  ├── Custom Commands (Week 4) ── reusable /slash prompts
+  └── SKILL.md (Week 3) ── discoverable skill definitions
+
+Hooks (Week 2)
+  ├── PreToolUse ── block/modify before execution
+  ├── PostToolUse ── validate after execution
+  └── TypeScript checker, query duplication prevention
+
+MCP Servers (Week 3-4)
+  ├── Notion, Playwright, GitHub, PostgreSQL
+  └── Multi-server pipelines for complex workflows
+
+Subagents (Week 4)
+  ├── Explore, Bash, Plan, General-Purpose
+  ├── Parallel development with Task tool
+  └── Background execution (run_in_background)
+
+Headless Mode (Week 4)
+  ├── claude -p "prompt" ── non-interactive execution
+  ├── --output-format json ── structured output
+  └── CI/CD pipeline integration (Week 5)</code></pre>
                             </div>
 
-                            <button onclick="completeLesson(1)" class="btn-primary text-dark-900 px-6 py-3 rounded-xl font-semibold mt-6">
+                            <button onclick="completeLesson(1)" class="btn-secondary px-6 py-3 rounded-xl text-sm font-medium">
                                 Mark as Complete
                             </button>
                         </div>
                     </div>
                 </div>
 
-                <!-- Lesson 2: CI/CD Pipelines -->
+                <!-- Lesson 2: CI/CD & GitHub Actions -->
                 <div id="lesson2" class="lesson-card rounded-2xl overflow-hidden">
                     <div class="lesson-header p-6 flex items-center justify-between" onclick="toggleLesson(2)">
                         <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 rounded-xl bg-accent/20 flex items-center justify-center text-2xl">2</div>
+                            <div class="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center text-2xl">2</div>
                             <div>
-                                <h3 class="font-bold text-xl">CI/CD Pipelines</h3>
-                                <p class="text-gray-400 text-sm">GitHub Actions integration with Claude</p>
+                                <h3 class="font-bold text-xl">CI/CD & GitHub Actions</h3>
+                                <p class="text-gray-400 text-sm">Automated pipelines with Claude Code</p>
                             </div>
                         </div>
                         <div class="flex items-center gap-3">
@@ -370,122 +342,135 @@
                     </div>
                     <div class="lesson-content">
                         <div class="px-6 pb-6 space-y-6">
-                            <h4 class="font-bold text-lg text-accent">GitHub Actions with Claude</h4>
-                            <p class="text-gray-300">Integrate Claude Code into your CI/CD pipeline for automated code review, testing, and deployment assistance.</p>
+                            <div class="tip-box">
+                                <p class="text-rose-200 font-medium">Why CI/CD?</p>
+                                <p class="text-sm mt-1 text-gray-300">CI/CD (Continuous Integration / Continuous Deployment) automates your build, test, and deploy process. Combined with Claude Code's headless mode, you can create powerful automated workflows.</p>
+                            </div>
 
+                            <h4 class="font-bold text-lg text-accent">GitHub Actions Basics</h4>
                             <div class="code-block">
-                                <div class="code-block-header">.github/workflows/claude-ci.yml</div>
-                                <pre><code class="text-green-400 text-sm"><span class="code-keyword">name:</span> Claude Code CI
+                                <div class="code-block-header">.github/workflows/ci.yml</div>
+                                <pre><code class="text-green-400 text-sm"><span class="code-keyword">name</span>: CI Pipeline
 
-<span class="code-keyword">on:</span>
-  pull_request:
-    types: [opened, synchronize]
+<span class="code-keyword">on</span>:
   push:
     branches: [main]
+  pull_request:
+    branches: [main]
 
-<span class="code-keyword">jobs:</span>
-  code-review:
+<span class="code-keyword">jobs</span>:
+  build-and-test:
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '20'
+      - run: npm ci
+      - run: npm run build
+      - run: npm test</code></pre>
+                            </div>
+
+                            <h4 class="font-bold text-lg mt-6 text-accent">Claude Code in CI/CD</h4>
+                            <div class="code-block">
+                                <div class="code-block-header">.github/workflows/claude-review.yml</div>
+                                <pre><code class="text-green-400 text-sm"><span class="code-keyword">name</span>: Claude Code Review
+
+<span class="code-keyword">on</span>:
+  pull_request:
+    types: [opened, synchronize]
+
+<span class="code-keyword">jobs</span>:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
 
       - name: Install Claude Code
         run: npm install -g @anthropic-ai/claude-code
 
-      - name: Review PR
+      - name: Review PR Changes
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
-          claude --headless --print \
+          claude -p "Review git diff for bugs, security issues,
+            and code quality. Output as JSON." \
+            --output-format json \
             --allowedTools "Read,Grep,Glob" \
-            -p "Review the changes in this PR. Focus on:
-                1. Security vulnerabilities
-                2. Performance issues
-                3. Code style consistency
-                Output as a structured report."</code></pre>
+            --yes > review-report.json
+
+      - name: Upload Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: review-report
+          path: review-report.json</code></pre>
                             </div>
 
-                            <h4 class="font-bold text-lg mt-8 text-accent">Pre-merge Validation</h4>
+                            <h4 class="font-bold text-lg mt-6 text-accent">Pre-merge Validation</h4>
                             <div class="code-block">
-                                <div class="code-block-header">Validation Job</div>
-                                <pre><code class="text-green-400 text-sm">  validate:
+                                <div class="code-block-header">.github/workflows/validate.yml</div>
+                                <pre><code class="text-green-400 text-sm"><span class="code-keyword">name</span>: Pre-merge Check
+
+<span class="code-keyword">on</span>:
+  pull_request:
+
+<span class="code-keyword">jobs</span>:
+  validate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
 
-      - name: Claude Validation
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
+      - run: npm test
+
+      <span class="code-comment"># Optional: Claude security scan</span>
+      - name: Security Scan
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
-          result=$(claude --headless --print \
-            --allowedTools "Read,Grep,Bash" \
-            -p "Check if this code is production-ready:
-                1. Run tests (npm test)
-                2. Check for TODO/FIXME comments
-                3. Verify no console.log statements
-                4. Ensure error handling is complete
-
-                Output PASS or FAIL with reasons.")
-
-          if echo "$result" | grep -q "FAIL"; then
-            echo "Validation failed:"
-            echo "$result"
-            exit 1
-          fi</code></pre>
+          npm install -g @anthropic-ai/claude-code
+          claude -p "Scan for OWASP Top 10 vulnerabilities" \
+            --allowedTools "Read,Grep,Glob" --yes</code></pre>
                             </div>
 
-                            <h4 class="font-bold text-lg mt-8 text-accent">Security Scanning</h4>
-                            <div class="code-block">
-                                <div class="code-block-header">Security Job</div>
-                                <pre><code class="text-green-400 text-sm">  security-scan:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Claude Security Scan
-        env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-        run: |
-          claude --headless --print \
-            --allowedTools "Read,Grep,Glob" \
-            -p "Perform security audit:
-                1. Check for hardcoded secrets
-                2. SQL injection vulnerabilities
-                3. XSS vulnerabilities
-                4. Insecure dependencies
-                5. Authentication issues
-
-                Output findings with severity levels."</code></pre>
+                            <h4 class="font-bold text-lg mt-6 text-accent">Deployment Automation</h4>
+                            <div class="grid md:grid-cols-2 gap-4 mt-4">
+                                <div class="card rounded-xl p-4">
+                                    <h5 class="font-semibold text-accent mb-2">Vercel / Netlify</h5>
+                                    <p class="text-sm text-gray-400">Auto-deploy on push to main. Preview deployments for PRs. Zero-config for Next.js, React, etc.</p>
+                                </div>
+                                <div class="card rounded-xl p-4">
+                                    <h5 class="font-semibold text-accent mb-2">Railway / Render</h5>
+                                    <p class="text-sm text-gray-400">Full-stack deployment with database support. Auto-deploy from GitHub with environment variables.</p>
+                                </div>
+                                <div class="card rounded-xl p-4">
+                                    <h5 class="font-semibold text-accent mb-2">npm / PyPI</h5>
+                                    <p class="text-sm text-gray-400">Publish CLI tools as packages. GitHub Actions can auto-publish on release tag creation.</p>
+                                </div>
+                                <div class="card rounded-xl p-4">
+                                    <h5 class="font-semibold text-accent mb-2">Docker / Fly.io</h5>
+                                    <p class="text-sm text-gray-400">Containerized deployment. Dockerfile + CI/CD for consistent environments across dev and production.</p>
+                                </div>
                             </div>
 
-                            <div class="tip-box mt-6">
-                                <p class="text-rose-200 font-medium">Cost Management Tip</p>
-                                <p class="text-sm mt-1 text-gray-300">Use <code class="bg-dark-800 px-2 py-1 rounded text-xs">--model haiku</code> for quick checks and <code class="bg-dark-800 px-2 py-1 rounded text-xs">--allowedTools</code> to limit scope. Reserve Opus for complex analysis. This can reduce CI costs by 80%.</p>
-                            </div>
-
-                            <button onclick="completeLesson(2)" class="btn-primary text-dark-900 px-6 py-3 rounded-xl font-semibold mt-6">
+                            <button onclick="completeLesson(2)" class="btn-secondary px-6 py-3 rounded-xl text-sm font-medium">
                                 Mark as Complete
                             </button>
                         </div>
                     </div>
                 </div>
 
-                <!-- Lesson 3: Best Practices -->
+                <!-- Lesson 3: Integration Patterns -->
                 <div id="lesson3" class="lesson-card rounded-2xl overflow-hidden">
                     <div class="lesson-header p-6 flex items-center justify-between" onclick="toggleLesson(3)">
                         <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 rounded-xl bg-accent/20 flex items-center justify-center text-2xl">3</div>
+                            <div class="w-12 h-12 rounded-xl bg-amber-500/20 flex items-center justify-center text-2xl">3</div>
                             <div>
-                                <h3 class="font-bold text-xl">Best Practices</h3>
-                                <p class="text-gray-400 text-sm">CLAUDE.md, Hook security, effective prompting</p>
+                                <h3 class="font-bold text-xl">Integration Patterns</h3>
+                                <p class="text-gray-400 text-sm">Combining all features into a unified workflow</p>
                             </div>
                         </div>
                         <div class="flex items-center gap-3">
@@ -497,140 +482,106 @@
                     </div>
                     <div class="lesson-content">
                         <div class="px-6 pb-6 space-y-6">
-                            <h4 class="font-bold text-lg text-accent">CLAUDE.md Best Practices</h4>
+                            <div class="tip-box">
+                                <p class="text-rose-200 font-medium">Full-Stack Integration</p>
+                                <p class="text-sm mt-1 text-gray-300">The real power of Claude Code emerges when you combine features: CLAUDE.md for context, hooks for quality, MCP for external tools, subagents for parallelism, and headless mode for automation.</p>
+                            </div>
+
+                            <h4 class="font-bold text-lg text-accent">Pattern 1: Full Development Workflow</h4>
                             <div class="code-block">
-                                <div class="code-block-header">CLAUDE.md</div>
-                                <pre><code class="text-green-400 text-sm"><span class="code-comment"># CLAUDE.md</span>
+                                <div class="code-block-header">End-to-End Development</div>
+                                <pre><code class="text-green-400 text-sm"><span class="code-comment"># 1. Initialize project with context (Week 1)</span>
+> /init
+> <span class="code-comment"># Add project conventions to CLAUDE.md</span>
 
-<span class="code-comment">## Project Overview</span>
-Brief description of what this project does.
+<span class="code-comment"># 2. Plan the feature (Week 1)</span>
+> Shift+Tab x2 (Plan Mode)
+> "Design user authentication system"
 
-<span class="code-comment">## Architecture</span>
-- Frontend: React + TypeScript
-- Backend: Node.js + Express
-- Database: PostgreSQL
+<span class="code-comment"># 3. Implement with hooks for validation (Week 2)</span>
+<span class="code-comment"># PostToolUse hook runs tsc after every file edit</span>
 
-<span class="code-comment">## Coding Conventions</span>
-- Use functional components with hooks
-- Prefer named exports over default exports
-- Error handling: Always use try-catch with typed errors
-- Testing: Write tests alongside implementation
+<span class="code-comment"># 4. Use subagents for parallel tasks (Week 4)</span>
+> "Build backend API while testing frontend components"
 
-<span class="code-comment">## Common Patterns</span>
-### API Calls
-Use the useQuery hook from @tanstack/react-query:
-```typescript
-const { data, isLoading } = useQuery({
-  queryKey: ['users'],
-  queryFn: fetchUsers
-});
-```
-
-<span class="code-comment">## Known Issues</span>
-- Don't modify files in /legacy - scheduled for removal
-- The auth module uses an older pattern - don't follow it</code></pre>
+<span class="code-comment"># 5. Deploy with CI/CD (Week 5)</span>
+> git push  <span class="code-comment"># GitHub Actions auto-test & deploy</span></code></pre>
                             </div>
 
-                            <h4 class="font-bold text-lg mt-8 text-accent">Hook Security Best Practices</h4>
-                            <div class="grid md:grid-cols-2 gap-4 mt-4">
-                                <div class="bg-green-500/10 border border-green-500/30 rounded-xl p-4">
-                                    <h5 class="font-semibold text-green-400 mb-2">Do</h5>
-                                    <ul class="text-sm space-y-2 text-gray-300">
-                                        <li>- Validate all input from stdin</li>
-                                        <li>- Use absolute paths in hooks</li>
-                                        <li>- Handle errors gracefully</li>
-                                        <li>- Log hook activity for debugging</li>
-                                        <li>- Test hooks thoroughly before deploy</li>
-                                    </ul>
-                                </div>
-                                <div class="bg-red-500/10 border border-red-500/30 rounded-xl p-4">
-                                    <h5 class="font-semibold text-red-400 mb-2">Don't</h5>
-                                    <ul class="text-sm space-y-2 text-gray-300">
-                                        <li>- Trust file paths blindly</li>
-                                        <li>- Execute untrusted commands</li>
-                                        <li>- Store secrets in hook files</li>
-                                        <li>- Ignore exit codes</li>
-                                        <li>- Skip path traversal checks</li>
-                                    </ul>
-                                </div>
+                            <h4 class="font-bold text-lg mt-6 text-accent">Pattern 2: Automated Review Pipeline</h4>
+                            <div class="code-block">
+                                <div class="code-block-header">Code Review Automation</div>
+                                <pre><code class="text-green-400 text-sm"><span class="code-comment"># Hook (Week 2): PostToolUse on Edit/Write</span>
+<span class="code-comment"># Runs after every file modification</span>
+
+<span class="code-comment"># 1. TypeScript validation hook</span>
+tsc --noEmit  <span class="code-comment"># Catch type errors immediately</span>
+
+<span class="code-comment"># 2. Query duplication hook</span>
+<span class="code-comment"># Launches a review subagent (Week 4) to check for duplicates</span>
+
+<span class="code-comment"># 3. CI/CD (Week 5): On push</span>
+<span class="code-comment"># GitHub Actions runs full test suite + Claude security scan</span>
+
+<span class="code-comment"># 4. Headless review (Week 4): On PR</span>
+claude -p "Review this PR" --output-format json --yes</code></pre>
                             </div>
 
-                            <h4 class="font-bold text-lg mt-8 text-accent">Effective Prompting</h4>
-                            <div class="space-y-4 mt-4">
-                                <div class="code-block">
-                                    <div class="code-block-header">Be Specific</div>
-                                    <pre><code class="text-sm"><span class="code-comment"># Bad</span>
-"Fix the bug"
+                            <h4 class="font-bold text-lg mt-6 text-accent">Pattern 3: Research-to-Product Pipeline</h4>
+                            <div class="code-block">
+                                <div class="code-block-header">MCP + Subagents + CI/CD</div>
+                                <pre><code class="text-green-400 text-sm"><span class="code-comment"># Step 1: Research with MCP (Week 3-4)</span>
+<span class="code-comment"># Playwright MCP scrapes competitor data</span>
+<span class="code-comment"># Notion MCP fetches product requirements</span>
 
-<span class="code-comment"># Good</span>
-<span class="text-green-400">"Fix the null pointer exception in src/auth/login.ts:45
-that occurs when the user session expires"</span></code></pre>
-                                </div>
-                                <div class="code-block">
-                                    <div class="code-block-header">Provide Context</div>
-                                    <pre><code class="text-sm"><span class="code-comment"># Bad</span>
-"Add validation"
+<span class="code-comment"># Step 2: Parallel Development with Subagents (Week 4)</span>
+Task: Plan architecture
+Task: Build API endpoints
+Task: Create UI components
+Task: Write tests
 
-<span class="code-comment"># Good</span>
-<span class="text-green-400">"Add email validation to the signup form in @src/components/SignupForm.tsx
-following the pattern used in @src/components/LoginForm.tsx"</span></code></pre>
-                                </div>
-                                <div class="code-block">
-                                    <div class="code-block-header">Define Output</div>
-                                    <pre><code class="text-sm"><span class="code-comment"># Bad</span>
-"Analyze the code"
+<span class="code-comment"># Step 3: Quality with Hooks (Week 2)</span>
+<span class="code-comment"># Auto-lint, type-check, security scan on every edit</span>
 
-<span class="code-comment"># Good</span>
-<span class="text-green-400">"Analyze src/api/ for performance issues.
-Output as JSON with: { file, line, issue, suggestion, severity }"</span></code></pre>
-                                </div>
+<span class="code-comment"># Step 4: Deploy with CI/CD (Week 5)</span>
+<span class="code-comment"># Push to main -> GitHub Actions -> Vercel/Railway</span></code></pre>
                             </div>
 
-                            <h4 class="font-bold text-lg mt-8 text-accent">Resource Management</h4>
-                            <div class="overflow-x-auto">
-                                <table class="w-full mt-4 text-sm">
-                                    <thead>
-                                        <tr class="border-b border-white/10">
-                                            <th class="text-left py-3 px-4 text-accent">Resource</th>
-                                            <th class="text-left py-3 px-4">Best Practice</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="text-gray-300">
-                                        <tr class="border-b border-white/5">
-                                            <td class="py-3 px-4 font-semibold">Context Window</td>
-                                            <td class="py-3 px-4">Use /compact regularly. Reference files with @ instead of pasting.</td>
-                                        </tr>
-                                        <tr class="border-b border-white/5">
-                                            <td class="py-3 px-4 font-semibold">API Costs</td>
-                                            <td class="py-3 px-4">Use Haiku for simple tasks. Limit subagent maxTurns.</td>
-                                        </tr>
-                                        <tr class="border-b border-white/5">
-                                            <td class="py-3 px-4 font-semibold">Memory</td>
-                                            <td class="py-3 px-4">Keep CLAUDE.md focused. Use # to update not accumulate.</td>
-                                        </tr>
-                                        <tr class="border-b border-white/5">
-                                            <td class="py-3 px-4 font-semibold">Time</td>
-                                            <td class="py-3 px-4">Use Plan Mode for complex tasks. Parallel subagents for speed.</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                            <h4 class="font-bold text-lg mt-6 text-accent">Project Architecture Example</h4>
+                            <div class="code-block">
+                                <div class="code-block-header">Final Project Structure</div>
+                                <pre><code class="text-green-400 text-sm">my-project/
+├── CLAUDE.md              <span class="code-comment"># Project context & conventions</span>
+├── .claude/
+│   ├── settings.local.json <span class="code-comment"># Hooks + Custom Commands + MCP</span>
+│   └── skills/            <span class="code-comment"># Custom skills (SKILL.md)</span>
+├── .github/
+│   └── workflows/
+│       ├── ci.yml         <span class="code-comment"># Build + Test pipeline</span>
+│       └── review.yml     <span class="code-comment"># Claude headless review</span>
+├── hooks/
+│   ├── tsc_check.js       <span class="code-comment"># PostToolUse: type checking</span>
+│   └── env_guard.js       <span class="code-comment"># PreToolUse: block .env reads</span>
+├── src/                   <span class="code-comment"># Application source code</span>
+├── tests/                 <span class="code-comment"># Test suite</span>
+└── package.json</code></pre>
                             </div>
 
-                            <button onclick="completeLesson(3)" class="btn-primary text-dark-900 px-6 py-3 rounded-xl font-semibold mt-6">
+                            <button onclick="completeLesson(3)" class="btn-secondary px-6 py-3 rounded-xl text-sm font-medium">
                                 Mark as Complete
                             </button>
                         </div>
                     </div>
                 </div>
 
-                <!-- Lesson 4: Demo Preparation -->
+                <!-- Lesson 4: Best Practices -->
                 <div id="lesson4" class="lesson-card rounded-2xl overflow-hidden">
                     <div class="lesson-header p-6 flex items-center justify-between" onclick="toggleLesson(4)">
                         <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 rounded-xl bg-accent/20 flex items-center justify-center text-2xl">4</div>
+                            <div class="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center text-2xl">4</div>
                             <div>
-                                <h3 class="font-bold text-xl">Demo Preparation</h3>
-                                <p class="text-gray-400 text-sm">Final project presentation preparation</p>
+                                <h3 class="font-bold text-xl">Best Practices</h3>
+                                <p class="text-gray-400 text-sm">Production-ready conventions and security</p>
                             </div>
                         </div>
                         <div class="flex items-center gap-3">
@@ -642,125 +593,97 @@ Output as JSON with: { file, line, issue, suggestion, severity }"</span></code><
                     </div>
                     <div class="lesson-content">
                         <div class="px-6 pb-6 space-y-6">
-                            <div class="tip-box">
-                                <p class="text-rose-200 font-medium">Final Project Demo</p>
-                                <p class="text-sm mt-1 text-gray-300">Your demo should showcase the skills you've learned and the project you've built. Here's how to prepare an effective presentation.</p>
+                            <h4 class="font-bold text-lg text-accent">CLAUDE.md Best Practices</h4>
+                            <div class="code-block">
+                                <div class="code-block-header">CLAUDE.md Template</div>
+                                <pre><code class="text-green-400 text-sm"><span class="code-comment"># Project Name</span>
+
+<span class="code-comment">## Architecture</span>
+- Frontend: React + TypeScript
+- Backend: Express.js + PostgreSQL
+- Deploy: Vercel (frontend) + Railway (backend)
+
+<span class="code-comment">## Conventions</span>
+- Use functional components with hooks
+- All API routes return JSON with {data, error} shape
+- Tests required for all new features
+- Never commit .env files
+
+<span class="code-comment">## Common Tasks</span>
+- Build: npm run build
+- Test: npm test
+- Lint: npm run lint
+- Dev server: npm run dev</code></pre>
                             </div>
 
-                            <h4 class="font-bold text-lg text-accent">Demo Checklist</h4>
-                            <div class="space-y-3 mt-4">
-                                <div class="flex items-start gap-3 bg-dark-700 rounded-xl p-4">
-                                    <span class="text-accent text-xl font-bold">1</span>
-                                    <div>
-                                        <p class="font-semibold text-white">Project Overview (2 min)</p>
-                                        <p class="text-sm text-gray-300">What problem does your project solve? Who is it for?</p>
-                                    </div>
-                                </div>
-                                <div class="flex items-start gap-3 bg-dark-700 rounded-xl p-4">
-                                    <span class="text-accent text-xl font-bold">2</span>
-                                    <div>
-                                        <p class="font-semibold text-white">Architecture Demo (3 min)</p>
-                                        <p class="text-sm text-gray-300">Show CLAUDE.md, hooks config, MCP setup. Explain your project structure.</p>
-                                    </div>
-                                </div>
-                                <div class="flex items-start gap-3 bg-dark-700 rounded-xl p-4">
-                                    <span class="text-accent text-xl font-bold">3</span>
-                                    <div>
-                                        <p class="font-semibold text-white">Live Coding with Claude (5 min)</p>
-                                        <p class="text-sm text-gray-300">Add a feature or fix a bug live. Show hooks in action.</p>
-                                    </div>
-                                </div>
-                                <div class="flex items-start gap-3 bg-dark-700 rounded-xl p-4">
-                                    <span class="text-accent text-xl font-bold">4</span>
-                                    <div>
-                                        <p class="font-semibold text-white">Automation Demo (3 min)</p>
-                                        <p class="text-sm text-gray-300">Show /commit, /pr, or CI/CD pipeline. Demonstrate headless mode.</p>
-                                    </div>
-                                </div>
-                                <div class="flex items-start gap-3 bg-dark-700 rounded-xl p-4">
-                                    <span class="text-accent text-xl font-bold">5</span>
-                                    <div>
-                                        <p class="font-semibold text-white">Lessons Learned (2 min)</p>
-                                        <p class="text-sm text-gray-300">What worked well? What would you do differently?</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <h4 class="font-bold text-lg mt-8 text-accent">Demo Tips</h4>
+                            <h4 class="font-bold text-lg mt-6 text-accent">Hook Security Best Practices</h4>
                             <div class="grid md:grid-cols-2 gap-4 mt-4">
-                                <div class="bg-dark-700 rounded-xl p-4">
-                                    <h5 class="font-semibold text-accent mb-2">Prepare Fallbacks</h5>
-                                    <p class="text-sm text-gray-300">Have backup recordings if live demo fails. Test everything beforehand.</p>
+                                <div class="card rounded-xl p-4">
+                                    <h5 class="font-semibold text-accent mb-2">Use Absolute Paths</h5>
+                                    <p class="text-sm text-gray-400">Always specify full paths for hook scripts to prevent path interception attacks. Use $PWD placeholder in shared configs.</p>
                                 </div>
-                                <div class="bg-dark-700 rounded-xl p-4">
-                                    <h5 class="font-semibold text-accent mb-2">Clean Context</h5>
-                                    <p class="text-sm text-gray-300">Start with /clear for a fresh session. Ensure CLAUDE.md is up to date.</p>
+                                <div class="card rounded-xl p-4">
+                                    <h5 class="font-semibold text-accent mb-2">Quote Shell Variables</h5>
+                                    <p class="text-sm text-gray-400">Always use "$VAR" instead of $VAR. Unquoted variables can lead to command injection if the input contains shell metacharacters.</p>
                                 </div>
-                                <div class="bg-dark-700 rounded-xl p-4">
-                                    <h5 class="font-semibold text-accent mb-2">Show, Don't Tell</h5>
-                                    <p class="text-sm text-gray-300">Let Claude do the work. Narrate what's happening as it works.</p>
+                                <div class="card rounded-xl p-4">
+                                    <h5 class="font-semibold text-accent mb-2">Block Path Traversal</h5>
+                                    <p class="text-sm text-gray-400">Check for ".." in file paths. Prevent hooks from being tricked into accessing files outside the project directory.</p>
                                 </div>
-                                <div class="bg-dark-700 rounded-xl p-4">
-                                    <h5 class="font-semibold text-accent mb-2">Highlight Integration</h5>
-                                    <p class="text-sm text-gray-300">Show how different features work together (hooks + MCP, skills + subagents).</p>
+                                <div class="card rounded-xl p-4">
+                                    <h5 class="font-semibold text-accent mb-2">Protect Sensitive Files</h5>
+                                    <p class="text-sm text-gray-400">Use PreToolUse hooks to block reads of .env, .git/, private keys, and other sensitive files.</p>
                                 </div>
                             </div>
 
-                            <h4 class="font-bold text-lg mt-8 text-accent">Evaluation Criteria</h4>
-                            <div class="overflow-x-auto">
-                                <table class="w-full mt-4 text-sm">
-                                    <thead>
-                                        <tr class="border-b border-white/10">
-                                            <th class="text-left py-3 px-4 text-accent">Criterion</th>
-                                            <th class="text-left py-3 px-4">Weight</th>
-                                            <th class="text-left py-3 px-4">Description</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="text-gray-300">
-                                        <tr class="border-b border-white/5">
-                                            <td class="py-3 px-4 font-semibold">Project Completeness</td>
-                                            <td class="py-3 px-4">30 pts</td>
-                                            <td class="py-3 px-4">Core features, deployment, documentation</td>
-                                        </tr>
-                                        <tr class="border-b border-white/5">
-                                            <td class="py-3 px-4 font-semibold">Feature Integration</td>
-                                            <td class="py-3 px-4">25 pts</td>
-                                            <td class="py-3 px-4">Week 1-5 features properly integrated</td>
-                                        </tr>
-                                        <tr class="border-b border-white/5">
-                                            <td class="py-3 px-4 font-semibold">CI/CD & Automation</td>
-                                            <td class="py-3 px-4">15 pts</td>
-                                            <td class="py-3 px-4">GitHub Actions, test automation, deploy</td>
-                                        </tr>
-                                        <tr class="border-b border-white/5">
-                                            <td class="py-3 px-4 font-semibold">Demo Quality</td>
-                                            <td class="py-3 px-4">20 pts</td>
-                                            <td class="py-3 px-4">Clear presentation, live demo, Q&A</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                            <h4 class="font-bold text-lg mt-6 text-accent">Effective Prompting</h4>
+                            <div class="space-y-4 mt-4">
+                                <div class="card rounded-xl p-4">
+                                    <h5 class="font-semibold text-green-400 mb-2">Good Prompt</h5>
+                                    <p class="text-sm text-gray-300">"Add a /users API endpoint that returns paginated results. Use the existing User model from src/models/user.ts. Include validation for page and limit query params. Write tests."</p>
+                                </div>
+                                <div class="card rounded-xl p-4">
+                                    <h5 class="font-semibold text-red-400 mb-2">Bad Prompt</h5>
+                                    <p class="text-sm text-gray-300">"Add a users endpoint"</p>
+                                </div>
+                            </div>
+                            <p class="text-gray-400 text-sm mt-2">Be specific about: file locations, existing patterns to follow, expected behavior, and testing requirements. Claude performs better with explicit context.</p>
+
+                            <h4 class="font-bold text-lg mt-6 text-accent">Resource Management</h4>
+                            <div class="grid md:grid-cols-2 gap-4 mt-4">
+                                <div class="card rounded-xl p-4">
+                                    <h5 class="font-semibold text-accent mb-2">Model Selection</h5>
+                                    <p class="text-sm text-gray-400">Use <code class="bg-dark-600 px-1 rounded text-xs">--model haiku</code> for quick tasks (linting, simple queries). Use Sonnet for standard development. Reserve Opus for complex architecture decisions.</p>
+                                </div>
+                                <div class="card rounded-xl p-4">
+                                    <h5 class="font-semibold text-accent mb-2">Context Limits</h5>
+                                    <p class="text-sm text-gray-400">Keep CLAUDE.md focused and concise. Use .claudeignore for large binary files and node_modules. Let Claude auto-compact when context gets large.</p>
+                                </div>
+                                <div class="card rounded-xl p-4">
+                                    <h5 class="font-semibold text-accent mb-2">Subagent Costs</h5>
+                                    <p class="text-sm text-gray-400">Each subagent uses its own API context. Use Explore agents for search (lightweight) and General-Purpose only when needed (heavier).</p>
+                                </div>
+                                <div class="card rounded-xl p-4">
+                                    <h5 class="font-semibold text-accent mb-2">Hook Performance</h5>
+                                    <p class="text-sm text-gray-400">Keep hooks lightweight -- heavy operations slow down every tool call. Only monitor critical directories for expensive hooks like query duplication checks.</p>
+                                </div>
                             </div>
 
-                            <div class="bg-gradient-to-r from-rose-500/20 to-amber-500/20 border border-rose-500/30 rounded-xl p-6 mt-6 text-center">
-                                <p class="text-2xl mb-2 text-white">Good luck on your final project!</p>
-                                <p class="text-gray-400">Show us what you've learned over these 5 weeks.</p>
-                            </div>
-
-                            <button onclick="completeLesson(4)" class="btn-primary text-dark-900 px-6 py-3 rounded-xl font-semibold mt-6">
+                            <button onclick="completeLesson(4)" class="btn-secondary px-6 py-3 rounded-xl text-sm font-medium">
                                 Mark as Complete
                             </button>
                         </div>
                     </div>
                 </div>
 
-                <!-- Lesson 5: Pro Tips (Boris Cherny) -->
+                <!-- Lesson 5: Demo Preparation -->
                 <div id="lesson5" class="lesson-card rounded-2xl overflow-hidden">
                     <div class="lesson-header p-6 flex items-center justify-between" onclick="toggleLesson(5)">
                         <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 rounded-xl bg-accent/20 flex items-center justify-center text-2xl">5</div>
+                            <div class="w-12 h-12 rounded-xl bg-pink-500/20 flex items-center justify-center text-2xl">5</div>
                             <div>
-                                <h3 class="font-bold text-xl">Pro Tips (Boris Cherny)</h3>
-                                <p class="text-gray-400 text-sm">Parallel execution, model selection, verification feedback loops</p>
+                                <h3 class="font-bold text-xl">Demo Preparation</h3>
+                                <p class="text-gray-400 text-sm">Final project checklist and demo tips</p>
                             </div>
                         </div>
                         <div class="flex items-center gap-3">
@@ -773,149 +696,102 @@ Output as JSON with: { file, line, issue, suggestion, severity }"</span></code><
                     <div class="lesson-content">
                         <div class="px-6 pb-6 space-y-6">
                             <div class="tip-box">
-                                <p class="text-rose-200 font-medium">Boris Cherny's Advanced Tips</p>
-                                <p class="text-sm mt-1 text-gray-300">Advanced tips shared by Boris Cherny from Anthropic Developer Relations. These tips are essential for utilizing Claude Code at an expert level.</p>
+                                <p class="text-rose-200 font-medium">Final Project Demo</p>
+                                <p class="text-sm mt-1 text-gray-300">Your demo is worth 20 points. A well-structured 12-minute presentation covering your project overview, architecture, live demo, and reflections will maximize your score.</p>
                             </div>
 
-                            <h4 class="font-bold text-lg text-accent">Tip 1: Parallel Execution Environment</h4>
-                            <p class="text-gray-300">Run Claude in multiple terminals simultaneously to <strong class="text-accent">maximize throughput</strong>. Process different subtasks in parallel to significantly reduce total time.</p>
-                            <div class="code-block">
-                                <div class="code-block-header">Parallel Terminal Setup</div>
-                                <pre><code class="text-green-400 text-sm"><span class="code-comment"># Terminal 1: Backend API development</span>
-cd backend && claude "Implement API endpoints"
-
-<span class="code-comment"># Terminal 2: Frontend development</span>
-cd frontend && claude "Develop React components"
-
-<span class="code-comment"># Terminal 3: Write tests</span>
-cd tests && claude "Write unit tests"
-
-<span class="code-comment"># Terminal 4: Documentation</span>
-cd docs && claude "Generate API documentation"</code></pre>
+                            <h4 class="font-bold text-lg text-accent">Demo Checklist</h4>
+                            <div class="space-y-3 mt-4">
+                                <div class="card rounded-xl p-4 flex items-start gap-3">
+                                    <span class="text-lg mt-0.5">1</span>
+                                    <div>
+                                        <h5 class="font-semibold text-white">Project Overview (2 min)</h5>
+                                        <p class="text-sm text-gray-400">What does your project do? Who is it for? Why did you build it?</p>
+                                    </div>
+                                </div>
+                                <div class="card rounded-xl p-4 flex items-start gap-3">
+                                    <span class="text-lg mt-0.5">2</span>
+                                    <div>
+                                        <h5 class="font-semibold text-white">Architecture & Features (3 min)</h5>
+                                        <p class="text-sm text-gray-400">Show CLAUDE.md, hooks, MCP config, custom commands. Explain how features integrate.</p>
+                                    </div>
+                                </div>
+                                <div class="card rounded-xl p-4 flex items-start gap-3">
+                                    <span class="text-lg mt-0.5">3</span>
+                                    <div>
+                                        <h5 class="font-semibold text-white">Live Feature Demo (5 min)</h5>
+                                        <p class="text-sm text-gray-400">Show the application working. Demonstrate Claude Code features in action: hooks firing, MCP data flowing, subagents running.</p>
+                                    </div>
+                                </div>
+                                <div class="card rounded-xl p-4 flex items-start gap-3">
+                                    <span class="text-lg mt-0.5">4</span>
+                                    <div>
+                                        <h5 class="font-semibold text-white">Reflections (2 min)</h5>
+                                        <p class="text-sm text-gray-400">What did you learn? What was challenging? What would you do differently?</p>
+                                    </div>
+                                </div>
                             </div>
 
-                            <h4 class="font-bold text-lg mt-8 text-accent">Tip 2: Web and Local Parallel Operation</h4>
-                            <p class="text-gray-300">Use Claude.ai (web) and Claude Code (terminal) <strong class="text-accent">simultaneously</strong>. Do research/design on the web while implementing in the terminal.</p>
+                            <h4 class="font-bold text-lg mt-6 text-accent">Feature Integration Checklist</h4>
                             <div class="grid md:grid-cols-2 gap-4 mt-4">
-                                <div class="bg-dark-700 rounded-xl p-4">
-                                    <h5 class="font-semibold text-accent mb-2">Claude.ai (Web)</h5>
-                                    <ul class="text-sm space-y-1 text-gray-300">
-                                        <li>- Architecture design discussions</li>
-                                        <li>- API documentation analysis</li>
-                                        <li>- Complex algorithm explanations</li>
-                                        <li>- Long-term context retention</li>
+                                <div class="card rounded-xl p-4">
+                                    <h5 class="font-semibold text-violet-400 mb-2">Week 1-2 (16 pts)</h5>
+                                    <ul class="text-sm space-y-1 text-gray-400">
+                                        <li>- CLAUDE.md with project context</li>
+                                        <li>- Plan Mode for architecture</li>
+                                        <li>- @ file references</li>
+                                        <li>- Hooks (PreToolUse/PostToolUse)</li>
                                     </ul>
                                 </div>
-                                <div class="bg-dark-700 rounded-xl p-4">
-                                    <h5 class="font-semibold text-accent mb-2">Claude Code (Terminal)</h5>
-                                    <ul class="text-sm space-y-1 text-gray-300">
-                                        <li>- Actual code implementation</li>
-                                        <li>- File system access</li>
-                                        <li>- Git operations</li>
-                                        <li>- Build and test</li>
+                                <div class="card rounded-xl p-4">
+                                    <h5 class="font-semibold text-amber-400 mb-2">Week 3-4 (17 pts)</h5>
+                                    <ul class="text-sm space-y-1 text-gray-400">
+                                        <li>- Skills (SKILL.md, /commit)</li>
+                                        <li>- MCP servers (Notion, Playwright, etc.)</li>
+                                        <li>- Subagents for parallel tasks</li>
+                                        <li>- Custom Commands</li>
                                     </ul>
                                 </div>
                             </div>
 
-                            <h4 class="font-bold text-lg mt-8 text-accent">Tip 3: Model Selection Strategy</h4>
-                            <p class="text-gray-300">Choose the <strong class="text-accent">appropriate model</strong> based on task complexity. Use Sonnet by default, and only use Opus with thinking for complex reasoning.</p>
-                            <div class="overflow-x-auto">
-                                <table class="w-full mt-4 text-sm">
-                                    <thead>
-                                        <tr class="border-b border-white/10">
-                                            <th class="text-left py-3 px-4 text-accent">Model</th>
-                                            <th class="text-left py-3 px-4">Use Case</th>
-                                            <th class="text-left py-3 px-4">Cost</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="text-gray-300">
-                                        <tr class="border-b border-white/5">
-                                            <td class="py-3 px-4 font-semibold text-green-400">Haiku</td>
-                                            <td class="py-3 px-4">Simple edits, formatting, renaming</td>
-                                            <td class="py-3 px-4">$</td>
-                                        </tr>
-                                        <tr class="border-b border-white/5">
-                                            <td class="py-3 px-4 font-semibold text-blue-400">Sonnet (Default)</td>
-                                            <td class="py-3 px-4">General development tasks, bug fixes</td>
-                                            <td class="py-3 px-4">$$</td>
-                                        </tr>
-                                        <tr class="border-b border-white/5">
-                                            <td class="py-3 px-4 font-semibold text-amber-400">Opus 4.5</td>
-                                            <td class="py-3 px-4">Complex architecture, difficult bugs</td>
-                                            <td class="py-3 px-4">$$$</td>
-                                        </tr>
-                                        <tr class="border-b border-white/5">
-                                            <td class="py-3 px-4 font-semibold text-rose-400">Opus + ultrathink</td>
-                                            <td class="py-3 px-4">Very complex reasoning, design decisions</td>
-                                            <td class="py-3 px-4">$$$$</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            <h4 class="font-bold text-lg mt-8 text-accent">Tip 8: Strategic Use of Subagents</h4>
-                            <p class="text-gray-300">Run subagents <strong class="text-accent">in parallel</strong> to speed up work. Assign independent tasks to each agent.</p>
-                            <div class="code-block">
-                                <div class="code-block-header">Parallel Subagents</div>
-                                <pre><code class="text-green-400 text-sm"><span class="code-comment"># Create subagents from main Claude</span>
-> "Run 4 parallel agents to simultaneously:
-   1. Scan for security vulnerabilities
-   2. Profile performance
-   3. Analyze code quality
-   4. Check test coverage"
-
-<span class="code-comment"># Claude automatically:</span>
-<span class="code-comment"># - Creates 4 subagents with Task tool</span>
-<span class="code-comment"># - Runs them in parallel with run_in_background: true</span>
-<span class="code-comment"># - Collects results and creates integrated report</span></code></pre>
-                            </div>
-
-                            <h4 class="font-bold text-lg mt-8 text-accent">Tip 13: Verification Feedback Loop (Most Important)</h4>
-                            <div class="tip-box">
-                                <p class="text-rose-200 font-medium">Core Principle</p>
-                                <p class="text-sm mt-1 text-gray-300">After Claude writes code, <strong>always verify</strong>. Immediately catch and fix errors through build, test, and type checking.</p>
-                            </div>
-                            <div class="code-block mt-4">
-                                <div class="code-block-header">Verification Feedback Loop Pattern</div>
-                                <pre><code class="text-green-400 text-sm"><span class="code-comment"># Verification Feedback Loop Pattern</span>
-1. Claude writes code
-2. Immediately run verification: npm run build && npm test
-3. If errors occur, give feedback to Claude
-4. After fix, verify again
-5. Repeat until all verifications pass
-
-<span class="code-comment"># Automate with hooks</span>
-{
-  "hooks": {
-    "PostToolUse": [{
-      "matcher": "Write|Edit",
-      "hooks": [{
-        "type": "command",
-        "command": "npm run typecheck 2>&1 || true"
-      }]
-    }]
-  }
-}</code></pre>
-                            </div>
-
-                            <h4 class="font-bold text-lg mt-8 text-accent">Official Plugin: code-simplifier</h4>
-                            <div class="card rounded-xl p-4 mt-4">
-                                <div class="flex items-center gap-3 mb-2">
-                                    <span class="text-xl font-bold text-white">code-simplifier</span>
+                            <h4 class="font-bold text-lg mt-6 text-accent">Demo Tips</h4>
+                            <div class="grid md:grid-cols-2 gap-4 mt-4">
+                                <div class="card rounded-xl p-4">
+                                    <h5 class="font-semibold text-accent mb-2">Before the Demo</h5>
+                                    <ul class="text-sm space-y-1 text-gray-400">
+                                        <li>- Run /clear to reset Claude session</li>
+                                        <li>- Prepare backup recording</li>
+                                        <li>- Test all features work locally</li>
+                                        <li>- Verify deploy URL is accessible</li>
+                                    </ul>
                                 </div>
-                                <p class="text-sm text-gray-400 mb-3">A plugin that automatically simplifies complex code. Performs duplicate removal, refactoring suggestions, and readability improvements.</p>
-                                <div class="code-block">
-                                    <div class="code-block-header">Installation & Usage</div>
-                                    <pre><code class="text-green-400 text-sm"><span class="code-comment"># Install</span>
-claude plugins add github:anthropics/code-simplifier
-
-<span class="code-comment"># Usage</span>
-/simplify src/complex-module.ts    <span class="code-comment"># Simplify specific file</span>
-/simplify --all                    <span class="code-comment"># Analyze entire project</span></code></pre>
+                                <div class="card rounded-xl p-4">
+                                    <h5 class="font-semibold text-accent mb-2">During the Demo</h5>
+                                    <ul class="text-sm space-y-1 text-gray-400">
+                                        <li>- Show, don't just tell</li>
+                                        <li>- Narrate what's happening on screen</li>
+                                        <li>- If something breaks, explain why</li>
+                                        <li>- Stay within time limits</li>
+                                    </ul>
                                 </div>
                             </div>
 
-                            <button onclick="completeLesson(5)" class="btn-primary text-dark-900 px-6 py-3 rounded-xl font-semibold mt-6">
+                            <div class="warning-box mt-6">
+                                <div class="flex items-start gap-3">
+                                    <span class="text-xl">Note</span>
+                                    <div>
+                                        <p class="text-amber-200 font-medium">Evaluation Criteria</p>
+                                        <p class="text-sm mt-1 text-gray-300">
+                                            <strong>Project Completeness</strong> (30 pts): Core features + deployment + docs<br>
+                                            <strong>Feature Integration</strong> (25 pts): Use of Week 1-5 features<br>
+                                            <strong>CI/CD & Automation</strong> (15 pts): GitHub Actions + auto-test/deploy<br>
+                                            <strong>Demo Quality</strong> (20 pts): Presentation + live demo + Q&A
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button onclick="completeLesson(5)" class="btn-secondary px-6 py-3 rounded-xl text-sm font-medium">
                                 Mark as Complete
                             </button>
                         </div>
@@ -925,113 +801,113 @@ claude plugins add github:anthropics/code-simplifier
         </section>
 
         <!-- Terminology Section -->
-        <section class="mb-12">
+        <section class="mb-16">
             <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-4">TERMINOLOGY</h2>
             <div class="space-y-3">
                 <details class="card rounded-xl p-4 cursor-pointer">
                     <summary class="font-bold text-white flex items-center justify-between">
-                        Parallel Execution
+                        CI/CD
                         <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                         </svg>
                     </summary>
                     <p class="text-gray-400 text-sm mt-3">
-                        A method of distributed processing by running multiple Claude instances or subagents simultaneously. Running independent tasks in parallel can significantly reduce total completion time.
+                        Continuous Integration / Continuous Deployment. Automates building, testing, and deploying code on every push or PR.
+                        GitHub Actions is a popular CI/CD platform built into GitHub.
                     </p>
                 </details>
                 <details class="card rounded-xl p-4 cursor-pointer">
                     <summary class="font-bold text-white flex items-center justify-between">
-                        ultrathink (Extended Thinking)
+                        GitHub Actions
                         <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                         </svg>
                     </summary>
                     <p class="text-gray-400 text-sm mt-3">
-                        An extended thinking mode enabled in Opus models. Claude thinks longer and deeper before responding. Useful for complex architecture design or difficult debugging. Activate with <code class="bg-dark-800 px-1 rounded text-xs">ultrathink about...</code>.
+                        Workflow automation built into GitHub. Define YAML files in <code class="bg-dark-800 px-1 rounded text-xs">.github/workflows/</code> to run jobs on push, PR, schedule, or manual trigger.
                     </p>
                 </details>
                 <details class="card rounded-xl p-4 cursor-pointer">
                     <summary class="font-bold text-white flex items-center justify-between">
-                        Verification Feedback Loop
+                        Integration Pattern
                         <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                         </svg>
                     </summary>
                     <p class="text-gray-400 text-sm mt-3">
-                        The iterative process of code writing -> verification (build/test) -> feedback -> fix. Automating with PostToolUse hooks ensures real-time quality assurance for Claude-written code.
+                        A repeatable approach to combining multiple Claude Code features (CLAUDE.md, hooks, MCP, subagents, headless) into a cohesive workflow for real-world projects.
                     </p>
                 </details>
                 <details class="card rounded-xl p-4 cursor-pointer">
                     <summary class="font-bold text-white flex items-center justify-between">
-                        Claude Code SDK
+                        Deployment
                         <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                         </svg>
                     </summary>
                     <p class="text-gray-400 text-sm mt-3">
-                        The <code class="bg-dark-800 px-1 rounded text-xs">@anthropic-ai/claude-agent-sdk</code> package. Allows programmatic invocation of Claude Code from JavaScript/TypeScript. Used for automation scripts, CI/CD pipelines, and custom tool development.
+                        Making your application accessible to users. Platforms include Vercel (frontend), Railway (full-stack), npm (CLI tools), and Docker-based hosting for services.
                     </p>
                 </details>
                 <details class="card rounded-xl p-4 cursor-pointer">
                     <summary class="font-bold text-white flex items-center justify-between">
-                        Plan Mode
+                        Season Champion
                         <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                         </svg>
                     </summary>
                     <p class="text-gray-400 text-sm mt-3">
-                        A planning mode entered with <code class="bg-dark-800 px-1 rounded text-xs">Shift+Tab x2</code>. Claude first creates an execution plan and proceeds with work after receiving approval. Prevents unintended changes in complex tasks.
+                        The participant with the highest total score across all 5 weeks. Tiebreaker: Week 5 score, then Week 4, then submission time. Top 3 receive certificates.
                     </p>
                 </details>
             </div>
         </section>
 
-        <!-- Knowledge Check Section (Always Visible Quiz) -->
-        <section class="mb-12">
+        <!-- Quiz Section -->
+        <section class="mb-16">
             <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-6">KNOWLEDGE CHECK</h2>
             <div class="card rounded-2xl p-8">
                 <div class="flex items-center justify-between mb-6">
-                    <h3 class="text-xl font-bold">Week 5 Quiz</h3>
-                    <span class="text-sm text-gray-400">Question <span id="currentQ">1</span>/10</span>
+                    <h3 class="font-bold text-2xl">Quiz: Final Project & Review</h3>
+                    <span id="quizProgress" class="text-sm text-gray-400">Question 1/10</span>
                 </div>
 
                 <div id="quizContainer">
-                    <!-- Questions rendered by JS -->
+                    <!-- Quiz questions will be rendered here -->
                 </div>
 
-                <div id="quizNavigation" class="mt-8 pt-6 border-t border-white/10 flex justify-between">
-                    <button id="prevQ" onclick="prevQuestion()" class="btn-secondary px-6 py-3 rounded-xl font-semibold hidden">
-                        Previous
-                    </button>
-                    <button id="nextQ" onclick="nextQuestion()" class="btn-primary text-dark-900 px-6 py-3 rounded-xl font-semibold ml-auto">
-                        Next
-                    </button>
-                </div>
-
-                <!-- Quiz Complete (shown after finishing) -->
-                <div id="quizComplete" class="hidden text-center py-8">
-                    <div class="text-6xl mb-6">&#127942;</div>
-                    <h3 class="text-3xl font-bold mb-4">Course Complete!</h3>
-                    <p class="text-gray-400 text-lg mb-2">Your Final Quiz Score</p>
-                    <p class="text-5xl font-bold text-accent mb-8"><span id="finalScore">0</span>/10</p>
-                    <button onclick="retakeQuiz()" class="btn-secondary px-6 py-3 rounded-xl font-medium">
-                        Retake Quiz
-                    </button>
+                <div id="quizResults" class="hidden text-center py-8">
+                    <div class="text-6xl mb-4" id="resultEmoji">Congrats!</div>
+                    <h4 class="text-2xl font-bold mb-2">Quiz Complete!</h4>
+                    <p class="text-gray-400 mb-6">You scored <span id="finalScore" class="text-accent font-bold">0</span>/10</p>
+                    <div class="flex gap-4 justify-center">
+                        <button onclick="retakeQuiz()" class="btn-secondary px-6 py-3 rounded-xl text-sm font-medium">
+                            Retake Quiz
+                        </button>
+                        <a id="challengeQuizBtn" href="week5" class="btn-primary px-6 py-3 rounded-xl text-sm font-medium inline-flex items-center gap-2">
+                            Go to Challenge
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                            </svg>
+                        </a>
+                    </div>
                 </div>
             </div>
         </section>
 
-        <!-- CTA Section -->
-        <section class="mb-12">
-            <div class="card rounded-2xl p-8 text-center bg-gradient-to-r from-accent/10 to-amber-500/10">
-                <h2 class="text-2xl font-bold mb-4">Ready for the Final Challenge?</h2>
-                <p class="text-gray-400 mb-6">Complete all lessons and test your knowledge, then tackle the final project!</p>
-                <div class="flex flex-wrap justify-center gap-4">
-                    <a id="challengeBtn" href="week5" class="btn-primary text-dark-900 px-8 py-4 rounded-xl font-bold text-lg inline-block">
-                        Go to Final Challenge
-                    </a>
-                    <a href="/" class="btn-secondary px-8 py-4 rounded-xl font-medium inline-block">
-                        Back to Home
+        <!-- Go to Challenge CTA -->
+        <section class="mb-16">
+            <div class="card rounded-3xl p-8 border-accent/30 bg-gradient-to-br from-accent/5 to-transparent">
+                <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div>
+                        <h3 class="text-2xl font-bold mb-2">Ready for the Final Challenge?</h3>
+                        <p class="text-gray-400">Build your final project integrating all 5 weeks of Claude Code features and present a live demo.</p>
+                    </div>
+                    <a id="challengeBtn" href="week5" class="btn-primary px-8 py-4 rounded-xl font-bold text-lg flex items-center gap-3 whitespace-nowrap">
+                        Start Challenge
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                        </svg>
                     </a>
                 </div>
             </div>
@@ -1060,9 +936,9 @@ claude plugins add github:anthropics/code-simplifier
                     const data = await response.json();
 
                     if (data.status !== 'started') {
-                        // Disable all challenge buttons
                         const challengeButtons = [
                             document.getElementById('challengeNavBtn'),
+                            document.getElementById('challengeQuizBtn'),
                             document.getElementById('challengeBtn')
                         ];
 
@@ -1072,7 +948,6 @@ claude plugins add github:anthropics/code-simplifier
                             }
                         });
 
-                        // Add warning message after main CTA button
                         const mainBtn = document.getElementById('challengeBtn');
                         if (mainBtn && mainBtn.parentElement) {
                             const existingMsg = mainBtn.parentElement.querySelector('.challenge-warning');
@@ -1090,82 +965,65 @@ claude plugins add github:anthropics/code-simplifier
             }
         }
 
-        // State management
-        let completedLessons = new Set();
-        let score = 0;
-        let currentQuestion = 0;
-        let answeredQuestions = [];
-
-        // Quiz questions
+        // Quiz Data
         const quizQuestions = [
             {
-                q: "Which week covered hooks and automation?",
+                question: "Which week introduced CLAUDE.md and Plan Mode?",
                 options: ["Week 1", "Week 2", "Week 3", "Week 4"],
-                correct: 1
+                correct: 0
             },
             {
-                q: "What is the recommended model for quick exploration tasks in CI/CD?",
-                options: ["Opus", "Sonnet", "Haiku", "GPT-4"],
+                question: "What exit code does a PreToolUse hook use to block a tool call?",
+                options: ["Exit code 0", "Exit code 1", "Exit code 2", "Exit code 3"],
                 correct: 2
             },
             {
-                q: "What should CLAUDE.md contain?",
-                options: ["Only API keys", "Project context and conventions", "Only file paths", "Nothing important"],
+                question: "What file defines a discoverable Claude Code skill?",
+                options: ["package.json", "SKILL.md", "skill.config.js", "CLAUDE.md"],
                 correct: 1
             },
             {
-                q: "How do you start a fresh Claude session for demos?",
-                options: ["/reset", "/clear", "/new", "/fresh"],
+                question: "Which subagent type is best for codebase search and file discovery?",
+                options: ["Bash", "Plan", "Explore", "General-Purpose"],
+                correct: 2
+            },
+            {
+                question: "What is the correct way to run Claude Code non-interactively?",
+                options: ["claude --silent", "claude --batch", "claude -p \"prompt\"", "claude --headless"],
+                correct: 2
+            },
+            {
+                question: "In GitHub Actions, which file format defines workflows?",
+                options: ["JSON", "TOML", "YAML", "XML"],
+                correct: 2
+            },
+            {
+                question: "What flag restricts which tools Claude can use in headless mode?",
+                options: ["--limitTools", "--allowedTools", "--tools", "--restrict"],
                 correct: 1
             },
             {
-                q: "What flag restricts available tools in headless mode?",
-                options: ["--tools", "--limit", "--allowedTools", "--restrict"],
-                correct: 2
-            },
-            {
-                q: "Which integration pattern combines research with implementation?",
-                options: ["MCP + Subagents", "Hooks + SDK", "WebFetch + ultrathink + Plan Mode", "All of the above"],
-                correct: 3
-            },
-            {
-                q: "What exit code blocks a tool call in a hook?",
-                options: ["0", "1", "2", "255"],
-                correct: 2
-            },
-            {
-                q: "What is the recommended way to reduce CI costs with Claude?",
-                options: ["Use Opus for everything", "Skip code review", "Use Haiku and limit tools", "Don't use Claude in CI"],
-                correct: 2
-            },
-            {
-                q: "What should you do before a live demo?",
-                options: ["Skip testing", "Prepare fallback recordings", "Use a new project", "Clear CLAUDE.md"],
+                question: "Where do you configure MCP servers for a project?",
+                options: ["package.json", ".claude/settings.local.json", ".env", "tsconfig.json"],
                 correct: 1
             },
             {
-                q: "What is the largest evaluation criterion for the final project?",
-                options: ["Demo Quality", "CI/CD & Automation", "Project Completeness", "Feature Integration"],
+                question: "What is the recommended way to handle sensitive files like .env?",
+                options: ["Add to .gitignore only", "Use a PreToolUse hook to block reads", "Encrypt the file", "Delete before each session"],
+                correct: 1
+            },
+            {
+                question: "How are Season Champion rankings determined?",
+                options: ["Week 5 score only", "Average of best 3 weeks", "Total score across all 5 weeks", "Peer voting"],
                 correct: 2
             }
         ];
 
-        // Initialize on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            loadState();
-            renderQuiz();
-            // Auto-open first incomplete lesson
-            for (let i = 1; i <= 5; i++) {
-                if (!completedLessons.has(i)) {
-                    toggleLesson(i);
-                    break;
-                }
-            }
-            // Check challenge status
-            checkChallengeStatus();
-        });
+        let currentQuestion = 0;
+        let score = 0;
+        let answeredQuestions = new Array(quizQuestions.length).fill(null);
+        let completedLessons = new Set();
 
-        // Load state from sessionStorage
         function loadState() {
             const saved = sessionStorage.getItem('week5_learn_state');
             if (saved) {
@@ -1174,14 +1032,12 @@ claude plugins add github:anthropics/code-simplifier
                 score = state.quizScore || 0;
                 answeredQuestions = state.answeredQuestions || new Array(quizQuestions.length).fill(null);
                 currentQuestion = state.currentQuestion || 0;
-            } else {
-                answeredQuestions = new Array(quizQuestions.length).fill(null);
             }
             updateProgress();
             updateLessonStatuses();
+            renderQuiz();
         }
 
-        // Save state to sessionStorage
         function saveState() {
             const state = {
                 completedLessons: Array.from(completedLessons),
@@ -1192,164 +1048,134 @@ claude plugins add github:anthropics/code-simplifier
             sessionStorage.setItem('week5_learn_state', JSON.stringify(state));
         }
 
-        // Toggle lesson accordion
         function toggleLesson(num) {
-            const card = document.getElementById(`lesson${num}`);
-            const content = card.querySelector('.lesson-content');
-            const chevron = card.querySelector('.chevron');
+            const lesson = document.getElementById(`lesson${num}`);
+            const content = lesson.querySelector('.lesson-content');
+            const chevron = lesson.querySelector('.chevron');
 
-            // Close other lessons
-            document.querySelectorAll('.lesson-card').forEach(c => {
-                if (c.id !== `lesson${num}`) {
-                    c.classList.remove('open');
-                    c.querySelector('.lesson-content').classList.remove('open');
-                    c.querySelector('.chevron').classList.remove('open');
+            document.querySelectorAll('.lesson-card').forEach(card => {
+                if (card.id !== `lesson${num}`) {
+                    card.classList.remove('open');
+                    card.querySelector('.lesson-content').classList.remove('open');
+                    card.querySelector('.chevron').classList.remove('open');
                 }
             });
 
-            // Toggle current lesson
-            card.classList.toggle('open');
+            lesson.classList.toggle('open');
             content.classList.toggle('open');
             chevron.classList.toggle('open');
         }
 
-        // Complete a lesson
         function completeLesson(num) {
             completedLessons.add(num);
-            updateProgress();
-            updateLessonStatuses();
             saveState();
+            updateLessonStatuses();
+            updateProgress();
 
-            // Auto-open next incomplete lesson
-            for (let i = num + 1; i <= 5; i++) {
-                if (!completedLessons.has(i)) {
-                    toggleLesson(i);
-                    return;
-                }
+            if (num < 5) {
+                setTimeout(() => toggleLesson(num + 1), 300);
             }
-            // If all complete, close current
-            toggleLesson(num);
         }
 
-        // Update lesson status badges
         function updateLessonStatuses() {
             for (let i = 1; i <= 5; i++) {
-                const statusEl = document.getElementById(`lesson${i}-status`);
-                if (statusEl) {
-                    if (completedLessons.has(i)) {
-                        statusEl.textContent = 'Completed';
-                        statusEl.classList.remove('bg-gray-700', 'text-gray-400');
-                        statusEl.classList.add('bg-green-500/20', 'text-green-400');
-                    } else {
-                        statusEl.textContent = 'Not Started';
-                        statusEl.classList.remove('bg-green-500/20', 'text-green-400');
-                        statusEl.classList.add('bg-gray-700', 'text-gray-400');
-                    }
+                const status = document.getElementById(`lesson${i}-status`);
+                if (completedLessons.has(i)) {
+                    status.textContent = 'Completed';
+                    status.className = 'text-xs px-3 py-1 rounded-full bg-green-500/20 text-green-400';
                 }
             }
         }
 
-        // Update progress display
         function updateProgress() {
-            const total = 5;
-            const completed = completedLessons.size;
-            document.getElementById('progressText').textContent = `${completed}/${total} Lessons`;
-            document.getElementById('progressFill').style.width = `${(completed / total) * 100}%`;
+            const lessonProgress = completedLessons.size;
+            const progressPercent = (lessonProgress / 5) * 100;
+
+            document.getElementById('progressText').textContent = `${lessonProgress}/5 Lessons`;
+            document.getElementById('progressFill').style.width = `${progressPercent}%`;
             document.getElementById('quizScoreDisplay').textContent = score;
 
-            // Show completion status
-            const completionStatus = document.getElementById('completionStatus');
-            if (completed === total && score >= 7) {
-                completionStatus.classList.remove('hidden');
-            } else {
-                completionStatus.classList.add('hidden');
+            if (lessonProgress === 5 && score >= 7) {
+                document.getElementById('completionStatus').classList.remove('hidden');
             }
         }
 
-        // Render current quiz question
         function renderQuiz() {
             const container = document.getElementById('quizContainer');
-            const q = quizQuestions[currentQuestion];
-            const answered = answeredQuestions[currentQuestion];
+            const results = document.getElementById('quizResults');
 
-            document.getElementById('currentQ').textContent = currentQuestion + 1;
-
-            let html = `<p class="text-lg mb-6 text-white">${q.q}</p><div class="space-y-3">`;
-            q.options.forEach((opt, i) => {
-                let classes = 'quiz-option w-full text-left p-4 rounded-xl border border-white/10';
-                let feedback = '';
-
-                if (answered !== null) {
-                    if (i === q.correct) {
-                        classes += ' correct';
-                        feedback = '<span class="ml-2 text-green-400 text-sm">(Correct)</span>';
-                    } else if (i === answered && answered !== q.correct) {
-                        classes += ' incorrect';
-                        feedback = '<span class="ml-2 text-red-400 text-sm">(Incorrect)</span>';
-                    }
-                } else if (i === answered) {
-                    classes += ' selected';
-                }
-
-                html += `
-                    <button onclick="selectAnswer(${i})" class="${classes}" ${answered !== null ? 'disabled' : ''}>
-                        <span class="inline-block w-6 h-6 rounded-full border border-current text-center text-sm mr-3">${String.fromCharCode(65 + i)}</span>
-                        ${opt}${feedback}
-                    </button>
-                `;
-            });
-            html += '</div>';
-            container.innerHTML = html;
-
-            // Update navigation buttons
-            document.getElementById('prevQ').classList.toggle('hidden', currentQuestion === 0);
-
-            const nextBtn = document.getElementById('nextQ');
-            if (currentQuestion === quizQuestions.length - 1) {
-                nextBtn.textContent = 'Finish';
-            } else {
-                nextBtn.textContent = 'Next';
-            }
-
-            // Show/hide quiz elements based on completion
-            const allAnswered = answeredQuestions.every(a => a !== null);
-            if (allAnswered && currentQuestion === quizQuestions.length - 1) {
-                document.getElementById('quizNavigation').classList.add('hidden');
-                document.getElementById('quizComplete').classList.remove('hidden');
+            if (answeredQuestions.every(a => a !== null)) {
+                container.classList.add('hidden');
+                results.classList.remove('hidden');
                 document.getElementById('finalScore').textContent = score;
-            } else {
-                document.getElementById('quizNavigation').classList.remove('hidden');
-                document.getElementById('quizComplete').classList.add('hidden');
+                document.getElementById('resultEmoji').textContent = score >= 7 ? 'Excellent!' : score >= 5 ? 'Good job!' : 'Keep learning!';
+                return;
             }
+
+            container.classList.remove('hidden');
+            results.classList.add('hidden');
+
+            const q = quizQuestions[currentQuestion];
+            document.getElementById('quizProgress').textContent = `Question ${currentQuestion + 1}/10`;
+
+            container.innerHTML = `
+                <div class="mb-6">
+                    <p class="text-lg font-medium mb-6">${q.question}</p>
+                    <div class="space-y-3">
+                        ${q.options.map((opt, i) => `
+                            <div class="quiz-option card rounded-xl p-4 ${answeredQuestions[currentQuestion] === i ? (i === q.correct ? 'correct' : 'incorrect') : ''}"
+                                 onclick="selectAnswer(${i})" ${answeredQuestions[currentQuestion] !== null ? 'style="pointer-events: none;"' : ''}>
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-lg bg-dark-600 flex items-center justify-center text-sm font-bold">
+                                        ${String.fromCharCode(65 + i)}
+                                    </div>
+                                    <span>${opt}</span>
+                                    ${answeredQuestions[currentQuestion] === i ? (i === q.correct ? '<span class="ml-auto text-green-400">Correct</span>' : '<span class="ml-auto text-red-400">Wrong</span>') : ''}
+                                    ${answeredQuestions[currentQuestion] !== null && i === q.correct && answeredQuestions[currentQuestion] !== i ? '<span class="ml-auto text-green-400">Correct Answer</span>' : ''}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                <div class="flex justify-between items-center">
+                    <button onclick="prevQuestion()" class="btn-secondary px-4 py-2 rounded-xl text-sm" ${currentQuestion === 0 ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>
+                        Previous
+                    </button>
+                    <div class="flex gap-1">
+                        ${quizQuestions.map((_, i) => `
+                            <div class="w-2 h-2 rounded-full ${i === currentQuestion ? 'bg-accent' : answeredQuestions[i] !== null ? (answeredQuestions[i] === quizQuestions[i].correct ? 'bg-green-500' : 'bg-red-500') : 'bg-gray-600'}"></div>
+                        `).join('')}
+                    </div>
+                    <button onclick="nextQuestion()" class="btn-primary px-4 py-2 rounded-xl text-sm" ${answeredQuestions[currentQuestion] === null ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>
+                        ${currentQuestion === quizQuestions.length - 1 ? 'Finish' : 'Next'}
+                    </button>
+                </div>
+            `;
         }
 
-        // Select an answer
-        function selectAnswer(idx) {
+        function selectAnswer(index) {
             if (answeredQuestions[currentQuestion] !== null) return;
 
-            answeredQuestions[currentQuestion] = idx;
-            if (idx === quizQuestions[currentQuestion].correct) {
+            answeredQuestions[currentQuestion] = index;
+            if (index === quizQuestions[currentQuestion].correct) {
                 score++;
             }
-            updateProgress();
             saveState();
+            updateProgress();
             renderQuiz();
         }
 
-        // Navigate to next question
         function nextQuestion() {
+            if (answeredQuestions[currentQuestion] === null) return;
             if (currentQuestion < quizQuestions.length - 1) {
                 currentQuestion++;
                 saveState();
                 renderQuiz();
             } else {
-                // Quiz finished
-                saveState();
                 renderQuiz();
             }
         }
 
-        // Navigate to previous question
         function prevQuestion() {
             if (currentQuestion > 0) {
                 currentQuestion--;
@@ -1358,15 +1184,25 @@ claude plugins add github:anthropics/code-simplifier
             }
         }
 
-        // Retake quiz
         function retakeQuiz() {
-            answeredQuestions = new Array(quizQuestions.length).fill(null);
             currentQuestion = 0;
             score = 0;
-            updateProgress();
+            answeredQuestions = new Array(quizQuestions.length).fill(null);
             saveState();
+            updateProgress();
             renderQuiz();
         }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadState();
+            for (let i = 1; i <= 5; i++) {
+                if (!completedLessons.has(i)) {
+                    toggleLesson(i);
+                    break;
+                }
+            }
+            checkChallengeStatus();
+        });
     </script>
 </body>
 </html>
