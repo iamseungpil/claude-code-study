@@ -287,22 +287,33 @@ Evaluate based on code review. DO NOT run any commands.
 ## Rubric (MUST follow this scoring criteria strictly)
 {rubric_content}
 
-## IMPORTANT Instructions
+## CRITICAL INSTRUCTIONS
 1. Read the rubric carefully - it contains ALL scoring criteria
 2. Score EACH category according to the rubric breakdown
 3. Maximum rubric score is {max_rubric_score} points for Week {week}
 4. The rubric file contains JSON output examples - follow that format exactly
 5. feedback should be 2-3 sentences in Korean
 
-## Output Format
-Return ONLY valid JSON (no markdown, no explanation):
+## OUTPUT FORMAT REQUIREMENT
+YOU MUST OUTPUT ONLY A VALID JSON OBJECT. NO EXPLANATIONS, NO MARKDOWN, NO TEXT BEFORE OR AFTER THE JSON.
+
+Start your response with {{ and end with }}. Do not include any other text.
+
+Required JSON structure:
 {{
-    "rubric_score": <0-{max_rubric_score}>,
-    "breakdown": {{ /* categories from rubric */ }},
+    "rubric_score": <number 0-{max_rubric_score}>,
+    "breakdown": {{
+        "stage_1": <number>,
+        "stage_2": <number>,
+        "stage_3": <number>,
+        "documentation": <number>
+    }},
     "feedback": "<2-3 sentence summary in Korean>",
-    "strengths": ["<strength 1>", "<strength 2>"],
+    "strengths": ["<strength 1>", "<strength 2>", "<strength 3>"],
     "improvements": ["<improvement 1>", "<improvement 2>"]
-}}"""
+}}
+
+OUTPUT ONLY THE JSON OBJECT ABOVE. NO OTHER TEXT."""
 
     # Run Claude CLI
     try:
