@@ -294,26 +294,34 @@ Evaluate based on code review. DO NOT run any commands.
 4. The rubric file contains JSON output examples - follow that format exactly
 5. feedback should be 2-3 sentences in Korean
 
-## OUTPUT FORMAT REQUIREMENT
-YOU MUST OUTPUT ONLY A VALID JSON OBJECT. NO EXPLANATIONS, NO MARKDOWN, NO TEXT BEFORE OR AFTER THE JSON.
+## OUTPUT FORMAT REQUIREMENT - CRITICAL - READ CAREFULLY
 
-Start your response with {{ and end with }}. Do not include any other text.
+YOU MUST RESPOND WITH ONLY A VALID JSON OBJECT.
 
-Required JSON structure:
+FORBIDDEN:
+- NO explanations before the JSON
+- NO "Let me analyze..." or "I need to evaluate..." text
+- NO markdown code blocks (no ```)
+- NO text after the JSON
+
+REQUIRED:
+- Start immediately with {{
+- End with }}
+- Follow the EXACT field names from the rubric's "Output JSON Format" section
+- Use the breakdown field names from the rubric (e.g., stage_1_security_hook for Week 2, NOT stage_1)
+
+EXAMPLE OUTPUT (check rubric for exact breakdown field names):
 {{
     "rubric_score": <number 0-{max_rubric_score}>,
     "breakdown": {{
-        "stage_1": <number>,
-        "stage_2": <number>,
-        "stage_3": <number>,
-        "documentation": <number>
+        /* USE EXACT FIELD NAMES FROM RUBRIC */
     }},
     "feedback": "<2-3 sentence summary in Korean>",
     "strengths": ["<strength 1>", "<strength 2>", "<strength 3>"],
     "improvements": ["<improvement 1>", "<improvement 2>"]
 }}
 
-OUTPUT ONLY THE JSON OBJECT ABOVE. NO OTHER TEXT."""
+DO NOT WRITE ANYTHING EXCEPT THE JSON OBJECT. START WITH {{ IMMEDIATELY."""
 
     # Run Claude CLI
     try:
