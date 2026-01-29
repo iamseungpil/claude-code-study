@@ -188,19 +188,19 @@ async def lifespan(app: FastAPI):
     # Initialize participants.json if not exists
     participants_file = DATA_DIR / "participants.json"
     if not participants_file.exists():
-        with open(participants_file, 'w') as f:
+        with open(participants_file, 'w', encoding='utf-8') as f:
             json.dump({"participants": []}, f)
 
     # Initialize users.json if not exists
     users_file = DATA_DIR / "users.json"
     if not users_file.exists():
-        with open(users_file, 'w') as f:
+        with open(users_file, 'w', encoding='utf-8') as f:
             json.dump({"users": []}, f)
 
     # Initialize challenges.json if not exists
     challenges_file = DATA_DIR / "challenges.json"
     if not challenges_file.exists():
-        with open(challenges_file, 'w') as f:
+        with open(challenges_file, 'w', encoding='utf-8') as f:
             json.dump({
                 f"week{i}": {"status": "not_started", "start_time": None, "end_time": None}
                 for i in range(1, 6)
@@ -266,7 +266,7 @@ def load_challenges() -> dict:
     """Load challenges data from JSON file."""
     challenges_file = DATA_DIR / "challenges.json"
     try:
-        with open(challenges_file) as f:
+        with open(challenges_file, encoding='utf-8') as f:
             return json.load(f)
     except (FileNotFoundError, json.JSONDecodeError):
         return {
@@ -278,7 +278,7 @@ def load_challenges() -> dict:
 def save_challenges(challenges: dict):
     """Save challenges data to JSON file."""
     challenges_file = DATA_DIR / "challenges.json"
-    with open(challenges_file, 'w') as f:
+    with open(challenges_file, 'w', encoding='utf-8') as f:
         json.dump(challenges, f, indent=2, ensure_ascii=False)
 
 
@@ -387,7 +387,7 @@ async def register_user(data: UserRegister):
     users_file = DATA_DIR / "users.json"
 
     try:
-        with open(users_file) as f:
+        with open(users_file, encoding='utf-8') as f:
             db = json.load(f)
     except (FileNotFoundError, json.JSONDecodeError):
         db = {"users": []}
@@ -421,7 +421,7 @@ async def register_user(data: UserRegister):
         "registered_at": datetime.now().isoformat()
     })
 
-    with open(users_file, 'w') as f:
+    with open(users_file, 'w', encoding='utf-8') as f:
         json.dump(db, f, indent=2, ensure_ascii=False)
 
     # Create token
@@ -448,7 +448,7 @@ async def login_user(data: UserLogin):
     users_file = DATA_DIR / "users.json"
 
     try:
-        with open(users_file) as f:
+        with open(users_file, encoding='utf-8') as f:
             db = json.load(f)
     except (FileNotFoundError, json.JSONDecodeError):
         raise HTTPException(401, "Invalid credentials")
@@ -496,7 +496,7 @@ async def get_current_profile(current_user: Optional[dict] = Depends(get_current
     users_file = DATA_DIR / "users.json"
 
     try:
-        with open(users_file) as f:
+        with open(users_file, encoding='utf-8') as f:
             db = json.load(f)
     except (FileNotFoundError, json.JSONDecodeError):
         raise HTTPException(401, "Not authenticated")
@@ -524,7 +524,7 @@ async def register_participant(data: ParticipantRegister):
     """Register a new participant."""
     participants_file = DATA_DIR / "participants.json"
     
-    with open(participants_file) as f:
+    with open(participants_file, encoding='utf-8') as f:
         db = json.load(f)
     
     # Check duplicate
@@ -540,7 +540,7 @@ async def register_participant(data: ParticipantRegister):
         "scores": {}
     })
     
-    with open(participants_file, 'w') as f:
+    with open(participants_file, 'w', encoding='utf-8') as f:
         json.dump(db, f, indent=2, ensure_ascii=False)
     
     return {"status": "registered", "participant_id": data.participant_id}
@@ -551,7 +551,7 @@ async def list_participants():
     """List all participants."""
     participants_file = DATA_DIR / "participants.json"
     
-    with open(participants_file) as f:
+    with open(participants_file, encoding='utf-8') as f:
         db = json.load(f)
     
     return db["participants"]
@@ -670,7 +670,7 @@ async def admin_list_users(admin: dict = Depends(require_admin)):
     users_file = DATA_DIR / "users.json"
 
     try:
-        with open(users_file) as f:
+        with open(users_file, encoding='utf-8') as f:
             db = json.load(f)
     except (FileNotFoundError, json.JSONDecodeError):
         return []
@@ -696,7 +696,7 @@ async def admin_delete_user(user_id: str, admin: dict = Depends(require_admin)):
     users_file = DATA_DIR / "users.json"
 
     try:
-        with open(users_file) as f:
+        with open(users_file, encoding='utf-8') as f:
             db = json.load(f)
     except (FileNotFoundError, json.JSONDecodeError):
         raise HTTPException(404, "User not found")
@@ -712,7 +712,7 @@ async def admin_delete_user(user_id: str, admin: dict = Depends(require_admin)):
     if len(db["users"]) == original_len:
         raise HTTPException(404, "User not found")
 
-    with open(users_file, 'w') as f:
+    with open(users_file, 'w', encoding='utf-8') as f:
         json.dump(db, f, indent=2, ensure_ascii=False)
 
     return {"status": "deleted", "user_id": user_id}
@@ -1108,7 +1108,7 @@ async def submit_solution(
 
     metadata["status"] = "cloned"
 
-    with open(metadata_file, 'w') as f:
+    with open(metadata_file, 'w', encoding='utf-8') as f:
         json.dump(metadata, f, indent=2)
 
     # Save to SQLite database
@@ -1130,7 +1130,7 @@ async def submit_solution(
     # Mark evaluation as "evaluating" before starting (so polling knows to wait)
     eval_file = EVALUATIONS_DIR / f"week{data.week}" / f"{participant_id}.json"
     eval_file.parent.mkdir(parents=True, exist_ok=True)
-    with open(eval_file, 'w') as f:
+    with open(eval_file, 'w', encoding='utf-8') as f:
         json.dump({
             "participant": participant_id,
             "week": data.week,
@@ -1462,7 +1462,7 @@ async def github_webhook(request: Request):
 
     # Create restart flag file
     try:
-        with open(RESTART_FLAG_FILE, 'w') as f:
+        with open(RESTART_FLAG_FILE, 'w', encoding='utf-8') as f:
             f.write(datetime.now().isoformat())
         logging.info(f"Restart flag created: {RESTART_FLAG_FILE}")
     except Exception as e:
