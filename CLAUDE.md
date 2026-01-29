@@ -227,6 +227,16 @@ cloudflared tunnel --url http://localhost:8003
 - **Solution**: Changed all JavaScript redirects from `'index.html'` to `'/'`
 - **Files Modified**: All `week*.html` files
 
+### Issue 12: Windows Encoding Error in Evaluation (2026-01-29)
+- **Cause**: `evaluator.py` used `open()` without `encoding='utf-8'` parameter
+  - Windows defaults to cp949 encoding, which can't encode Unicode characters like em dash (—)
+  - Korean text and special characters in evaluation feedback caused encoding errors
+- **Symptom**: `'cp949' codec can't encode character '\u2014' in position 241: illegal multibyte sequence`
+- **Solution**: Added `encoding='utf-8'` to ALL `open()` calls in evaluator.py (8 locations)
+- **File Modified**: `backend/evaluator.py`
+  - Lines 110, 134, 507, 518, 537, 618, 647, 662
+- **Lesson**: Always explicitly specify encoding in Python file operations on Windows
+
 ### Cloudflare Pages Configuration (IMPORTANT)
 - **Build output directory**: `frontend`
 - **Files served at**: Root paths (`/index.html`, `/week1.html`, etc.)
