@@ -247,6 +247,19 @@ cloudflared tunnel --url http://localhost:8003
   1. Added `encoding='utf-8'` to all 27 `open()` calls in server.py
   2. Converted existing cp949-encoded JSON files to UTF-8
 - **File Modified**: `backend/server.py`
+
+### Issue 14: Claude CLI Returning Text Instead of JSON (2026-01-29)
+- **Cause**: Evaluation prompt was not explicit enough about requiring JSON-only output
+  - Claude CLI with `--output-format json` returned markdown text in the result field
+  - Parser expected JSON but received: "Looking at the submission, I need to evaluate..."
+- **Symptom**: `Expecting property name enclosed in double quotes: line 1 column 3 (char 2)`
+  - sundong's Week 1 submission evaluation failed with JSON parse error
+- **Solution**: Enhanced prompt with explicit JSON-only requirements
+  - Added "YOU MUST OUTPUT ONLY A VALID JSON OBJECT. NO EXPLANATIONS, NO MARKDOWN"
+  - Specified exact JSON structure with all required fields
+  - Added "OUTPUT ONLY THE JSON OBJECT ABOVE. NO OTHER TEXT" at end of prompt
+- **File Modified**: `backend/evaluator.py` (lines 272-305)
+- **Commit**: 335efa1
   - All challenges, users, participants, metadata, evaluation file operations
 - **Lesson**: Encoding must be consistent - both read AND write operations need UTF-8
 - **Fix Applied**: Used `sed` to batch update all file operations, then manually converted existing files
