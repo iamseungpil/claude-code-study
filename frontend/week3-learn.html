@@ -201,13 +201,13 @@
             <div class="card rounded-2xl p-6 max-w-md">
                 <div class="flex items-center justify-between mb-3">
                     <span class="text-sm font-medium text-gray-400">Learning Progress</span>
-                    <span id="progressText" class="text-sm font-bold text-accent">0/5 Lessons</span>
+                    <span id="progressText" class="text-sm font-bold text-accent">0/6 Lessons</span>
                 </div>
                 <div class="progress-bar h-2">
                     <div id="progressFill" class="progress-fill" style="width: 0%"></div>
                 </div>
                 <div class="mt-3 flex items-center justify-between text-xs text-gray-500">
-                    <span>Quiz Score: <span id="quizScoreDisplay" class="text-accent font-bold">0</span>/10</span>
+                    <span>Quiz Score: <span id="quizScoreDisplay" class="text-accent font-bold">0</span>/12</span>
                     <span id="completionStatus" class="hidden text-green-400">Ready for Challenge!</span>
                 </div>
             </div>
@@ -668,6 +668,138 @@ For each function in the specified file:
                         </div>
                     </div>
                 </div>
+
+                <!-- Lesson 6: Skill Design Patterns -->
+                <div id="lesson6" class="lesson-card rounded-2xl overflow-hidden">
+                    <div class="lesson-header p-6 flex items-center justify-between" onclick="toggleLesson(6)">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-cyan-500/20 flex items-center justify-center text-2xl">6</div>
+                            <div>
+                                <h3 class="font-bold text-xl">Skill Design Patterns</h3>
+                                <p class="text-gray-400 text-sm">5 proven patterns for building effective skills</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span id="lesson6-status" class="text-xs px-3 py-1 rounded-full bg-gray-700 text-gray-400">Not Started</span>
+                            <svg class="chevron w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="lesson-content">
+                        <div class="px-6 pb-6 space-y-6">
+                            <div class="tip-box">
+                                <p class="text-pink-200 font-medium">Choosing Your Approach</p>
+                                <p class="text-sm mt-1 text-gray-300">There are two ways to start building a skill: <strong class="text-white">Problem-first</strong> (identify a workflow pain point, then design the skill) vs <strong class="text-white">Tool-first</strong> (explore available MCP tools, then find useful combinations). Problem-first is recommended for most teams.</p>
+                            </div>
+
+                            <h4 class="font-bold text-lg text-accent">Pattern 1: Sequential Workflow Orchestration</h4>
+                            <p class="text-gray-300">Chain multiple steps in a fixed order. Each step's output feeds the next.</p>
+                            <div class="code-block">
+                                <div class="code-block-header">SKILL.md — sequential pipeline</div>
+                                <pre><code class="text-green-400 text-sm"><span class="code-comment"># Sequential Workflow: Code Review Pipeline</span>
+
+<span class="code-comment">## Steps (execute in order)</span>
+1. Run linter on changed files  → collect warnings
+2. Run tests                    → collect failures
+3. Analyze code complexity      → flag hotspots
+4. Generate review summary      → combine all results
+
+<span class="code-comment">## Rules</span>
+- Stop pipeline if step 2 has critical failures
+- Pass each step's output as context to the next</code></pre>
+                            </div>
+
+                            <h4 class="font-bold text-lg mt-6 text-accent">Pattern 2: Multi-MCP Coordination</h4>
+                            <p class="text-gray-300">Combine tools from multiple MCP servers to accomplish a single task.</p>
+                            <div class="code-block">
+                                <div class="code-block-header">SKILL.md — multi-MCP</div>
+                                <pre><code class="text-green-400 text-sm"><span class="code-comment"># Multi-MCP: Research Assistant</span>
+
+<span class="code-comment">## MCP Servers Used</span>
+- <span class="code-keyword">semantic-scholar</span>  → search papers
+- <span class="code-keyword">filesystem</span>         → save results
+- <span class="code-keyword">slack</span>              → post summary
+
+<span class="code-comment">## Workflow</span>
+1. Query Semantic Scholar for recent papers on topic
+2. Filter by citation count &gt; 10
+3. Write markdown summary to ./output/
+4. Post digest to #research Slack channel</code></pre>
+                            </div>
+
+                            <h4 class="font-bold text-lg mt-6 text-accent">Pattern 3: Iterative Refinement</h4>
+                            <p class="text-gray-300">Repeat a step until a quality threshold is met (or a max iteration count).</p>
+                            <div class="code-block">
+                                <div class="code-block-header">SKILL.md — iterative refinement</div>
+                                <pre><code class="text-green-400 text-sm"><span class="code-comment"># Iterative Refinement: Doc Writer</span>
+
+<span class="code-comment">## Process</span>
+1. Generate initial draft
+2. Self-review against checklist:
+   - Accuracy, clarity, completeness
+3. If score &lt; 8/10 → revise and go to step 2
+4. Max 3 iterations, then output best version
+
+<span class="code-comment">## Checklist</span>
+- [ ] All parameters documented
+- [ ] Examples included
+- [ ] No jargon without definition</code></pre>
+                            </div>
+
+                            <h4 class="font-bold text-lg mt-6 text-accent">Pattern 4: Context-aware Tool Selection</h4>
+                            <p class="text-gray-300">Choose different tools or paths based on the input context.</p>
+                            <div class="code-block">
+                                <div class="code-block-header">SKILL.md — context-aware</div>
+                                <pre><code class="text-green-400 text-sm"><span class="code-comment"># Context-aware: Smart Formatter</span>
+
+<span class="code-comment">## Decision Logic</span>
+- If input is <span class="code-keyword">.py</span>  → use Black formatter
+- If input is <span class="code-keyword">.ts</span>  → use Prettier
+- If input is <span class="code-keyword">.md</span>  → use markdownlint
+- If input is <span class="code-keyword">.json</span> → validate schema + format
+
+<span class="code-comment">## Fallback</span>
+- Unknown file type → report unsupported, list available types</code></pre>
+                            </div>
+
+                            <h4 class="font-bold text-lg mt-6 text-accent">Pattern 5: Domain-specific Intelligence</h4>
+                            <p class="text-gray-300">Embed expert knowledge and heuristics directly in the skill instructions.</p>
+                            <div class="code-block">
+                                <div class="code-block-header">SKILL.md — domain expert</div>
+                                <pre><code class="text-green-400 text-sm"><span class="code-comment"># Domain Expert: Security Auditor</span>
+
+<span class="code-comment">## Embedded Knowledge</span>
+- OWASP Top 10 checklist (2025 edition)
+- Common CVE patterns for Node.js apps
+- Company-specific auth requirements
+
+<span class="code-comment">## Process</span>
+1. Scan codebase for vulnerability patterns
+2. Cross-reference with internal security policy
+3. Output: severity-ranked findings with fix suggestions
+
+<span class="code-comment">## Key Heuristic</span>
+- Any user input reaching SQL/shell without sanitization = CRITICAL</code></pre>
+                            </div>
+
+                            <div class="warning-box mt-6">
+                                <p class="text-amber-200 font-medium">When to Use Each Pattern</p>
+                                <div class="text-sm mt-2 text-gray-300 space-y-1">
+                                    <p><strong class="text-white">Sequential</strong> — deterministic multi-step tasks (CI, deploy, onboarding)</p>
+                                    <p><strong class="text-white">Multi-MCP</strong> — tasks spanning multiple services (research, reporting)</p>
+                                    <p><strong class="text-white">Iterative</strong> — quality-sensitive outputs (writing, code gen)</p>
+                                    <p><strong class="text-white">Context-aware</strong> — input varies widely (file types, languages)</p>
+                                    <p><strong class="text-white">Domain-specific</strong> — deep expertise required (security, compliance)</p>
+                                </div>
+                            </div>
+
+                            <button onclick="completeLesson(6)" class="btn-secondary px-6 py-3 rounded-xl text-sm font-medium">
+                                Mark as Complete
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -759,6 +891,36 @@ For each function in the specified file:
                         Use <code class="bg-dark-800 px-1 rounded text-xs">--model</code> flag or <code class="bg-dark-800 px-1 rounded text-xs">/model</code> command to switch models based on task complexity.
                     </p>
                 </details>
+                <details class="card rounded-xl p-4 cursor-pointer">
+                    <summary class="font-bold text-white flex items-center justify-between">
+                        Progressive Disclosure
+                        <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </summary>
+                    <p class="text-gray-400 text-sm mt-3">
+                        A 3-stage skill loading strategy: <strong class="text-white">Stage 1</strong> loads a short summary,
+                        <strong class="text-white">Stage 2</strong> loads full instructions on invocation,
+                        <strong class="text-white">Stage 3</strong> loads external resources on demand.
+                        Reduces context window usage while keeping skills discoverable.
+                    </p>
+                </details>
+                <details class="card rounded-xl p-4 cursor-pointer">
+                    <summary class="font-bold text-white flex items-center justify-between">
+                        Skill Patterns
+                        <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </summary>
+                    <p class="text-gray-400 text-sm mt-3">
+                        Five proven design patterns for building effective skills:
+                        <strong class="text-white">Sequential Workflow Orchestration</strong> (ordered multi-step),
+                        <strong class="text-white">Multi-MCP Coordination</strong> (cross-service),
+                        <strong class="text-white">Iterative Refinement</strong> (quality loop),
+                        <strong class="text-white">Context-aware Tool Selection</strong> (conditional paths),
+                        <strong class="text-white">Domain-specific Intelligence</strong> (embedded expertise).
+                    </p>
+                </details>
             </div>
         </section>
 
@@ -768,7 +930,7 @@ For each function in the specified file:
             <div class="card rounded-2xl p-8">
                 <div class="flex items-center justify-between mb-6">
                     <h3 class="font-bold text-2xl">Quiz: Skills & MCP Basics</h3>
-                    <span id="quizProgress" class="text-sm text-gray-400">Question 1/10</span>
+                    <span id="quizProgress" class="text-sm text-gray-400">Question 1/12</span>
                 </div>
 
                 <div id="quizContainer">
@@ -778,7 +940,7 @@ For each function in the specified file:
                 <div id="quizResults" class="hidden text-center py-8">
                     <div class="text-6xl mb-4" id="resultEmoji">Congrats!</div>
                     <h4 class="text-2xl font-bold mb-2">Quiz Complete!</h4>
-                    <p class="text-gray-400 mb-6">You scored <span id="finalScore" class="text-accent font-bold">0</span>/10</p>
+                    <p class="text-gray-400 mb-6">You scored <span id="finalScore" class="text-accent font-bold">0</span>/12</p>
                     <div class="flex gap-4 justify-center">
                         <button onclick="retakeQuiz()" class="btn-secondary px-6 py-3 rounded-xl text-sm font-medium">
                             Retake Quiz
@@ -917,6 +1079,16 @@ For each function in the specified file:
                 question: "Which command adds an MCP server to Claude Code?",
                 options: ["claude install mcp", "claude mcp add", "claude add-server", "claude mcp install"],
                 correct: 1
+            },
+            {
+                question: "Which skill design pattern repeats a step until a quality threshold is met?",
+                options: ["Sequential Workflow", "Multi-MCP Coordination", "Iterative Refinement", "Context-aware Tool Selection"],
+                correct: 2
+            },
+            {
+                question: "What are the two approaches to start building a skill?",
+                options: ["Top-down vs Bottom-up", "Problem-first vs Tool-first", "Code-first vs Design-first", "Manual vs Automated"],
+                correct: 1
             }
         ];
 
@@ -976,13 +1148,13 @@ For each function in the specified file:
             updateLessonStatuses();
             updateProgress();
 
-            if (num < 5) {
+            if (num < 6) {
                 setTimeout(() => toggleLesson(num + 1), 300);
             }
         }
 
         function updateLessonStatuses() {
-            for (let i = 1; i <= 5; i++) {
+            for (let i = 1; i <= 6; i++) {
                 const status = document.getElementById(`lesson${i}-status`);
                 if (completedLessons.has(i)) {
                     status.textContent = 'Completed';
@@ -993,13 +1165,13 @@ For each function in the specified file:
 
         function updateProgress() {
             const lessonProgress = completedLessons.size;
-            const progressPercent = (lessonProgress / 5) * 100;
+            const progressPercent = (lessonProgress / 6) * 100;
 
-            document.getElementById('progressText').textContent = `${lessonProgress}/5 Lessons`;
+            document.getElementById('progressText').textContent = `${lessonProgress}/6 Lessons`;
             document.getElementById('progressFill').style.width = `${progressPercent}%`;
             document.getElementById('quizScoreDisplay').textContent = score;
 
-            if (lessonProgress === 5 && score >= 7) {
+            if (lessonProgress === 6 && score >= 7) {
                 document.getElementById('completionStatus').classList.remove('hidden');
             }
         }
@@ -1013,7 +1185,7 @@ For each function in the specified file:
                 container.classList.add('hidden');
                 results.classList.remove('hidden');
                 document.getElementById('finalScore').textContent = score;
-                document.getElementById('resultEmoji').textContent = score >= 7 ? 'Excellent!' : score >= 5 ? 'Good job!' : 'Keep learning!';
+                document.getElementById('resultEmoji').textContent = score >= 9 ? 'Excellent!' : score >= 6 ? 'Good job!' : 'Keep learning!';
                 return;
             }
 
@@ -1021,7 +1193,7 @@ For each function in the specified file:
             results.classList.add('hidden');
 
             const q = quizQuestions[currentQuestion];
-            document.getElementById('quizProgress').textContent = `Question ${currentQuestion + 1}/10`;
+            document.getElementById('quizProgress').textContent = `Question ${currentQuestion + 1}/12`;
 
             container.innerHTML = `
                 <div class="mb-6">
@@ -1101,7 +1273,7 @@ For each function in the specified file:
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', () => {
             loadState();
-            for (let i = 1; i <= 5; i++) {
+            for (let i = 1; i <= 6; i++) {
                 if (!completedLessons.has(i)) {
                     toggleLesson(i);
                     break;
