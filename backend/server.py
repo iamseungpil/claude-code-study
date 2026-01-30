@@ -18,11 +18,10 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Optional
 from contextlib import asynccontextmanager
-import asyncio
-from concurrent.futures import ThreadPoolExecutor
 
 # Load .env file if it exists
 from dotenv import load_dotenv
+
 load_dotenv()
 # Also load .env.webhook for webhook secrets (can be tracked in git)
 load_dotenv(Path(__file__).parent / ".env.webhook")
@@ -48,7 +47,8 @@ from database import (
     get_submission_count as db_get_submission_count,
     get_week_leaderboard as db_get_week_leaderboard,
     get_season_leaderboard as db_get_season_leaderboard,
-    get_time_rank_by_elapsed
+    get_time_rank_by_elapsed,
+    update_submission_evaluation,
 )
 
 # JWT Configuration
@@ -57,7 +57,9 @@ if not JWT_SECRET:
     if os.environ.get("ENVIRONMENT", "development").lower() == "production":
         raise RuntimeError("JWT_SECRET environment variable must be set in production")
     JWT_SECRET = secrets.token_hex(32)
-    logging.warning("Using auto-generated JWT_SECRET. Set JWT_SECRET env var for production.")
+    logging.warning(
+        "Using auto-generated JWT_SECRET. Set JWT_SECRET env var for production."
+    )
 JWT_ALGORITHM = "HS256"
 JWT_EXPIRATION_HOURS = 24
 
@@ -66,7 +68,7 @@ GITHUB_WEBHOOK_SECRET = os.environ.get("GITHUB_WEBHOOK_SECRET", "")
 if not GITHUB_WEBHOOK_SECRET:
     logging.warning("GITHUB_WEBHOOK_SECRET not set. Webhook verification disabled.")
 
-# Restart flag file for watcher.py
+# Restart flag file for deploy watcher
 RESTART_FLAG_FILE = Path(__file__).parent / "restart_flag.txt"
 
 # Configuration
@@ -80,15 +82,26 @@ FRONTEND_DIR = BASE_DIR / "frontend"
 SERVE_STATIC = os.environ.get("SERVE_STATIC", "true").lower() == "true"
 
 # Validation patterns
-PARTICIPANT_ID_PATTERN = re.compile(r'^[a-zA-Z0-9_-]{3,30}$')
-GITHUB_URL_PATTERN = re.compile(r'^https://github\.com/[a-zA-Z0-9_-]+/[a-zA-Z0-9_.-]+/?$')
-NAME_PATTERN = re.compile(r'^[a-zA-Z가-힣\s]{1,50}$')
+PARTICIPANT_ID_PATTERN = re.compile(r"^[a-zA-Z0-9_-]{3,30}$")
+GITHUB_URL_PATTERN = re.compile(
+    r"^https://github\.com/[a-zA-Z0-9_-]+/[a-zA-Z0-9_.-]+/?$"
+)
+NAME_PATTERN = re.compile(r"^[a-zA-Z가-힣\s]{1,50}$")
+
+# Admin configuration
+# Comma-separated list of user_ids that should be treated as admins.
+ADMIN_USER_IDS = {
+    u.strip().lower()
+    for u in os.environ.get("ADMIN_USER_IDS", "iamseungpil").split(",")
+    if u.strip()
+}
+
 
 # Pydantic Models
 def validate_week_range(v: int) -> int:
     """Shared week validation (1-5)."""
     if not 1 <= v <= 5:
-        raise ValueError('Week must be between 1 and 5')
+        raise ValueError("Week must be between 1 and 5")
     return v
 
 
@@ -96,16 +109,16 @@ class SubmissionRequest(BaseModel):
     week: int
     github_url: str
 
-    @field_validator('week')
+    @field_validator("week")
     @classmethod
     def validate_week(cls, v):
         return validate_week_range(v)
 
-    @field_validator('github_url')
+    @field_validator("github_url")
     @classmethod
     def validate_github_url(cls, v):
         if not GITHUB_URL_PATTERN.match(v):
-            raise ValueError('Invalid GitHub URL format')
+            raise ValueError("Invalid GitHub URL format")
         return v
 
 
@@ -114,11 +127,13 @@ class ParticipantRegister(BaseModel):
     name: str
     github_username: Optional[str] = None
 
-    @field_validator('participant_id')
+    @field_validator("participant_id")
     @classmethod
     def validate_participant_id(cls, v):
         if not PARTICIPANT_ID_PATTERN.match(v):
-            raise ValueError('Participant ID must be 3-30 characters (letters, numbers, _, -)')
+            raise ValueError(
+                "Participant ID must be 3-30 characters (letters, numbers, _, -)"
+            )
         return v
 
 
@@ -126,7 +141,7 @@ class StartChallenge(BaseModel):
     participant_id: str
     week: int
 
-    @field_validator('week')
+    @field_validator("week")
     @classmethod
     def validate_week(cls, v):
         return validate_week_range(v)
@@ -136,10 +151,11 @@ class EndChallenge(BaseModel):
     participant_id: str
     week: int
 
-    @field_validator('week')
+    @field_validator("week")
     @classmethod
     def validate_week(cls, v):
         return validate_week_range(v)
+
 
 # Authentication Models
 class UserRegister(BaseModel):
@@ -148,30 +164,41 @@ class UserRegister(BaseModel):
     last_name: str
     password: str
 
-    @field_validator('user_id')
+    @field_validator("user_id")
     @classmethod
     def validate_user_id(cls, v):
         if not PARTICIPANT_ID_PATTERN.match(v):
-            raise ValueError('User ID must be 3-30 characters (letters, numbers, _, -)')
+            raise ValueError("User ID must be 3-30 characters (letters, numbers, _, -)")
         return v
 
-    @field_validator('first_name', 'last_name')
+    @field_validator("first_name", "last_name")
     @classmethod
     def validate_name(cls, v):
         if not NAME_PATTERN.match(v):
-            raise ValueError('Name must contain only letters and spaces (1-50 characters)')
+            raise ValueError(
+                "Name must contain only letters and spaces (1-50 characters)"
+            )
         return v.strip()
 
-    @field_validator('password')
+    @field_validator("password")
     @classmethod
     def validate_password(cls, v):
         if len(v) < 4:
-            raise ValueError('Password must be at least 4 characters')
+            raise ValueError("Password must be at least 4 characters")
         return v
+
 
 class UserLogin(BaseModel):
     user_id: str
     password: str
+
+
+class AdminEvaluationRequest(BaseModel):
+    rubric_score: int
+    submission_number: int
+    feedback: Optional[str] = None
+    strengths: Optional[list[str]] = None
+    improvements: Optional[list[str]] = None
 
 
 @asynccontextmanager
@@ -188,23 +215,31 @@ async def lifespan(app: FastAPI):
     # Initialize participants.json if not exists
     participants_file = DATA_DIR / "participants.json"
     if not participants_file.exists():
-        with open(participants_file, 'w', encoding='utf-8') as f:
+        with open(participants_file, "w", encoding="utf-8") as f:
             json.dump({"participants": []}, f)
 
     # Initialize users.json if not exists
     users_file = DATA_DIR / "users.json"
     if not users_file.exists():
-        with open(users_file, 'w', encoding='utf-8') as f:
+        with open(users_file, "w", encoding="utf-8") as f:
             json.dump({"users": []}, f)
 
     # Initialize challenges.json if not exists
     challenges_file = DATA_DIR / "challenges.json"
     if not challenges_file.exists():
-        with open(challenges_file, 'w', encoding='utf-8') as f:
-            json.dump({
-                f"week{i}": {"status": "not_started", "start_time": None, "end_time": None}
-                for i in range(1, 6)
-            }, f, indent=2)
+        with open(challenges_file, "w", encoding="utf-8") as f:
+            json.dump(
+                {
+                    f"week{i}": {
+                        "status": "not_started",
+                        "start_time": None,
+                        "end_time": None,
+                    }
+                    for i in range(1, 6)
+                },
+                f,
+                indent=2,
+            )
 
     yield
     # Shutdown: nothing to clean up
@@ -214,7 +249,7 @@ app = FastAPI(
     title="Claude Code Study API",
     description="API for submission and leaderboard",
     version="1.0.0",
-    lifespan=lifespan
+    lifespan=lifespan,
 )
 
 # CORS 설정 (환경변수로 유연하게 관리)
@@ -237,11 +272,13 @@ if CLOUDFLARE_PAGES_URL:
 
 # 추가 CORS origins (쉼표 구분)
 if os.environ.get("CORS_ORIGINS"):
-    ALLOWED_ORIGINS.extend([
-        origin.strip()
-        for origin in os.environ.get("CORS_ORIGINS", "").split(",")
-        if origin.strip()
-    ])
+    ALLOWED_ORIGINS.extend(
+        [
+            origin.strip()
+            for origin in os.environ.get("CORS_ORIGINS", "").split(",")
+            if origin.strip()
+        ]
+    )
 
 # 개발용: 모든 origin 허용 (주의: 프로덕션에서 사용 금지)
 # 와일드카드 CORS와 credentials는 함께 사용할 수 없음
@@ -249,7 +286,9 @@ ALLOW_CREDENTIALS = True
 if os.environ.get("ALLOW_ALL_ORIGINS", "").lower() == "true":
     ALLOWED_ORIGINS = ["*"]
     ALLOW_CREDENTIALS = False  # 와일드카드 시 credentials 비활성화
-    logging.warning("SECURITY: ALLOW_ALL_ORIGINS enabled. Credentials disabled for CORS.")
+    logging.warning(
+        "SECURITY: ALLOW_ALL_ORIGINS enabled. Credentials disabled for CORS."
+    )
 
 app.add_middleware(
     CORSMiddleware,
@@ -262,11 +301,12 @@ app.add_middleware(
 
 # ============== Challenges Helper Functions ==============
 
+
 def load_challenges() -> dict:
     """Load challenges data from JSON file."""
     challenges_file = DATA_DIR / "challenges.json"
     try:
-        with open(challenges_file, encoding='utf-8') as f:
+        with open(challenges_file, encoding="utf-8") as f:
             return json.load(f)
     except (FileNotFoundError, json.JSONDecodeError):
         return {
@@ -278,20 +318,21 @@ def load_challenges() -> dict:
 def save_challenges(challenges: dict):
     """Save challenges data to JSON file."""
     challenges_file = DATA_DIR / "challenges.json"
-    with open(challenges_file, 'w', encoding='utf-8') as f:
+    with open(challenges_file, "w", encoding="utf-8") as f:
         json.dump(challenges, f, indent=2, ensure_ascii=False)
 
 
 # ============== Authentication ==============
 
+
 def hash_password(password: str) -> str:
     """Hash a password using bcrypt."""
-    return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
 
 def verify_password(password: str, hashed: str) -> bool:
     """Verify a password against its hash."""
-    return bcrypt.checkpw(password.encode('utf-8'), hashed.encode('utf-8'))
+    return bcrypt.checkpw(password.encode("utf-8"), hashed.encode("utf-8"))
 
 
 def create_jwt_token(user_data: dict) -> str:
@@ -302,7 +343,7 @@ def create_jwt_token(user_data: dict) -> str:
         "first_name": user_data["first_name"],
         "last_name": user_data["last_name"],
         "role": user_data.get("role", "participant"),
-        "exp": datetime.utcnow() + timedelta(hours=JWT_EXPIRATION_HOURS)
+        "exp": datetime.utcnow() + timedelta(hours=JWT_EXPIRATION_HOURS),
     }
     return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
 
@@ -315,7 +356,9 @@ def verify_jwt_token(token: str) -> Optional[dict]:
         return None
 
 
-async def get_current_user(authorization: Optional[str] = Header(None)) -> Optional[dict]:
+async def get_current_user(
+    authorization: Optional[str] = Header(None),
+) -> Optional[dict]:
     """Dependency to get current user from JWT token."""
     if not authorization:
         return None
@@ -327,7 +370,9 @@ async def get_current_user(authorization: Optional[str] = Header(None)) -> Optio
     return verify_jwt_token(token)
 
 
-async def require_admin(current_user: Optional[dict] = Depends(get_current_user)) -> dict:
+async def require_admin(
+    current_user: Optional[dict] = Depends(get_current_user),
+) -> dict:
     """Dependency to require admin role."""
     if not current_user:
         raise HTTPException(401, "Not authenticated")
@@ -352,22 +397,21 @@ async def get_profile_image_url(first_name: str, last_name: str = "") -> Optiona
     first_only = first_name.lower().replace(" ", "")
 
     name_variants = [
-        full_combined,                    # seungpillee
-        first_only,                       # seungpil
-        first_name,                       # Seungpil
-        first_name.lower(),               # seungpil
-        first_name.capitalize(),          # Seungpil
+        full_combined,  # seungpillee
+        first_only,  # seungpil
+        first_name,  # Seungpil
+        first_name.lower(),  # seungpil
+        first_name.capitalize(),  # Seungpil
     ]
     # Remove duplicates while preserving order
     name_variants = list(dict.fromkeys(name_variants))
 
     try:
         async with httpx.AsyncClient(
-            timeout=httpx.Timeout(5.0),
-            follow_redirects=True
+            timeout=httpx.Timeout(5.0), follow_redirects=True
         ) as client:
             for name in name_variants:
-                for ext in ['png', 'jpg', 'jpeg']:
+                for ext in ["png", "jpg", "jpeg"]:
                     url = f"https://sundong.kim/assets/img/members/{name}.{ext}"
                     try:
                         response = await client.head(url)
@@ -376,7 +420,9 @@ async def get_profile_image_url(first_name: str, last_name: str = "") -> Optiona
                     except httpx.HTTPError:
                         continue
     except Exception as e:
-        logging.warning(f"Profile image lookup failed for '{first_name} {last_name}': {type(e).__name__}: {e}")
+        logging.warning(
+            f"Profile image lookup failed for '{first_name} {last_name}': {type(e).__name__}: {e}"
+        )
 
     return None
 
@@ -387,7 +433,7 @@ async def register_user(data: UserRegister):
     users_file = DATA_DIR / "users.json"
 
     try:
-        with open(users_file, encoding='utf-8') as f:
+        with open(users_file, encoding="utf-8") as f:
             db = json.load(f)
     except (FileNotFoundError, json.JSONDecodeError):
         db = {"users": []}
@@ -407,38 +453,42 @@ async def register_user(data: UserRegister):
     # Get profile image (uses firstname+lastname combined, e.g., "seungpillee.png")
     profile_image = await get_profile_image_url(data.first_name, data.last_name)
 
-    # Determine role: user_id "iamseungpil" is admin, others are participants
-    role = "admin" if data.user_id.lower() == "iamseungpil" else "participant"
+    # Determine role: allow multiple admin user_ids via ADMIN_USER_IDS
+    role = "admin" if data.user_id.lower() in ADMIN_USER_IDS else "participant"
 
-    db["users"].append({
-        "user_id": data.user_id,
-        "full_name": full_name,
-        "first_name": data.first_name,
-        "last_name": data.last_name,
-        "password_hash": hash_password(data.password),
-        "profile_image": profile_image,
-        "role": role,
-        "registered_at": datetime.now().isoformat()
-    })
+    db["users"].append(
+        {
+            "user_id": data.user_id,
+            "full_name": full_name,
+            "first_name": data.first_name,
+            "last_name": data.last_name,
+            "password_hash": hash_password(data.password),
+            "profile_image": profile_image,
+            "role": role,
+            "registered_at": datetime.now().isoformat(),
+        }
+    )
 
-    with open(users_file, 'w', encoding='utf-8') as f:
+    with open(users_file, "w", encoding="utf-8") as f:
         json.dump(db, f, indent=2, ensure_ascii=False)
 
     # Create token
-    token = create_jwt_token({
-        "user_id": data.user_id,
-        "full_name": full_name,
-        "first_name": data.first_name,
-        "last_name": data.last_name,
-        "role": role
-    })
+    token = create_jwt_token(
+        {
+            "user_id": data.user_id,
+            "full_name": full_name,
+            "first_name": data.first_name,
+            "last_name": data.last_name,
+            "role": role,
+        }
+    )
 
     return {
         "status": "registered",
         "user_id": data.user_id,
         "full_name": full_name,
         "profile_image": profile_image,
-        "token": token
+        "token": token,
     }
 
 
@@ -448,7 +498,7 @@ async def login_user(data: UserLogin):
     users_file = DATA_DIR / "users.json"
 
     try:
-        with open(users_file, encoding='utf-8') as f:
+        with open(users_file, encoding="utf-8") as f:
             db = json.load(f)
     except (FileNotFoundError, json.JSONDecodeError):
         raise HTTPException(401, "Invalid credentials")
@@ -467,13 +517,15 @@ async def login_user(data: UserLogin):
         raise HTTPException(401, "Invalid credentials")
 
     # Create token
-    token = create_jwt_token({
-        "user_id": user.get("user_id"),
-        "full_name": user["full_name"],
-        "first_name": user["first_name"],
-        "last_name": user["last_name"],
-        "role": user.get("role", "participant")
-    })
+    token = create_jwt_token(
+        {
+            "user_id": user.get("user_id"),
+            "full_name": user["full_name"],
+            "first_name": user["first_name"],
+            "last_name": user["last_name"],
+            "role": user.get("role", "participant"),
+        }
+    )
 
     return {
         "status": "logged_in",
@@ -483,7 +535,7 @@ async def login_user(data: UserLogin):
         "last_name": user["last_name"],
         "profile_image": user.get("profile_image"),
         "role": user.get("role", "participant"),
-        "token": token
+        "token": token,
     }
 
 
@@ -496,7 +548,7 @@ async def get_current_profile(current_user: Optional[dict] = Depends(get_current
     users_file = DATA_DIR / "users.json"
 
     try:
-        with open(users_file, encoding='utf-8') as f:
+        with open(users_file, encoding="utf-8") as f:
             db = json.load(f)
     except (FileNotFoundError, json.JSONDecodeError):
         raise HTTPException(401, "Not authenticated")
@@ -511,7 +563,7 @@ async def get_current_profile(current_user: Optional[dict] = Depends(get_current
                 "last_name": u["last_name"],
                 "profile_image": u.get("profile_image"),
                 "role": u.get("role", "participant"),
-                "registered_at": u.get("registered_at")
+                "registered_at": u.get("registered_at"),
             }
 
     raise HTTPException(401, "Not authenticated")
@@ -519,30 +571,33 @@ async def get_current_profile(current_user: Optional[dict] = Depends(get_current
 
 # ============== Participants ==============
 
+
 @app.post("/api/participants/register")
 async def register_participant(data: ParticipantRegister):
     """Register a new participant."""
     participants_file = DATA_DIR / "participants.json"
-    
-    with open(participants_file, encoding='utf-8') as f:
+
+    with open(participants_file, encoding="utf-8") as f:
         db = json.load(f)
-    
+
     # Check duplicate
     for p in db["participants"]:
         if p["id"] == data.participant_id:
             raise HTTPException(400, "Participant ID already exists")
-    
-    db["participants"].append({
-        "id": data.participant_id,
-        "name": data.name,
-        "github": data.github_username,
-        "registered_at": datetime.now().isoformat(),
-        "scores": {}
-    })
-    
-    with open(participants_file, 'w', encoding='utf-8') as f:
+
+    db["participants"].append(
+        {
+            "id": data.participant_id,
+            "name": data.name,
+            "github": data.github_username,
+            "registered_at": datetime.now().isoformat(),
+            "scores": {},
+        }
+    )
+
+    with open(participants_file, "w", encoding="utf-8") as f:
         json.dump(db, f, indent=2, ensure_ascii=False)
-    
+
     return {"status": "registered", "participant_id": data.participant_id}
 
 
@@ -550,14 +605,15 @@ async def register_participant(data: ParticipantRegister):
 async def list_participants():
     """List all participants."""
     participants_file = DATA_DIR / "participants.json"
-    
-    with open(participants_file, encoding='utf-8') as f:
+
+    with open(participants_file, encoding="utf-8") as f:
         db = json.load(f)
-    
+
     return db["participants"]
 
 
 # ============== Challenge Management (Admin) ==============
+
 
 @app.post("/api/admin/challenge/{week}/start")
 async def admin_start_challenge(week: int, admin: dict = Depends(require_admin)):
@@ -576,7 +632,7 @@ async def admin_start_challenge(week: int, admin: dict = Depends(require_admin))
         "status": "started",
         "start_time": start_time,
         "end_time": None,
-        "started_by": admin.get("user_id")
+        "started_by": admin.get("user_id"),
     }
     save_challenges(challenges)
 
@@ -584,7 +640,7 @@ async def admin_start_challenge(week: int, admin: dict = Depends(require_admin))
         "status": "started",
         "week": week,
         "start_time": start_time,
-        "started_by": admin.get("user_id")
+        "started_by": admin.get("user_id"),
     }
 
 
@@ -605,11 +661,7 @@ async def admin_end_challenge(week: int, admin: dict = Depends(require_admin)):
     challenges[week_key]["end_time"] = end_time
     save_challenges(challenges)
 
-    return {
-        "status": "ended",
-        "week": week,
-        "end_time": end_time
-    }
+    return {"status": "ended", "week": week, "end_time": end_time}
 
 
 @app.post("/api/admin/challenge/{week}/restart")
@@ -649,7 +701,7 @@ async def admin_restart_challenge(week: int, admin: dict = Depends(require_admin
         "start_time": None,
         "end_time": None,
         "started_by": None,
-        "personal_starts": {}
+        "personal_starts": {},
     }
     save_challenges(challenges)
 
@@ -658,11 +710,12 @@ async def admin_restart_challenge(week: int, admin: dict = Depends(require_admin
         "week": week,
         "deleted_submissions": deleted_submissions,
         "deleted_evaluations": deleted_evaluations,
-        "message": f"Week {week} has been reset. All submissions and evaluations cleared."
+        "message": f"Week {week} has been reset. All submissions and evaluations cleared.",
     }
 
 
 # ============== User Management (Admin) ==============
+
 
 @app.get("/api/admin/users")
 async def admin_list_users(admin: dict = Depends(require_admin)):
@@ -670,7 +723,7 @@ async def admin_list_users(admin: dict = Depends(require_admin)):
     users_file = DATA_DIR / "users.json"
 
     try:
-        with open(users_file, encoding='utf-8') as f:
+        with open(users_file, encoding="utf-8") as f:
             db = json.load(f)
     except (FileNotFoundError, json.JSONDecodeError):
         return []
@@ -684,7 +737,7 @@ async def admin_list_users(admin: dict = Depends(require_admin)):
             "last_name": u.get("last_name"),
             "role": u.get("role", "participant"),
             "profile_image": u.get("profile_image"),
-            "registered_at": u.get("registered_at")
+            "registered_at": u.get("registered_at"),
         }
         for u in db.get("users", [])
     ]
@@ -696,7 +749,7 @@ async def admin_delete_user(user_id: str, admin: dict = Depends(require_admin)):
     users_file = DATA_DIR / "users.json"
 
     try:
-        with open(users_file, encoding='utf-8') as f:
+        with open(users_file, encoding="utf-8") as f:
             db = json.load(f)
     except (FileNotFoundError, json.JSONDecodeError):
         raise HTTPException(404, "User not found")
@@ -707,18 +760,23 @@ async def admin_delete_user(user_id: str, admin: dict = Depends(require_admin)):
 
     # Find and remove user
     original_len = len(db.get("users", []))
-    db["users"] = [u for u in db.get("users", []) if u.get("user_id", "").lower() != user_id.lower()]
+    db["users"] = [
+        u
+        for u in db.get("users", [])
+        if u.get("user_id", "").lower() != user_id.lower()
+    ]
 
     if len(db["users"]) == original_len:
         raise HTTPException(404, "User not found")
 
-    with open(users_file, 'w', encoding='utf-8') as f:
+    with open(users_file, "w", encoding="utf-8") as f:
         json.dump(db, f, indent=2, ensure_ascii=False)
 
     return {"status": "deleted", "user_id": user_id}
 
 
 # ============== Challenge Status (Public) ==============
+
 
 @app.get("/api/challenges/status")
 async def get_all_challenges_status():
@@ -735,18 +793,15 @@ async def get_challenge_status(week: int):
     challenges = load_challenges()
     week_key = f"week{week}"
 
-    return {
-        "week": week,
-        **challenges[week_key]
-    }
+    return {"week": week, **challenges[week_key]}
 
 
 # ============== Personal Timer APIs ==============
 
+
 @app.post("/api/challenge/{week}/start-personal")
 async def start_personal_timer(
-    week: int,
-    current_user: Optional[dict] = Depends(get_current_user)
+    week: int, current_user: Optional[dict] = Depends(get_current_user)
 ):
     """Start personal timer for a user in a specific week's challenge.
 
@@ -776,7 +831,9 @@ async def start_personal_timer(
 
     # 4. 챌린지 상태 확인 (started인지)
     if challenge["status"] == "not_started":
-        raise HTTPException(400, "Challenge has not started yet. Wait for admin to start.")
+        raise HTTPException(
+            400, "Challenge has not started yet. Wait for admin to start."
+        )
 
     if challenge["status"] == "ended":
         raise HTTPException(400, "Challenge has ended. Cannot start personal timer.")
@@ -793,14 +850,14 @@ async def start_personal_timer(
             "week": week,
             "user_id": user_id,
             "started_at": existing["started_at"],
-            "message": "Personal timer was already started"
+            "message": "Personal timer was already started",
         }
 
     # 7. 새로운 개인 시작 시간 기록 (UTC)
     started_at = datetime.now(timezone.utc).isoformat()
     challenge["personal_starts"][user_id] = {
         "started_at": started_at,
-        "status": "in_progress"
+        "status": "in_progress",
     }
 
     # 8. challenges.json 저장
@@ -811,14 +868,13 @@ async def start_personal_timer(
         "status": "started",
         "week": week,
         "user_id": user_id,
-        "started_at": started_at
+        "started_at": started_at,
     }
 
 
 @app.get("/api/challenge/{week}/my-status")
 async def get_my_challenge_status(
-    week: int,
-    current_user: Optional[dict] = Depends(get_current_user)
+    week: int, current_user: Optional[dict] = Depends(get_current_user)
 ):
     """Get current user's personal challenge status for a specific week.
 
@@ -851,7 +907,7 @@ async def get_my_challenge_status(
         "challenge_status": challenge["status"],
         "personal_status": "not_started",
         "personal_start_time": None,
-        "elapsed_seconds": None
+        "elapsed_seconds": None,
     }
 
     # 5. personal_starts가 없으면 빈 딕셔너리 처리 (하위 호환성)
@@ -864,7 +920,10 @@ async def get_my_challenge_status(
         response["personal_start_time"] = user_personal.get("started_at")
 
         # 7. elapsed_seconds 계산 (시작했으면) - UTC 기준
-        if response["personal_start_time"] and response["personal_status"] == "in_progress":
+        if (
+            response["personal_start_time"]
+            and response["personal_status"] == "in_progress"
+        ):
             try:
                 start_time = datetime.fromisoformat(response["personal_start_time"])
                 # Ensure timezone-aware comparison
@@ -881,6 +940,7 @@ async def get_my_challenge_status(
 
 
 # ============== Submissions ==============
+
 
 def force_remove_directory(path: Path) -> bool:
     """Forcefully remove a directory, handling Windows permission issues."""
@@ -904,12 +964,17 @@ def force_remove_directory(path: Path) -> bool:
         # Last resort: try using system command
         try:
             import platform
-            if platform.system() == 'Windows':
-                subprocess.run(['cmd', '/c', 'rmdir', '/s', '/q', str(path)],
-                             capture_output=True, timeout=30)
+
+            if platform.system() == "Windows":
+                subprocess.run(
+                    ["cmd", "/c", "rmdir", "/s", "/q", str(path)],
+                    capture_output=True,
+                    timeout=30,
+                )
             else:
-                subprocess.run(['rm', '-rf', str(path)],
-                             capture_output=True, timeout=30)
+                subprocess.run(
+                    ["rm", "-rf", str(path)], capture_output=True, timeout=30
+                )
             return not path.exists()
         except Exception as e2:
             print(f"[Cleanup] System command also failed: {e2}")
@@ -934,7 +999,7 @@ def clone_github_repo(github_url: str, target_dir: Path) -> bool:
             ["git", "clone", "--depth", "1", github_url, str(target_dir)],
             capture_output=True,
             text=True,
-            timeout=60
+            timeout=60,
         )
 
         if result.returncode != 0:
@@ -953,62 +1018,21 @@ def clone_github_repo(github_url: str, target_dir: Path) -> bool:
         return False
 
 
-# Thread pool for concurrent evaluations (prevents blocking)
-# Each evaluation runs in its own thread, allowing multiple concurrent evaluations
-_evaluation_executor = ThreadPoolExecutor(max_workers=10, thread_name_prefix="eval_")
-
-# Lock to prevent concurrent evaluations for the same user/week
-# Key: "week_participant_id", Value: True if evaluation in progress
-_evaluation_locks: dict[str, bool] = {}
-
-
-def _run_evaluation_sync(week: int, participant_id: str):
-    """Synchronous evaluation function (runs in thread pool)."""
-    lock_key = f"{week}_{participant_id}"
-    try:
-        logging.info(f"Starting evaluation for {participant_id} week{week}")
-        subprocess.run(
-            ["python3", str(BASE_DIR / "backend" / "evaluator.py"),
-             "evaluate", str(week), participant_id],
-            cwd=str(BASE_DIR),
-            timeout=300
-        )
-        logging.info(f"Completed evaluation for {participant_id} week{week}")
-    except subprocess.TimeoutExpired:
-        logging.error(f"Evaluation timeout for {participant_id} week{week}")
-    except Exception as e:
-        logging.error(f"Evaluation error for {participant_id} week{week}: {e}")
-    finally:
-        # Release the lock when evaluation completes
-        _evaluation_locks.pop(lock_key, None)
-
-
-async def trigger_evaluation(week: int, participant_id: str):
-    """Trigger Claude Code evaluation asynchronously.
-
-    Uses ThreadPoolExecutor to run evaluations concurrently.
-    Multiple users submitting at the same time will not block each other.
-    If evaluation is already in progress for this user/week, skip (no duplicate runs).
-    """
-    lock_key = f"{week}_{participant_id}"
-
-    # Check if evaluation is already in progress for this user/week
-    if _evaluation_locks.get(lock_key):
-        logging.info(f"Evaluation already in progress for {participant_id} week{week}, skipping duplicate")
-        return
-
-    # Acquire lock
-    _evaluation_locks[lock_key] = True
-
-    loop = asyncio.get_event_loop()
-    # Schedule the evaluation to run in the thread pool
-    loop.run_in_executor(_evaluation_executor, _run_evaluation_sync, week, participant_id)
+def calculate_time_rank_bonus(rank: int) -> int:
+    """Calculate time rank bonus based on submission order."""
+    time_rank_points = {
+        1: 20,
+        2: 17,
+        3: 14,
+        4: 11,
+        5: 8,
+    }
+    return time_rank_points.get(rank, 5)
 
 
 @app.post("/api/submissions/submit")
 async def submit_solution(
-    data: SubmissionRequest,
-    current_user: Optional[dict] = Depends(get_current_user)
+    data: SubmissionRequest, current_user: Optional[dict] = Depends(get_current_user)
 ):
     """Submit a solution via GitHub URL. Requires authentication."""
     # Authentication check
@@ -1021,13 +1045,17 @@ async def submit_solution(
     challenge = challenges[week_key]
 
     if challenge["status"] == "not_started":
-        raise HTTPException(400, "Challenge has not started yet. Wait for admin to start.")
+        raise HTTPException(
+            400, "Challenge has not started yet. Wait for admin to start."
+        )
 
     if challenge["status"] == "ended":
         raise HTTPException(400, "Challenge has ended. No more submissions allowed.")
 
     # Use authenticated user's user_id as participant_id
     participant_id = current_user.get("user_id")
+    if not participant_id:
+        raise HTTPException(401, "Invalid user token")
 
     # Check if user has started their personal timer
     personal_starts = challenge.get("personal_starts", {})
@@ -1056,18 +1084,20 @@ async def submit_solution(
     submission_number = 1
 
     if metadata_file.exists():
-        with open(metadata_file, encoding='utf-8') as f:
+        with open(metadata_file, encoding="utf-8") as f:
             existing_metadata = json.load(f)
             existing_history = existing_metadata.get("submission_history", [])
             # If no history but has submitted_at, create first entry from existing data
             if not existing_history and existing_metadata.get("submitted_at"):
-                existing_history.append({
-                    "submission_number": 1,
-                    "github_url": existing_metadata.get("github_url"),
-                    "submitted_at": existing_metadata.get("submitted_at"),
-                    "elapsed_seconds": existing_metadata.get("elapsed_seconds"),
-                    "elapsed_minutes": existing_metadata.get("elapsed_minutes")
-                })
+                existing_history.append(
+                    {
+                        "submission_number": 1,
+                        "github_url": existing_metadata.get("github_url"),
+                        "submitted_at": existing_metadata.get("submitted_at"),
+                        "elapsed_seconds": existing_metadata.get("elapsed_seconds"),
+                        "elapsed_minutes": existing_metadata.get("elapsed_minutes"),
+                    }
+                )
             submission_number = len(existing_history) + 1
 
     # Create new submission entry
@@ -1076,7 +1106,7 @@ async def submit_solution(
         "github_url": data.github_url,
         "submitted_at": submission_time.isoformat(),
         "elapsed_seconds": round(elapsed_seconds, 1),
-        "elapsed_minutes": round(elapsed_minutes, 1)
+        "elapsed_minutes": round(elapsed_minutes, 1),
     }
     existing_history.append(new_submission)
 
@@ -1092,7 +1122,7 @@ async def submit_solution(
         "elapsed_minutes": round(elapsed_minutes, 1),
         "status": "submitted",
         "submission_number": submission_number,
-        "submission_history": existing_history
+        "submission_history": existing_history,
     }
 
     # Clone repository FIRST (before updating status)
@@ -1108,7 +1138,7 @@ async def submit_solution(
 
     metadata["status"] = "cloned"
 
-    with open(metadata_file, 'w', encoding='utf-8') as f:
+    with open(metadata_file, "w", encoding="utf-8") as f:
         json.dump(metadata, f, indent=2)
 
     # Save to SQLite database
@@ -1119,38 +1149,41 @@ async def submit_solution(
             submission_number=submission_number,
             github_url=data.github_url,
             submitted_at=submission_time.isoformat(),
-            elapsed_seconds=round(elapsed_seconds, 1),
+            elapsed_seconds=int(round(elapsed_seconds)),
             elapsed_minutes=round(elapsed_minutes, 1),
-            personal_start_time=user_personal["started_at"]
+            personal_start_time=user_personal["started_at"],
         )
-        logging.info(f"Saved submission to SQLite: {participant_id} week{data.week} try{submission_number}")
+        logging.info(
+            f"Saved submission to SQLite: {participant_id} week{data.week} try{submission_number}"
+        )
     except Exception as e:
         logging.warning(f"SQLite save failed: {e}")
 
-    # Mark evaluation as "evaluating" before starting (so polling knows to wait)
+    # Mark evaluation as pending review (manual admin evaluation)
     eval_file = EVALUATIONS_DIR / f"week{data.week}" / f"{participant_id}.json"
     eval_file.parent.mkdir(parents=True, exist_ok=True)
-    with open(eval_file, 'w', encoding='utf-8') as f:
-        json.dump({
-            "participant": participant_id,
-            "week": data.week,
-            "status": "evaluating",
-            "submission_number": submission_number,
-            "started_at": datetime.now(timezone.utc).isoformat()
-        }, f, indent=2)
-
-    # Trigger evaluation in background (non-blocking, concurrent)
-    asyncio.create_task(trigger_evaluation(data.week, participant_id))
+    with open(eval_file, "w", encoding="utf-8") as f:
+        json.dump(
+            {
+                "participant": participant_id,
+                "week": data.week,
+                "status": "pending_review",
+                "submission_number": submission_number,
+                "requested_at": datetime.now(timezone.utc).isoformat(),
+            },
+            f,
+            indent=2,
+        )
 
     return {
         "status": "submitted",
-        "message": "Evaluation will start shortly",
+        "message": "Submission received. Pending admin review.",
         "participant_id": participant_id,
         "week": data.week,
         "elapsed_minutes": round(elapsed_minutes, 1),
         "submission_number": submission_number,
         "is_resubmission": submission_number > 1,
-        "submission_history": existing_history
+        "submission_history": existing_history,
     }
 
 
@@ -1158,18 +1191,18 @@ async def submit_solution(
 async def list_submissions(week: int):
     """List all submissions for a week."""
     submissions_dir = SUBMISSIONS_DIR / f"week{week}"
-    
+
     if not submissions_dir.exists():
         return []
-    
+
     submissions = []
     for participant_dir in submissions_dir.iterdir():
         if participant_dir.is_dir():
             metadata_file = participant_dir / "metadata.json"
             if metadata_file.exists():
-                with open(metadata_file, encoding='utf-8') as f:
+                with open(metadata_file, encoding="utf-8") as f:
                     submissions.append(json.load(f))
-    
+
     return submissions
 
 
@@ -1186,56 +1219,188 @@ async def get_submission_history(week: int, participant_id: str):
     if not metadata_file.exists():
         return {"submission_history": [], "total_submissions": 0}
 
-    with open(metadata_file, encoding='utf-8') as f:
+    with open(metadata_file, encoding="utf-8") as f:
         metadata = json.load(f)
 
     history = metadata.get("submission_history", [])
 
     # If no history array but has submission data, create initial entry
     if not history and metadata.get("submitted_at"):
-        history = [{
-            "submission_number": 1,
-            "github_url": metadata.get("github_url"),
-            "submitted_at": metadata.get("submitted_at"),
-            "elapsed_seconds": metadata.get("elapsed_seconds"),
-            "elapsed_minutes": metadata.get("elapsed_minutes")
-        }]
+        history = [
+            {
+                "submission_number": 1,
+                "github_url": metadata.get("github_url"),
+                "submitted_at": metadata.get("submitted_at"),
+                "elapsed_seconds": metadata.get("elapsed_seconds"),
+                "elapsed_minutes": metadata.get("elapsed_minutes"),
+            }
+        ]
 
-    # For backward compatibility: if latest submission doesn't have embedded evaluation,
-    # try to read from eval file
-    if history and not history[-1].get("evaluation"):
+    # For backward compatibility: attach evaluation from eval file if missing
+    if history:
         eval_file = EVALUATIONS_DIR / f"week{week}" / f"{participant_id}.json"
         if eval_file.exists():
-            with open(eval_file, encoding='utf-8') as f:
+            with open(eval_file, encoding="utf-8") as f:
                 eval_data = json.load(f)
-                # Add latest evaluation to the most recent submission
-                history[-1]["evaluation"] = {
+            eval_submission_number = eval_data.get("submission_number")
+            target_entry = None
+            if eval_submission_number is not None:
+                for entry in history:
+                    if entry.get("submission_number") == eval_submission_number:
+                        target_entry = entry
+                        break
+            if target_entry is None and history:
+                target_entry = history[-1]
+            if target_entry is not None and not target_entry.get("evaluation"):
+                target_entry["evaluation"] = {
                     "total": eval_data.get("scores", {}).get("total"),
                     "rubric": eval_data.get("scores", {}).get("rubric"),
                     "time_rank": eval_data.get("scores", {}).get("time_rank"),
-                    "time_rank_bonus": eval_data.get("scores", {}).get("time_rank_bonus"),
+                    "time_rank_bonus": eval_data.get("scores", {}).get(
+                        "time_rank_bonus"
+                    ),
                     "status": eval_data.get("status"),
-                    "evaluated_at": eval_data.get("evaluated_at")
+                    "evaluated_at": eval_data.get("evaluated_at"),
                 }
 
     return {
         "submission_history": history,
         "total_submissions": len(history),
-        "personal_start_time": metadata.get("personal_start_time")
+        "personal_start_time": metadata.get("personal_start_time"),
     }
 
 
 # ============== Evaluations & Leaderboard ==============
 
+
+@app.post("/api/admin/evaluations/{week}/{participant_id}")
+async def admin_submit_evaluation(
+    week: int,
+    participant_id: str,
+    data: AdminEvaluationRequest,
+    admin: dict = Depends(require_admin),
+):
+    """Admin submits manual evaluation for a submission."""
+    if not 1 <= week <= 5:
+        raise HTTPException(400, "Week must be between 1 and 5")
+
+    if not PARTICIPANT_ID_PATTERN.match(participant_id):
+        raise HTTPException(400, "Invalid participant ID format")
+
+    submission_dir = SUBMISSIONS_DIR / f"week{week}" / participant_id
+    metadata_file = submission_dir / "metadata.json"
+
+    if not metadata_file.exists():
+        raise HTTPException(404, "Submission metadata not found")
+
+    with open(metadata_file, encoding="utf-8") as f:
+        metadata = json.load(f)
+
+    history = metadata.get("submission_history", [])
+    if not history and metadata.get("submitted_at"):
+        history = [
+            {
+                "submission_number": 1,
+                "github_url": metadata.get("github_url"),
+                "submitted_at": metadata.get("submitted_at"),
+                "elapsed_seconds": metadata.get("elapsed_seconds"),
+                "elapsed_minutes": metadata.get("elapsed_minutes"),
+            }
+        ]
+
+    target_entry = None
+    for entry in history:
+        if entry.get("submission_number") == data.submission_number:
+            target_entry = entry
+            break
+
+    if target_entry is None:
+        raise HTTPException(404, "Submission number not found")
+
+    time_rank = get_time_rank_by_elapsed(week, participant_id)
+    time_rank_bonus = calculate_time_rank_bonus(time_rank)
+    rubric_score = int(data.rubric_score)
+    total_score = rubric_score + time_rank_bonus
+    evaluated_at = datetime.now(timezone.utc).isoformat()
+
+    evaluation_payload = {
+        "participant": participant_id,
+        "week": week,
+        "status": "completed",
+        "scores": {
+            "rubric": rubric_score,
+            "time_rank": time_rank,
+            "time_rank_bonus": time_rank_bonus,
+            "total": total_score,
+        },
+        "breakdown": {},
+        "feedback": data.feedback or "",
+        "strengths": data.strengths or [],
+        "improvements": data.improvements or [],
+        "submission_number": data.submission_number,
+        "evaluated_at": evaluated_at,
+    }
+
+    eval_file = EVALUATIONS_DIR / f"week{week}" / f"{participant_id}.json"
+    eval_file.parent.mkdir(parents=True, exist_ok=True)
+    with open(eval_file, "w", encoding="utf-8") as f:
+        json.dump(evaluation_payload, f, indent=2, ensure_ascii=False)
+
+    target_entry["evaluation"] = {
+        "rubric": rubric_score,
+        "time_rank": time_rank,
+        "time_rank_bonus": time_rank_bonus,
+        "total": total_score,
+        "status": "completed",
+        "evaluated_at": evaluated_at,
+    }
+    metadata["submission_history"] = history
+
+    with open(metadata_file, "w", encoding="utf-8") as f:
+        json.dump(metadata, f, indent=2, ensure_ascii=False)
+
+    try:
+        update_submission_evaluation(
+            user_id=participant_id,
+            week=week,
+            submission_number=data.submission_number,
+            rubric_score=rubric_score,
+            time_rank=time_rank,
+            time_rank_bonus=time_rank_bonus,
+            total_score=total_score,
+            feedback=data.feedback or "",
+            breakdown={},
+            strengths=data.strengths or [],
+            improvements=data.improvements or [],
+            status="completed",
+        )
+    except Exception as e:
+        logging.warning(f"SQLite evaluation update failed: {e}")
+
+    return {
+        "status": "completed",
+        "participant_id": participant_id,
+        "week": week,
+        "submission_number": data.submission_number,
+        "scores": evaluation_payload["scores"],
+    }
+
+
 @app.get("/api/evaluations/{week}/{participant_id}")
 async def get_evaluation(week: int, participant_id: str):
     """Get evaluation result for a participant."""
     eval_file = EVALUATIONS_DIR / f"week{week}" / f"{participant_id}.json"
-    
-    if not eval_file.exists():
-        raise HTTPException(404, "Evaluation not found")
 
-    with open(eval_file, encoding='utf-8') as f:
+    if not eval_file.exists():
+        # Manual review workflow: missing file means not reviewed yet.
+        return {
+            "participant": participant_id,
+            "week": week,
+            "status": "pending_review",
+            "submission_number": None,
+        }
+
+    with open(eval_file, encoding="utf-8") as f:
         return json.load(f)
 
 
@@ -1254,21 +1419,26 @@ def _get_week_leaderboard_data(week: int) -> list:
 
     results = []
     for eval_file in evaluations_dir.glob("*.json"):
-        with open(eval_file, encoding='utf-8') as f:
+        with open(eval_file, encoding="utf-8") as f:
             data = json.load(f)
             if data.get("status") == "completed":
                 scores = data.get("scores", {})
                 # Skip entries without valid scores
                 if not scores or "total" not in scores:
                     continue
-                results.append({
-                    "participant_id": data.get("participant") or data.get("participant_id"),
-                    "total": scores.get("total", 0),
-                    "rubric": scores.get("rubric", 0),
-                    "time_rank": scores.get("time_rank", 0),
-                    "time_rank_bonus": scores.get("time_rank_bonus", scores.get("time_bonus", 0)),
-                    "evaluated_at": data.get("evaluated_at")
-                })
+                results.append(
+                    {
+                        "participant_id": data.get("participant")
+                        or data.get("participant_id"),
+                        "total": scores.get("total", 0),
+                        "rubric": scores.get("rubric", 0),
+                        "time_rank": scores.get("time_rank", 0),
+                        "time_rank_bonus": scores.get(
+                            "time_rank_bonus", scores.get("time_bonus", 0)
+                        ),
+                        "evaluated_at": data.get("evaluated_at"),
+                    }
+                )
 
     # Sort by total score descending
     results.sort(key=lambda x: x["total"], reverse=True)
@@ -1295,15 +1465,15 @@ async def get_season_leaderboard():
     """Get overall season leaderboard (all weeks combined)."""
     participants_file = DATA_DIR / "participants.json"
 
-    with open(participants_file, encoding='utf-8') as f:
+    with open(participants_file, encoding="utf-8") as f:
         db = json.load(f)
-    
+
     # Calculate season points
     season_scores = {}
-    
+
     for week in range(1, 6):
         week_leaderboard = _get_week_leaderboard_data(week)
-        
+
         for entry in week_leaderboard:
             pid = entry["participant_id"]
             if pid not in season_scores:
@@ -1311,9 +1481,9 @@ async def get_season_leaderboard():
                     "participant_id": pid,
                     "total_points": 0,
                     "weeks_completed": 0,
-                    "weekly_scores": {}
+                    "weekly_scores": {},
                 }
-            
+
             # Weekly ranking points
             rank = entry["rank"]
             if rank == 1:
@@ -1324,19 +1494,19 @@ async def get_season_leaderboard():
                 points = 5
             else:
                 points = 3
-            
+
             season_scores[pid]["total_points"] += points
             season_scores[pid]["weeks_completed"] += 1
             season_scores[pid]["weekly_scores"][f"week{week}"] = {
                 "rank": rank,
                 "points": points,
-                "score": entry["total"]
+                "score": entry["total"],
             }
-    
+
     # Sort by total points
     results = list(season_scores.values())
     results.sort(key=lambda x: x["total_points"], reverse=True)
-    
+
     # Add season rank
     for i, r in enumerate(results):
         r["season_rank"] = i + 1
@@ -1348,7 +1518,7 @@ async def get_season_leaderboard():
             r["title"] = "🥉 3rd Place"
         else:
             r["title"] = ""
-    
+
     return results
 
 
@@ -1360,6 +1530,7 @@ async def get_week_leaderboard(week: int):
 
 # ============== GitHub Webhook (Auto-Deploy) ==============
 # NOTE: This MUST be defined BEFORE the catch-all static file route
+
 
 def verify_github_signature(payload_body: bytes, signature_header: str) -> bool:
     """Verify GitHub webhook signature using HMAC-SHA256."""
@@ -1376,9 +1547,7 @@ def verify_github_signature(payload_body: bytes, signature_header: str) -> bool:
 
     expected_signature = signature_header[7:]  # Remove "sha256=" prefix
     computed_signature = hmac.new(
-        GITHUB_WEBHOOK_SECRET.encode('utf-8'),
-        payload_body,
-        hashlib.sha256
+        GITHUB_WEBHOOK_SECRET.encode("utf-8"), payload_body, hashlib.sha256
     ).hexdigest()
 
     return hmac.compare_digest(computed_signature, expected_signature)
@@ -1426,7 +1595,9 @@ async def github_webhook(request: Request):
     pusher = payload.get("pusher", {}).get("name", "unknown")
     commits = payload.get("commits", [])
     commit_count = len(commits)
-    logging.info(f"GitHub webhook: Push from {pusher} with {commit_count} commit(s) to {branch}")
+    logging.info(
+        f"GitHub webhook: Push from {pusher} with {commit_count} commit(s) to {branch}"
+    )
 
     # Run git pull
     try:
@@ -1435,14 +1606,18 @@ async def github_webhook(request: Request):
             cwd=str(BASE_DIR),
             capture_output=True,
             text=True,
-            timeout=60
+            timeout=60,
         )
 
         if result.returncode != 0:
             logging.error(f"Git pull failed: {result.stderr}")
             return JSONResponse(
                 status_code=500,
-                content={"status": "error", "message": "Git pull failed", "stderr": result.stderr}
+                content={
+                    "status": "error",
+                    "message": "Git pull failed",
+                    "stderr": result.stderr,
+                },
             )
 
         logging.info(f"Git pull successful: {result.stdout.strip()}")
@@ -1450,19 +1625,17 @@ async def github_webhook(request: Request):
     except subprocess.TimeoutExpired:
         logging.error("Git pull timeout")
         return JSONResponse(
-            status_code=500,
-            content={"status": "error", "message": "Git pull timeout"}
+            status_code=500, content={"status": "error", "message": "Git pull timeout"}
         )
     except Exception as e:
         logging.error(f"Git pull exception: {e}")
         return JSONResponse(
-            status_code=500,
-            content={"status": "error", "message": str(e)}
+            status_code=500, content={"status": "error", "message": str(e)}
         )
 
     # Create restart flag file
     try:
-        with open(RESTART_FLAG_FILE, 'w', encoding='utf-8') as f:
+        with open(RESTART_FLAG_FILE, "w", encoding="utf-8") as f:
             f.write(datetime.now().isoformat())
         logging.info(f"Restart flag created: {RESTART_FLAG_FILE}")
     except Exception as e:
@@ -1474,7 +1647,7 @@ async def github_webhook(request: Request):
         "branch": branch,
         "pusher": pusher,
         "commits": commit_count,
-        "restart_scheduled": True
+        "restart_scheduled": True,
     }
 
 
@@ -1482,13 +1655,23 @@ async def github_webhook(request: Request):
 
 # Allowed static HTML files (prevents arbitrary file access)
 ALLOWED_HTML_FILES = {
-    "index.html", "leaderboard.html", "admin.html",
-    "week1.html", "week2.html", "week3.html", "week4.html", "week5.html",
-    "week1-learn.html", "week2-learn.html", "week3-learn.html",
-    "week4-learn.html", "week5-learn.html"
+    "index.html",
+    "leaderboard.html",
+    "admin.html",
+    "week1.html",
+    "week2.html",
+    "week3.html",
+    "week4.html",
+    "week5.html",
+    "week1-learn.html",
+    "week2-learn.html",
+    "week3-learn.html",
+    "week4-learn.html",
+    "week5-learn.html",
 }
 
 if SERVE_STATIC:
+
     @app.get("/")
     async def serve_index():
         """Serve main page."""
@@ -1497,7 +1680,9 @@ if SERVE_STATIC:
     @app.get("/config.js")
     async def serve_config_js():
         """Serve config.js."""
-        return FileResponse(FRONTEND_DIR / "config.js", media_type="application/javascript")
+        return FileResponse(
+            FRONTEND_DIR / "config.js", media_type="application/javascript"
+        )
 
     # NOTE: Specific routes MUST be defined BEFORE catch-all routes
     @app.get("/challenges/week1/uigen.zip")
@@ -1506,7 +1691,9 @@ if SERVE_STATIC:
         zip_path = BASE_DIR / "challenges" / "week1" / "uigen.zip"
         if not zip_path.exists():
             raise HTTPException(404, "uigen.zip not found")
-        return FileResponse(zip_path, filename="uigen.zip", media_type="application/zip")
+        return FileResponse(
+            zip_path, filename="uigen.zip", media_type="application/zip"
+        )
 
     @app.get("/challenges/week2/{filename}")
     async def serve_week2_challenge(filename: str):
@@ -1527,15 +1714,17 @@ if SERVE_STATIC:
 
 # ============== Health Check ==============
 
+
 @app.get("/api/health")
 async def health_check():
     return {
         "status": "healthy",
         "timestamp": datetime.now().isoformat(),
-        "version": "1.0.0"
+        "version": "1.0.0",
     }
 
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8003)

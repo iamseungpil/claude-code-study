@@ -372,14 +372,14 @@ User: "/survey-writer"</code></pre>
                     </div>
                 </div>
 
-                <!-- Lesson 3: MCP 기초 -->
+                <!-- Lesson 3: MCP Basics -->
                 <div id="lesson3" class="lesson-card rounded-2xl overflow-hidden">
                     <div class="lesson-header p-6 flex items-center justify-between" onclick="toggleLesson(3)">
                         <div class="flex items-center gap-4">
                             <div class="w-12 h-12 rounded-xl bg-amber-500/20 flex items-center justify-center text-2xl">3</div>
                             <div>
-                                <h3 class="font-bold text-xl">MCP 기초</h3>
-                                <p class="text-gray-400 text-sm">Model Context Protocol의 개념과 기본 사용법</p>
+                                <h3 class="font-bold text-xl">MCP Basics</h3>
+                                <p class="text-gray-400 text-sm">Core concepts and practical usage of Model Context Protocol</p>
                             </div>
                         </div>
                         <div class="flex items-center gap-3">
@@ -479,7 +479,7 @@ claude mcp add slack -- npx -y @anthropic-ai/mcp-server-slack</code></pre>
                             <div class="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center text-2xl">4</div>
                             <div>
                                 <h3 class="font-bold text-xl">Model Selection</h3>
-                                <p class="text-gray-400 text-sm">Opus, Sonnet, Haiku 모델 선택과 Thinking Mode</p>
+                                <p class="text-gray-400 text-sm">Choosing between Opus, Sonnet, and Haiku + thinking modes</p>
                             </div>
                         </div>
                         <div class="flex items-center gap-3">
@@ -574,6 +574,23 @@ User: "ultrathink about the architecture for this system"</code></pre>
                             <div class="tip-box">
                                 <p class="text-pink-200 font-medium">Real-World Skills</p>
                                 <p class="text-sm mt-1 text-gray-300">Skills are most powerful when they encode your team's best practices and automate repetitive workflows.</p>
+                            </div>
+
+                            <div class="card rounded-xl p-5 border border-white/10">
+                                <div>
+                                        <h4 class="font-bold text-lg text-accent">OpenCode Subagents (Quick Intro)</h4>
+                                        <p class="text-gray-300 mt-1">A subagent is a specialized helper agent you delegate a focused task to (e.g., exploration, research, verification), so the primary agent can parallelize work and keep context organized.</p>
+                                        <div class="mt-4 grid md:grid-cols-2 gap-3 text-sm">
+                                            <div class="bg-dark-800/40 border border-white/5 rounded-xl p-3">
+                                                <div class="font-semibold text-white">When to use</div>
+                                                <div class="text-gray-400 mt-1">Parallel exploration, documentation lookup, review/verification, repetitive analysis.</div>
+                                            </div>
+                                            <div class="bg-dark-800/40 border border-white/5 rounded-xl p-3">
+                                                <div class="font-semibold text-white">How to delegate</div>
+                                                <div class="text-gray-400 mt-1">Give one goal, expected output format, constraints (read-only vs write), and relevant file paths.</div>
+                                            </div>
+                                        </div>
+                                </div>
                             </div>
 
                             <h4 class="font-bold text-lg text-accent">Example: Code Review Skill</h4>

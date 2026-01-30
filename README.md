@@ -1,6 +1,6 @@
 # Claude Code Study Group
 
-5주 Claude Code 스터디 평가 시스템
+5주 Claude Code 스터디 플랫폼 (제출 + 리더보드 + 관리자 수동 평가)
 
 ## 🚀 Quick Start
 
@@ -30,8 +30,7 @@ claude-code-study/
 │   └── leaderboard.html # 리더보드
 ├── backend/            # API 서버
 │   ├── server.py       # FastAPI 서버
-│   ├── evaluator.py    # 평가 로직
-│   └── watcher.py      # 제출 감시
+│   └── deploy_watcher.py # (옵션) 배포/재시작 워처
 ├── submissions/        # 참가자 제출물
 ├── evaluations/        # 평가 결과
 ├── rubrics/            # 평가 기준
@@ -73,17 +72,10 @@ curl -X POST http://localhost:8003/api/submissions/submit \
   -d '{"participant_id": "user001", "week": 1, "github_url": "https://github.com/user/repo"}'
 ```
 
-## 🤖 자동 평가
+## 🧑‍⚖️ 평가(수동)
 
-### Watcher 실행 (백그라운드)
-```bash
-python backend/watcher.py
-```
-
-### 수동 평가
-```bash
-python backend/evaluator.py evaluate 1 user001
-```
+- 제출 후 상태는 "Pending review"로 표시됩니다.
+- 관리자가 `admin.html`에서 점수와 피드백을 입력하면 평가가 완료됩니다.
 
 ## 📊 리더보드
 

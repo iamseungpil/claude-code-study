@@ -533,25 +533,181 @@
                     return;
                 }
 
-                container.innerHTML = recent.map(s => `
-                    <div class="flex items-center justify-between bg-dark-800/50 rounded-xl p-4">
-                        <div class="flex items-center gap-4">
-                            <div class="w-10 h-10 rounded-lg bg-accent-blue/20 flex items-center justify-center text-sm font-bold">
-                                W${s.week}
+                container.innerHTML = recent.map(s => {
+                    const pid = s.participant_id;
+                    const week = s.week;
+                    const history = Array.isArray(s.submission_history) ? [...s.submission_history] : [];
+                    history.sort((a, b) => (b.submission_number || 0) - (a.submission_number || 0));
+
+                    const optionsHtml = history.map(h => {
+                        const n = h.submission_number;
+                        const submittedAt = h.submitted_at ? new Date(h.submitted_at).toLocaleString('en-US') : '-';
+                        const elapsed = typeof h.elapsed_minutes === 'number' ? `${h.elapsed_minutes.toFixed(1)} min` : '-';
+                        const url = h.github_url ? escapeHtml(h.github_url) : '';
+                        const label = `Try #${n} · ${submittedAt} · ${elapsed}`;
+                        return `<option value="${n}" data-github-url="${url}">${escapeHtml(label)}</option>`;
+                    }).join('');
+
+                    const latestTry = history.length ? history[0].submission_number : '';
+                    const cardId = `review-${week}-${pid}`;
+
+                    return `
+                        <div class="bg-dark-800/50 rounded-2xl p-4 border border-white/5">
+                            <div class="flex items-center justify-between gap-4">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-10 h-10 rounded-lg bg-accent-blue/20 flex items-center justify-center text-sm font-bold">W${week}</div>
+                                    <div>
+                                        <div class="font-medium">${escapeHtml(pid)}</div>
+                                        <div class="text-sm text-gray-500">${s.submitted_at ? new Date(s.submitted_at).toLocaleString('en-US') : '-'}</div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <div class="text-right">
+                                        <div class="text-sm text-gray-400">${s.elapsed_minutes ? s.elapsed_minutes.toFixed(1) + ' min' : '-'}</div>
+                                        <div class="text-xs text-gray-500">${escapeHtml(s.status || '')}</div>
+                                    </div>
+                                    <button class="bg-white/5 hover:bg-white/10 border border-white/10 px-3 py-2 rounded-xl text-sm font-medium transition-colors" onclick="toggleReview('${week}','${escapeHtml(pid)}')">
+                                        Review
+                                    </button>
+                                </div>
                             </div>
-                            <div>
-                                <div class="font-medium">${s.participant_id}</div>
-                                <div class="text-sm text-gray-500">${s.submitted_at ? new Date(s.submitted_at).toLocaleString('en-US') : '-'}</div>
+
+                            <div id="${cardId}" class="hidden mt-4 pt-4 border-t border-white/10">
+                                <div class="grid md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="text-xs uppercase tracking-wide text-gray-500 font-bold">Submission Attempt</label>
+                                        <select id="attempt-${week}-${pid}" class="mt-2 w-full bg-dark-700/60 border border-white/10 rounded-xl px-3 py-2 text-sm" onchange="updateAttemptUrl('${week}','${escapeHtml(pid)}')">
+                                            ${optionsHtml}
+                                        </select>
+                                        <div class="mt-2 text-xs text-gray-500">Latest: Try #${latestTry || '-'}</div>
+                                        <div class="mt-3 text-xs text-gray-400 break-all">
+                                            <span class="text-gray-500">GitHub URL:</span>
+                                            <span id="attempt-url-${week}-${pid}"></span>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label class="text-xs uppercase tracking-wide text-gray-500 font-bold">Rubric Score</label>
+                                        <input id="rubric-${week}-${pid}" type="number" min="0" class="mt-2 w-full bg-dark-700/60 border border-white/10 rounded-xl px-3 py-2 text-sm" placeholder="e.g., 75" />
+                                        <div class="mt-2 text-xs text-gray-500">This will be combined with the system time bonus.</div>
+                                    </div>
+                                </div>
+
+                                <div class="mt-4 grid md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="text-xs uppercase tracking-wide text-gray-500 font-bold">Strengths (one per line)</label>
+                                        <textarea id="strengths-${week}-${pid}" rows="4" class="mt-2 w-full bg-dark-700/60 border border-white/10 rounded-xl px-3 py-2 text-sm" placeholder="- ..."></textarea>
+                                    </div>
+                                    <div>
+                                        <label class="text-xs uppercase tracking-wide text-gray-500 font-bold">Improvements (one per line)</label>
+                                        <textarea id="improvements-${week}-${pid}" rows="4" class="mt-2 w-full bg-dark-700/60 border border-white/10 rounded-xl px-3 py-2 text-sm" placeholder="- ..."></textarea>
+                                    </div>
+                                </div>
+
+                                <div class="mt-4">
+                                    <label class="text-xs uppercase tracking-wide text-gray-500 font-bold">Feedback</label>
+                                    <textarea id="feedback-${week}-${pid}" rows="4" class="mt-2 w-full bg-dark-700/60 border border-white/10 rounded-xl px-3 py-2 text-sm" placeholder="Write feedback in English"></textarea>
+                                </div>
+
+                                <div class="mt-4 flex items-center justify-end gap-3">
+                                    <button class="bg-accent-emerald/20 hover:bg-accent-emerald/30 border border-accent-emerald/30 text-emerald-200 px-4 py-2 rounded-xl text-sm font-bold transition-colors" onclick="submitManualReview('${week}','${escapeHtml(pid)}')">
+                                        Save Review
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                        <div class="text-right">
-                            <div class="text-sm text-gray-400">${s.elapsed_minutes ? s.elapsed_minutes.toFixed(1) + ' min' : '-'}</div>
-                            <div class="text-xs text-gray-500">${s.status}</div>
-                        </div>
-                    </div>
-                `).join('');
+                    `;
+                }).join('');
+
+                // Populate GitHub URL fields for visible cards
+                recent.forEach(s => {
+                    updateAttemptUrl(s.week, s.participant_id);
+                });
             } catch (e) {
                 container.innerHTML = '<div class="text-center text-gray-500 py-4">Failed to load submissions</div>';
+            }
+        }
+
+        function toggleReview(week, participantId) {
+            const el = document.getElementById(`review-${week}-${participantId}`);
+            if (!el) return;
+            el.classList.toggle('hidden');
+            if (!el.classList.contains('hidden')) {
+                updateAttemptUrl(week, participantId);
+            }
+        }
+
+        function updateAttemptUrl(week, participantId) {
+            const select = document.getElementById(`attempt-${week}-${participantId}`);
+            const urlEl = document.getElementById(`attempt-url-${week}-${participantId}`);
+            if (!select || !urlEl) return;
+            const selected = select.options[select.selectedIndex];
+            const url = selected?.getAttribute('data-github-url') || '';
+            urlEl.textContent = url || '-';
+        }
+
+        function parseLines(text) {
+            return (text || '')
+                .split('\n')
+                .map(s => s.trim())
+                .filter(s => s.length > 0)
+                .map(s => s.startsWith('-') ? s.replace(/^\-\s*/, '') : s);
+        }
+
+        async function submitManualReview(week, participantId) {
+            const token = localStorage.getItem('auth_token');
+            if (!token) {
+                alert('Login required');
+                return;
+            }
+
+            const attemptSelect = document.getElementById(`attempt-${week}-${participantId}`);
+            const rubricInput = document.getElementById(`rubric-${week}-${participantId}`);
+            const feedbackInput = document.getElementById(`feedback-${week}-${participantId}`);
+            const strengthsInput = document.getElementById(`strengths-${week}-${participantId}`);
+            const improvementsInput = document.getElementById(`improvements-${week}-${participantId}`);
+
+            const submissionNumber = parseInt(attemptSelect?.value || '', 10);
+            const rubricScore = parseInt(rubricInput?.value || '', 10);
+
+            if (!Number.isFinite(submissionNumber)) {
+                alert('Select a submission attempt');
+                return;
+            }
+            if (!Number.isFinite(rubricScore)) {
+                alert('Enter a rubric score');
+                return;
+            }
+
+            const payload = {
+                submission_number: submissionNumber,
+                rubric_score: rubricScore,
+                feedback: feedbackInput?.value || '',
+                strengths: parseLines(strengthsInput?.value || ''),
+                improvements: parseLines(improvementsInput?.value || ''),
+            };
+
+            try {
+                const response = await fetch(`${API_BASE}/api/admin/evaluations/${week}/${participantId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const err = await response.json().catch(() => ({}));
+                    alert(`Failed: ${err.detail || response.status}`);
+                    return;
+                }
+
+                const result = await response.json();
+                alert(`Saved review for ${participantId} (W${week}, Try #${result.submission_number}). Total: ${result.scores?.total ?? '-'}`);
+                loadRecentSubmissions();
+            } catch (e) {
+                alert('Connection error');
             }
         }
 

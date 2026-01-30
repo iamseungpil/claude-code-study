@@ -1040,18 +1040,17 @@ useEffect(() =&gt; {
                     statusEl.className = 'mt-6 text-center';
                     statusEl.classList.remove('hidden');
 
-                    // Temporarily disable button during evaluation
-                    document.getElementById('submitBtn').disabled = true;
-                    document.getElementById('submitBtn').classList.add('opacity-50', 'cursor-not-allowed');
-                    document.getElementById('submitBtn').innerHTML = 'Evaluating...';
+                    // Manual review workflow: do not lock the UI waiting for evaluation
+                    document.getElementById('submitBtn').disabled = false;
+                    document.getElementById('submitBtn').classList.remove('opacity-50', 'cursor-not-allowed');
+                    document.getElementById('submitBtn').innerHTML = '🔄 Resubmit';
 
                     // Update submission history from response
                     if (data.submission_history) {
                         displaySubmissionHistory(data.submission_history);
                     }
 
-                    // Start polling for evaluation results
-                    pollEvaluation(1, currentUser.user_id);
+                    showStatus('Submission received. Pending admin review.', 'text-amber-400');
                 } else {
                     const error = await response.json();
                     // If authentication error, redirect to login
@@ -1076,45 +1075,7 @@ useEffect(() =&gt; {
             el.classList.remove('hidden');
         }
 
-        // Poll for evaluation results
-        async function pollEvaluation(week, participantId, attempts = 0) {
-            const maxAttempts = 30; // 5 minutes max (10s interval)
-
-            if (attempts >= maxAttempts) {
-                showStatus('Evaluation is taking longer than expected. Check back later on the leaderboard.', 'text-amber-400');
-                return;
-            }
-
-            try {
-                const response = await fetch(`${API_BASE}/api/evaluations/${week}/${participantId}`);
-
-                if (response.ok) {
-                    const evalData = await response.json();
-                    // Check if evaluation is complete (not still "evaluating")
-                    if (evalData.status === 'completed') {
-                        displayEvaluationFeedback(evalData);
-                    } else if (evalData.status === 'evaluating') {
-                        // Still evaluating, keep polling
-                        showStatus(`Evaluation in progress... (${attempts + 1}/${maxAttempts})`, 'text-blue-400');
-                        setTimeout(() => pollEvaluation(week, participantId, attempts + 1), 5000);
-                    } else if (evalData.status === 'error') {
-                        showStatus('Evaluation failed: ' + (evalData.error || 'Unknown error'), 'text-red-400');
-                    } else {
-                        // Unknown status, show results anyway
-                        displayEvaluationFeedback(evalData);
-                    }
-                } else if (response.status === 404) {
-                    // Not yet evaluated, poll again
-                    showStatus(`Evaluation in progress... (${attempts + 1}/${maxAttempts})`, 'text-blue-400');
-                    setTimeout(() => pollEvaluation(week, participantId, attempts + 1), 5000);
-                } else {
-                    showStatus('Error checking evaluation status', 'text-red-400');
-                }
-            } catch (error) {
-                console.error('Evaluation poll error:', error);
-                setTimeout(() => pollEvaluation(week, participantId, attempts + 1), 5000);
-            }
-        }
+        // Manual review workflow: no evaluation polling
 
         // Sanitize HTML to prevent XSS
         function escapeHtml(text) {
@@ -1127,7 +1088,7 @@ useEffect(() =&gt; {
         function displayEvaluationFeedback(evalData) {
             const feedbackHtml = `
                 <div class="mt-8 p-6 bg-dark-800/50 rounded-2xl border border-accent/30">
-                    <h3 class="text-xl font-bold text-accent mb-4">Evaluation Complete!</h3>
+                    <h3 class="text-xl font-bold text-accent mb-4">Review Complete</h3>
 
                     <!-- Score Summary -->
                     <div class="grid grid-cols-3 gap-4 mb-6">
@@ -1194,7 +1155,7 @@ useEffect(() =&gt; {
 
             // Insert feedback after status message
             const statusEl = document.getElementById('statusMessage');
-            statusEl.innerHTML = 'Evaluation Complete!';
+            statusEl.innerHTML = 'Review Complete';
             statusEl.className = 'mt-6 text-center text-lg font-medium text-green-400';
 
             // Remove existing feedback containers first (prevent duplicates)
@@ -1227,7 +1188,9 @@ useEffect(() =&gt; {
                 const response = await fetch(`${API_BASE}/api/evaluations/1/${currentUser.user_id}`);
                 if (response.ok) {
                     const evalData = await response.json();
-                    displayEvaluationFeedback(evalData);
+                    if (evalData.status === 'completed') {
+                        displayEvaluationFeedback(evalData);
+                    }
                 }
             } catch (error) {
                 // No evaluation yet, that's fine
@@ -1284,7 +1247,7 @@ useEffect(() =&gt; {
                                     <span class="text-2xl font-bold text-white">${sub.evaluation.total}</span>
                                     <span class="text-sm text-gray-400">pts</span>
                                 </div>
-                            ` : (isLatest ? '<span class="text-sm text-amber-400">⏳ Evaluating...</span>' : '')}
+                             ` : (isLatest ? '<span class="text-sm text-amber-400">⏳ Pending review</span>' : '')}
                         </div>
                         <div class="grid grid-cols-2 gap-4 text-sm">
                             <div>

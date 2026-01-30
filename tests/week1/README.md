@@ -100,17 +100,11 @@ After running tests, results are saved to:
 - `test-results/results.json` - Full Playwright JSON report
 - `test-results/score-report.json` - Score breakdown for evaluation
 
-## Using with Backend Evaluator
+## Using with the Study Platform
 
-The backend evaluator automatically runs these tests:
+These Playwright tests are optional developer tooling. The current study platform uses **manual admin review** for scoring.
 
-```bash
-# From project root
-python backend/playwright_evaluator.py 1 participant_id
-
-# Or through the main evaluator
-python backend/evaluator.py evaluate 1 participant_id
-```
+If you want to run the tests locally for debugging a submission, run them directly from `tests/week1/`.
 
 ## Troubleshooting
 

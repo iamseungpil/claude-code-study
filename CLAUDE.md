@@ -1,7 +1,7 @@
-# Claude Code Study Evaluation System
+# Claude Code Study Platform
 
 ## Purpose
-Automated evaluation system for 5-week Claude Code study group.
+Study group platform for a 5-week Claude Code curriculum (submissions + leaderboard + admin review).
 
 ## Architecture
 
@@ -58,11 +58,11 @@ cloudflared tunnel --url http://localhost:8003
 - `rubrics/` - Week-specific scoring criteria
 - `challenges/` - Challenge materials for participants
 
-## Evaluation Flow
-1. Participant submits GitHub URL
+## Review Flow
+1. Participant submits a GitHub URL
 2. System clones to `submissions/weekN/participant_id/`
-3. Run: `claude -p "evaluate-submission weekN participant_id"`
-4. Result saved to `evaluations/weekN/participant_id.json`
+3. System creates/updates a pending review record in `evaluations/weekN/participant_id.json`
+4. Admin reviews the submission and saves the score/feedback (manual)
 
 ## Scoring Formula
 ```
@@ -70,9 +70,8 @@ total = rubric_score + time_bonus
 time_bonus = +10 (≤70%) | +5 (≤85%) | 0 (on time) | -5/5min (late)
 ```
 
-## Commands
-- `/project:evaluate-submission <week> <participant>` - Evaluate one
-- `/project:evaluate-all <week>` - Evaluate all pending
+## Admin Review
+- Manual review is submitted via the admin panel (UI) and stored as JSON in `evaluations/weekN/`.
 
 ## Important
 - Read `rubrics/weekN_rubric.md` before evaluating
@@ -136,18 +135,13 @@ time_bonus = +10 (≤70%) | +5 (≤85%) | 0 (on time) | -5/5min (late)
 - **Symptom**: `EACCES: permission denied` during `npm install`
 - **Solution**: Use `--cache /tmp/npm-cache` flag or fix permissions with `sudo chown -R $(whoami) ~/.npm`
 
-## Evaluation System Notes
+## Review System Notes
 
-### Evaluation Method: Code Analysis Only
-- **NO E2E/Playwright testing** - evaluation is done via Claude CLI code analysis
-- Claude reads source code and evaluates against rubric
-- No npm install/build required during evaluation
-- Faster and more reliable than E2E testing
+### Review Method
+- Review is manual: admins read the submission and enter rubric scores + feedback.
 
-### Evaluation Feedback Display
-- After submission, frontend polls `/api/evaluations/{week}/{participant_id}`
-- Displays score breakdown, feedback, strengths, improvements
-- Polling interval: 10 seconds, max 30 attempts (5 minutes)
+### Review Display
+- After submission, the UI shows "Pending review" until an admin saves a completed review.
 
 ## Current Deployment Setup (2026-01-20)
 
@@ -157,7 +151,7 @@ Frontend (Cloudflare Pages) → Cloudflare Tunnel → Local Backend (localhost:8
 ```
 
 ### Why Local Backend?
-- Local backend runs Claude CLI for code-only evaluation
+- Local backend stores submissions and supports admin review workflows
 - Cloudflare Tunnel provides secure remote access
 - No cold start delays
 - SQLite database for persistent storage
@@ -228,14 +222,8 @@ cloudflared tunnel --url http://localhost:8003
 - **Files Modified**: All `week*.html` files
 
 ### Issue 12: Windows Encoding Error in Evaluation (2026-01-29)
-- **Cause**: `evaluator.py` used `open()` without `encoding='utf-8'` parameter
-  - Windows defaults to cp949 encoding, which can't encode Unicode characters like em dash (—)
-  - Korean text and special characters in evaluation feedback caused encoding errors
-- **Symptom**: `'cp949' codec can't encode character '\u2014' in position 241: illegal multibyte sequence`
-- **Solution**: Added `encoding='utf-8'` to ALL `open()` calls in evaluator.py (8 locations)
-- **File Modified**: `backend/evaluator.py`
-  - Lines 110, 134, 507, 518, 537, 618, 647, 662
-- **Lesson**: Always explicitly specify encoding in Python file operations on Windows
+- Legacy note: this issue occurred when evaluation output contained non-ASCII characters.
+- Current system still enforces `encoding='utf-8'` for server-side file I/O.
 
 ### Issue 13: Windows Encoding Error in Server API (2026-01-29)
 - **Cause**: `server.py` had 27 `open()` calls without `encoding='utf-8'` parameter
@@ -249,20 +237,7 @@ cloudflared tunnel --url http://localhost:8003
 - **File Modified**: `backend/server.py`
 
 ### Issue 14: Claude CLI Returning Text Instead of JSON (2026-01-29)
-- **Cause**: Evaluation prompt was not explicit enough about requiring JSON-only output
-  - Claude CLI with `--output-format json` returned markdown text in the result field
-  - Parser expected JSON but received: "Looking at the submission, I need to evaluate..."
-- **Symptom**: `Expecting property name enclosed in double quotes: line 1 column 3 (char 2)`
-  - sundong's Week 1 submission evaluation failed with JSON parse error
-- **Solution**: Enhanced prompt with explicit JSON-only requirements
-  - Added "YOU MUST OUTPUT ONLY A VALID JSON OBJECT. NO EXPLANATIONS, NO MARKDOWN"
-  - Specified exact JSON structure with all required fields
-  - Added "OUTPUT ONLY THE JSON OBJECT ABOVE. NO OTHER TEXT" at end of prompt
-- **File Modified**: `backend/evaluator.py` (lines 272-305)
-- **Commit**: 335efa1
-  - All challenges, users, participants, metadata, evaluation file operations
-- **Lesson**: Encoding must be consistent - both read AND write operations need UTF-8
-- **Fix Applied**: Used `sed` to batch update all file operations, then manually converted existing files
+- Legacy note: this issue only applied to the removed automated Claude-based evaluation pipeline.
 
 ### Cloudflare Pages Configuration (IMPORTANT)
 - **Build output directory**: `frontend`
@@ -291,8 +266,8 @@ cloudflared tunnel --url http://localhost:8003
 ### Resubmission Flow
 1. User can resubmit anytime (button changes to "🔄 Resubmit")
 2. New submission is appended to `submission_history`
-3. Evaluation runs on latest submission
-4. Time rank bonus is recalculated based on latest submission time
+3. The submission becomes "Pending review" until an admin completes the review
+4. Time rank bonus is calculated based on the latest submission time
 
 ## E2E Testing with Playwright (2026-01-20)
 
