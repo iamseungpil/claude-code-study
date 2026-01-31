@@ -8,4 +8,4 @@ ADMIN_USER_IDS = "iamseungpil"
 [[d1_databases]]
 binding = "DB"
 database_name = "claude-study-db"
-database_id = "placeholder-replace-after-d1-create"
+database_id = "6fa0b374-b5fb-40ea-a0ba-6efb5a2b73bc"

@@ -23,7 +23,7 @@
     // Backend API URL (via Cloudflare Tunnel)
     // Set to your Cloudflare Tunnel URL when exposing local backend
     // Leave empty for local development (auto-detected)
-    const CONFIGURED_API_BASE = 'https://stage-present-dosage-unlike.trycloudflare.com';
+    const CONFIGURED_API_BASE = 'https://claude-code-study-api.iamseungpil.workers.dev';
 
     // ============================================================
     // API Base URL Detection Logic
