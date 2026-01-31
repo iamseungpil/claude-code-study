@@ -99,10 +99,17 @@ ADMIN_USER_IDS = {
 
 # Pydantic Models
 def validate_week_range(v: int) -> int:
-    """Shared week validation (1-5)."""
+    """Shared week validation (1-5) for Pydantic models."""
     if not 1 <= v <= 5:
         raise ValueError("Week must be between 1 and 5")
     return v
+
+
+def _validate_week_param(week: int) -> int:
+    """Validate week path parameter (1-5). Raises HTTPException(400) on invalid."""
+    if not 1 <= week <= 5:
+        raise HTTPException(400, "Week must be between 1 and 5")
+    return week
 
 
 class SubmissionRequest(BaseModel):
@@ -320,6 +327,36 @@ def save_challenges(challenges: dict):
     challenges_file = DATA_DIR / "challenges.json"
     with open(challenges_file, "w", encoding="utf-8") as f:
         json.dump(challenges, f, indent=2, ensure_ascii=False)
+
+
+def get_challenge(week: int) -> tuple[dict, dict, str]:
+    """Load challenges and return (challenges_dict, week_challenge, week_key).
+
+    Combines load_challenges() with week_key extraction for the common pattern.
+    """
+    challenges = load_challenges()
+    week_key = f"week{week}"
+    return challenges, challenges[week_key], week_key
+
+
+def ensure_submission_history(metadata: dict) -> list:
+    """Extract submission_history from metadata with backward compatibility.
+
+    If no submission_history array exists but metadata has submitted_at,
+    creates a single-entry history from the legacy flat fields.
+    """
+    history = metadata.get("submission_history", [])
+    if not history and metadata.get("submitted_at"):
+        history = [
+            {
+                "submission_number": 1,
+                "github_url": metadata.get("github_url"),
+                "submitted_at": metadata.get("submitted_at"),
+                "elapsed_seconds": metadata.get("elapsed_seconds"),
+                "elapsed_minutes": metadata.get("elapsed_minutes"),
+            }
+        ]
+    return history
 
 
 # ============== Authentication ==============
@@ -618,14 +655,11 @@ async def list_participants():
 @app.post("/api/admin/challenge/{week}/start")
 async def admin_start_challenge(week: int, admin: dict = Depends(require_admin)):
     """Admin starts a challenge for all participants."""
-    if not 1 <= week <= 5:
-        raise HTTPException(400, "Week must be between 1 and 5")
+    _validate_week_param(week)
+    challenges, week_data, week_key = get_challenge(week)
 
-    challenges = load_challenges()
-    week_key = f"week{week}"
-
-    if challenges[week_key]["status"] != "not_started":
-        raise HTTPException(400, f"Challenge already {challenges[week_key]['status']}")
+    if week_data["status"] != "not_started":
+        raise HTTPException(400, f"Challenge already {week_data['status']}")
 
     start_time = datetime.now().isoformat()
     challenges[week_key] = {
@@ -647,18 +681,15 @@ async def admin_start_challenge(week: int, admin: dict = Depends(require_admin))
 @app.post("/api/admin/challenge/{week}/end")
 async def admin_end_challenge(week: int, admin: dict = Depends(require_admin)):
     """Admin ends a challenge."""
-    if not 1 <= week <= 5:
-        raise HTTPException(400, "Week must be between 1 and 5")
+    _validate_week_param(week)
+    challenges, week_data, week_key = get_challenge(week)
 
-    challenges = load_challenges()
-    week_key = f"week{week}"
-
-    if challenges[week_key]["status"] != "started":
+    if week_data["status"] != "started":
         raise HTTPException(400, "Challenge is not active")
 
     end_time = datetime.now().isoformat()
-    challenges[week_key]["status"] = "ended"
-    challenges[week_key]["end_time"] = end_time
+    week_data["status"] = "ended"
+    week_data["end_time"] = end_time
     save_challenges(challenges)
 
     return {"status": "ended", "week": week, "end_time": end_time}
@@ -672,8 +703,7 @@ async def admin_restart_challenge(week: int, admin: dict = Depends(require_admin
     - Deletes all evaluations for the week
     - Resets challenge to not_started state
     """
-    if not 1 <= week <= 5:
-        raise HTTPException(400, "Week must be between 1 and 5")
+    _validate_week_param(week)
 
     deleted_submissions = 0
     deleted_evaluations = 0
@@ -694,8 +724,7 @@ async def admin_restart_challenge(week: int, admin: dict = Depends(require_admin
             deleted_evaluations += 1
 
     # Reset challenge to initial state
-    challenges = load_challenges()
-    week_key = f"week{week}"
+    challenges, _, week_key = get_challenge(week)
     challenges[week_key] = {
         "status": "not_started",
         "start_time": None,
@@ -787,13 +816,10 @@ async def get_all_challenges_status():
 @app.get("/api/challenge/{week}/status")
 async def get_challenge_status(week: int):
     """Get status of a specific week's challenge."""
-    if not 1 <= week <= 5:
-        raise HTTPException(400, "Week must be between 1 and 5")
+    _validate_week_param(week)
+    _, week_data, _ = get_challenge(week)
 
-    challenges = load_challenges()
-    week_key = f"week{week}"
-
-    return {"week": week, **challenges[week_key]}
+    return {"week": week, **week_data}
 
 
 # ============== Personal Timer APIs ==============
@@ -820,14 +846,9 @@ async def start_personal_timer(
     if not user_id:
         raise HTTPException(401, "Invalid user token")
 
-    # 2. week 유효성 검사
-    if not 1 <= week <= 5:
-        raise HTTPException(400, "Week must be between 1 and 5")
-
-    # 3. 챌린지 데이터 로드
-    challenges = load_challenges()
-    week_key = f"week{week}"
-    challenge = challenges[week_key]
+    # 2. week 유효성 검사 + 챌린지 데이터 로드
+    _validate_week_param(week)
+    challenges, challenge, week_key = get_challenge(week)
 
     # 4. 챌린지 상태 확인 (started인지)
     if challenge["status"] == "not_started":
@@ -892,14 +913,9 @@ async def get_my_challenge_status(
     if not user_id:
         raise HTTPException(401, "Invalid user token")
 
-    # 2. week 유효성 검사
-    if not 1 <= week <= 5:
-        raise HTTPException(400, "Week must be between 1 and 5")
-
-    # 3. 챌린지 데이터 로드
-    challenges = load_challenges()
-    week_key = f"week{week}"
-    challenge = challenges[week_key]
+    # 2. week 유효성 검사 + 챌린지 데이터 로드
+    _validate_week_param(week)
+    _, challenge, _ = get_challenge(week)
 
     # 4. 기본 응답 구조
     response = {
@@ -1040,9 +1056,7 @@ async def submit_solution(
         raise HTTPException(401, "Authentication required to submit solutions")
 
     # Check challenge status
-    challenges = load_challenges()
-    week_key = f"week{data.week}"
-    challenge = challenges[week_key]
+    challenges, challenge, week_key = get_challenge(data.week)
 
     if challenge["status"] == "not_started":
         raise HTTPException(
@@ -1086,18 +1100,7 @@ async def submit_solution(
     if metadata_file.exists():
         with open(metadata_file, encoding="utf-8") as f:
             existing_metadata = json.load(f)
-            existing_history = existing_metadata.get("submission_history", [])
-            # If no history but has submitted_at, create first entry from existing data
-            if not existing_history and existing_metadata.get("submitted_at"):
-                existing_history.append(
-                    {
-                        "submission_number": 1,
-                        "github_url": existing_metadata.get("github_url"),
-                        "submitted_at": existing_metadata.get("submitted_at"),
-                        "elapsed_seconds": existing_metadata.get("elapsed_seconds"),
-                        "elapsed_minutes": existing_metadata.get("elapsed_minutes"),
-                    }
-                )
+            existing_history = ensure_submission_history(existing_metadata)
             submission_number = len(existing_history) + 1
 
     # Create new submission entry
@@ -1222,19 +1225,7 @@ async def get_submission_history(week: int, participant_id: str):
     with open(metadata_file, encoding="utf-8") as f:
         metadata = json.load(f)
 
-    history = metadata.get("submission_history", [])
-
-    # If no history array but has submission data, create initial entry
-    if not history and metadata.get("submitted_at"):
-        history = [
-            {
-                "submission_number": 1,
-                "github_url": metadata.get("github_url"),
-                "submitted_at": metadata.get("submitted_at"),
-                "elapsed_seconds": metadata.get("elapsed_seconds"),
-                "elapsed_minutes": metadata.get("elapsed_minutes"),
-            }
-        ]
+    history = ensure_submission_history(metadata)
 
     # For backward compatibility: attach evaluation from eval file if missing
     if history:
@@ -1281,8 +1272,7 @@ async def admin_submit_evaluation(
     admin: dict = Depends(require_admin),
 ):
     """Admin submits manual evaluation for a submission."""
-    if not 1 <= week <= 5:
-        raise HTTPException(400, "Week must be between 1 and 5")
+    _validate_week_param(week)
 
     if not PARTICIPANT_ID_PATTERN.match(participant_id):
         raise HTTPException(400, "Invalid participant ID format")
@@ -1296,17 +1286,7 @@ async def admin_submit_evaluation(
     with open(metadata_file, encoding="utf-8") as f:
         metadata = json.load(f)
 
-    history = metadata.get("submission_history", [])
-    if not history and metadata.get("submitted_at"):
-        history = [
-            {
-                "submission_number": 1,
-                "github_url": metadata.get("github_url"),
-                "submitted_at": metadata.get("submitted_at"),
-                "elapsed_seconds": metadata.get("elapsed_seconds"),
-                "elapsed_minutes": metadata.get("elapsed_minutes"),
-            }
-        ]
+    history = ensure_submission_history(metadata)
 
     target_entry = None
     for entry in history:
@@ -1404,6 +1384,35 @@ async def get_evaluation(week: int, participant_id: str):
         return json.load(f)
 
 
+def _load_user_map() -> dict:
+    """Load user data from users.json and return a map of user_id -> {full_name, profile_image}."""
+    users_file = DATA_DIR / "users.json"
+    if not users_file.exists():
+        return {}
+    try:
+        with open(users_file, encoding="utf-8") as f:
+            data = json.load(f)
+        return {
+            u["user_id"]: {
+                "full_name": u.get("full_name", u["user_id"]),
+                "profile_image": u.get("profile_image"),
+            }
+            for u in data.get("users", [])
+        }
+    except Exception:
+        return {}
+
+
+def _enrich_with_user_info(entries: list, user_map: dict) -> list:
+    """Add full_name and profile_image to leaderboard entries."""
+    for entry in entries:
+        pid = entry["participant_id"]
+        user = user_map.get(pid, {})
+        entry["full_name"] = user.get("full_name", pid)
+        entry["profile_image"] = user.get("profile_image")
+    return entries
+
+
 def _get_week_leaderboard_data(week: int) -> list:
     """Helper function to get leaderboard data for a specific week.
 
@@ -1454,6 +1463,10 @@ def _get_week_leaderboard_data(week: int) -> list:
             r["medal"] = "🥉"
         else:
             r["medal"] = ""
+
+    # Enrich with user info (full_name, profile_image)
+    user_map = _load_user_map()
+    _enrich_with_user_info(results, user_map)
 
     return results
 
@@ -1518,6 +1531,10 @@ async def get_season_leaderboard():
             r["title"] = "🥉 3rd Place"
         else:
             r["title"] = ""
+
+    # Enrich with user info (full_name, profile_image)
+    user_map = _load_user_map()
+    _enrich_with_user_info(results, user_map)
 
     return results
 
@@ -1654,21 +1671,10 @@ async def github_webhook(request: Request):
 # ============== Static Files (Local Development Only) ==============
 
 # Allowed static HTML files (prevents arbitrary file access)
-ALLOWED_HTML_FILES = {
-    "index.html",
-    "leaderboard.html",
-    "admin.html",
-    "week1.html",
-    "week2.html",
-    "week3.html",
-    "week4.html",
-    "week5.html",
-    "week1-learn.html",
-    "week2-learn.html",
-    "week3-learn.html",
-    "week4-learn.html",
-    "week5-learn.html",
-}
+ALLOWED_HTML_FILES = {"index.html", "leaderboard.html", "admin.html"}
+for _i in range(1, 6):
+    ALLOWED_HTML_FILES.add(f"week{_i}.html")
+    ALLOWED_HTML_FILES.add(f"week{_i}-learn.html")
 
 if SERVE_STATIC:
 
@@ -1677,28 +1683,22 @@ if SERVE_STATIC:
         """Serve main page."""
         return FileResponse(FRONTEND_DIR / "index.html")
 
-    @app.get("/config.js")
-    async def serve_config_js():
-        """Serve config.js."""
-        return FileResponse(
-            FRONTEND_DIR / "config.js", media_type="application/javascript"
-        )
+    # Allowed JS/CSS assets from frontend directory
+    ALLOWED_STATIC_ASSETS = {
+        "config.js": "application/javascript",
+        "week-common.js": "application/javascript",
+        "week-common.css": "text/css",
+        "learn-common.js": "application/javascript",
+        "learn-common.css": "text/css",
+    }
 
     # NOTE: Specific routes MUST be defined BEFORE catch-all routes
-    @app.get("/challenges/week1/uigen.zip")
-    async def serve_week1_uigen():
-        """Serve Week 1 UIGen project zip."""
-        zip_path = BASE_DIR / "challenges" / "week1" / "uigen.zip"
-        if not zip_path.exists():
-            raise HTTPException(404, "uigen.zip not found")
-        return FileResponse(
-            zip_path, filename="uigen.zip", media_type="application/zip"
-        )
-
-    @app.get("/challenges/week2/{filename}")
-    async def serve_week2_challenge(filename: str):
-        """Serve Week 2 challenge files."""
-        file_path = BASE_DIR / "challenges" / "week2" / filename
+    @app.get("/challenges/{week_num}/{filename}")
+    async def serve_challenge_asset(week_num: str, filename: str):
+        """Serve challenge asset files for any week."""
+        if not re.match(r"^week[1-5]$", week_num):
+            raise HTTPException(404, "Invalid week")
+        file_path = BASE_DIR / "challenges" / week_num / filename
         if not file_path.exists():
             raise HTTPException(404, f"{filename} not found")
         return FileResponse(file_path, filename=filename)
@@ -1706,9 +1706,21 @@ if SERVE_STATIC:
     # Catch-all route MUST be last (matches any path not matched above)
     @app.get("/{filename:path}")
     async def serve_static_file(filename: str):
-        """Serve allowed static HTML files."""
+        """Serve allowed static HTML/JS/CSS files (supports clean URLs without .html)."""
+        # Serve allowed JS/CSS assets
+        if filename in ALLOWED_STATIC_ASSETS:
+            return FileResponse(
+                FRONTEND_DIR / filename,
+                media_type=ALLOWED_STATIC_ASSETS[filename],
+            )
+        # Serve allowed HTML files
         if filename in ALLOWED_HTML_FILES:
             return FileResponse(FRONTEND_DIR / filename)
+        # Support clean URLs: "week4-learn" -> "week4-learn.html"
+        if not filename.endswith(".html"):
+            html_filename = filename + ".html"
+            if html_filename in ALLOWED_HTML_FILES:
+                return FileResponse(FRONTEND_DIR / html_filename)
         raise HTTPException(404, "File not found")
 
 

@@ -1,0 +1,11 @@
+name = "claude-code-study-api"
+main = "src/index.ts"
+compatibility_date = "2024-06-01"
+
+[vars]
+ADMIN_USER_IDS = "iamseungpil"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "claude-study-db"
+database_id = "placeholder-replace-after-d1-create"

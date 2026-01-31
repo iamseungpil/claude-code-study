@@ -1,0 +1,10 @@
+/* week-common.css - Shared styles for week challenge pages */
+* { font-family: 'Outfit', sans-serif; }
+code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
+html { scroll-behavior: smooth; }
+.nav-blur { background: rgba(10, 10, 15, 0.85); backdrop-filter: blur(20px); }
+.card { background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%); border: 1px solid rgba(255,255,255,0.06); }
+.step-number { width: 48px; height: 48px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.25rem; flex-shrink: 0; }
+.btn-secondary { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); transition: all 0.3s ease; }
+.btn-secondary:hover { background: rgba(255,255,255,0.1); }
+.timer-display { font-variant-numeric: tabular-nums; }

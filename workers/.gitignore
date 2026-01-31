@@ -1,0 +1,4 @@
+node_modules/
+.wrangler/
+.dev.vars
+migrations/0002_data.sql

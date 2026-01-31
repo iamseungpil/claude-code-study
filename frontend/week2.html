@@ -21,113 +21,35 @@
             }
         }
     </script>
+    <link rel="stylesheet" href="week-common.css">
     <style>
-        * { font-family: 'Outfit', sans-serif; }
-        code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
-        html { scroll-behavior: smooth; }
-
         .hero-gradient {
             background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(168, 85, 247, 0.2) 0%, transparent 50%),
                         linear-gradient(180deg, #0f172a 0%, #0a0a0f 100%);
         }
-
-        .nav-blur {
-            background: rgba(10, 10, 15, 0.85);
-            backdrop-filter: blur(20px);
-        }
-
-        .card {
-            background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
-            border: 1px solid rgba(255,255,255,0.06);
-        }
-
         .stage-card {
             background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
             border: 1px solid rgba(255,255,255,0.06);
             transition: all 0.3s ease;
         }
-        .stage-card:hover {
-            border-color: rgba(255,255,255,0.15);
-        }
-
+        .stage-card:hover { border-color: rgba(255,255,255,0.15); }
         .stage-number {
-            width: 56px;
-            height: 56px;
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 1.5rem;
-            flex-shrink: 0;
+            width: 56px; height: 56px; border-radius: 16px;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 1.5rem; flex-shrink: 0;
         }
-
-        .code-block {
-            background: #0d1117;
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 12px;
-            overflow: hidden;
-        }
-        .code-block-header {
-            background: rgba(255,255,255,0.03);
-            padding: 10px 16px;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            font-size: 0.75rem;
-            color: #8b949e;
-            text-transform: uppercase;
-        }
-        .code-block pre {
-            padding: 16px;
-            font-size: 0.875rem;
-            line-height: 1.6;
-            color: #c9d1d9;
-            overflow-x: auto;
-        }
+        .code-block { background: #0d1117; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; overflow: hidden; }
+        .code-block-header { background: rgba(255,255,255,0.03); padding: 10px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.75rem; color: #8b949e; text-transform: uppercase; }
+        .code-block pre { padding: 16px; font-size: 0.875rem; line-height: 1.6; color: #c9d1d9; overflow-x: auto; }
         .code-comment { color: #6e7681; }
         .code-keyword { color: #ff7b72; }
         .code-string { color: #a5d6ff; }
-
-        .submit-card {
-            background: linear-gradient(135deg, rgba(168, 85, 247, 0.1) 0%, rgba(168, 85, 247, 0.02) 100%);
-            border: 1px solid rgba(168, 85, 247, 0.2);
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%);
-            transition: all 0.3s ease;
-        }
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px -10px rgba(168, 85, 247, 0.5);
-        }
-
-        .btn-secondary {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-            transition: all 0.3s ease;
-        }
-        .btn-secondary:hover {
-            background: rgba(255,255,255,0.1);
-        }
-
-        .timer-display {
-            font-variant-numeric: tabular-nums;
-        }
-
-        .tip-box {
-            background: rgba(168, 85, 247, 0.1);
-            border: 1px solid rgba(168, 85, 247, 0.3);
-        }
-
-        .warning-box {
-            background: rgba(251, 191, 36, 0.1);
-            border: 1px solid rgba(251, 191, 36, 0.3);
-        }
-
-        .important-box {
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-        }
+        .submit-card { background: linear-gradient(135deg, rgba(168, 85, 247, 0.1) 0%, rgba(168, 85, 247, 0.02) 100%); border: 1px solid rgba(168, 85, 247, 0.2); }
+        .btn-primary { background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%); transition: all 0.3s ease; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 30px -10px rgba(168, 85, 247, 0.5); }
+        .tip-box { background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.3); }
+        .warning-box { background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.3); }
+        .important-box { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); }
     </style>
 </head>
 <body class="bg-dark-900 text-white min-h-screen">
@@ -796,364 +718,23 @@ main().catch(err => {
 
     <script src="config.js"></script>
     <script>
-        // API Base URL (auto-configured from config.js)
-        const API_BASE = window.API_BASE || '';
-        const WEEK = 2;
-        let timerInterval = null;
-        let startTime = null;
-        let currentUser = null;
-        let personalStartTime = null;
-
-        // Check login status on page load
-        async function checkLoginStatus() {
-            const token = localStorage.getItem('auth_token');
-
-            // No token - redirect to main page
-            if (!token) {
-                alert('Please login to access the challenge page.');
-                window.location.href = '/';
-                return false;
-            }
-
-            try {
-                const response = await fetch(`${API_BASE}/api/auth/me`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-
-                if (response.ok) {
-                    currentUser = await response.json();
-                    const loginWarning = document.getElementById('login-warning');
-                    const startBtn = document.getElementById('startBtn');
-                    const submitBtn = document.getElementById('submitBtn');
-                    if (loginWarning) loginWarning.classList.add('hidden');
-                    if (startBtn) {
-                        startBtn.disabled = false;
-                        startBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-                    }
-                    if (submitBtn) {
-                        submitBtn.disabled = false;
-                        submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-                    }
-                    return true;
-                } else {
-                    // Invalid token - redirect to main page
-                    localStorage.removeItem('auth_token');
-                    alert('Your session has expired. Please login again.');
-                    window.location.href = '/';
-                    return false;
-                }
-            } catch (e) {
-                console.error('Auth check failed:', e);
-                alert('Authentication failed. Please login again.');
-                window.location.href = '/';
-                return false;
-            }
-        }
-
-        // Load personal timer status from server
-        async function loadPersonalStatus() {
-            const token = localStorage.getItem('auth_token');
-            if (!token || !currentUser) return;
-
-            try {
-                const response = await fetch(`${API_BASE}/api/challenge/${WEEK}/my-status`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-
-                    if (data.challenge_status !== 'started') {
-                        // Challenge not started - redirect to main page
-                        alert('Week 2 Challenge has not started yet. Please wait for the admin to start the challenge.');
-                        window.location.href = '/';
-                        return;
-                    }
-
-                    if (data.personal_status === 'in_progress' || data.personal_status === 'submitted') {
-                        personalStartTime = data.personal_start_time;
-
-                        document.getElementById('timerContainer').classList.remove('hidden');
-                        document.getElementById('startBtn').disabled = true;
-                        document.getElementById('startBtn').classList.add('opacity-50', 'cursor-not-allowed');
-                        document.getElementById('startBtn').innerHTML = 'Timer Started';
-
-                        timerInterval = setInterval(updateTimer, 1000);
-                        updateTimer();
-
-                        showChallengeForm();
-
-                        if (data.personal_status === 'submitted') {
-                            // Allow resubmission - keep button enabled
-                            document.getElementById('submitBtn').innerHTML = '🔄 Resubmit';
-                            showStatus('You have already submitted. You can resubmit to improve your score (time rank will be recalculated).', 'text-blue-400');
-                        }
-                    }
-                }
-            } catch (e) {
-                console.error('Failed to load personal status:', e);
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', async () => {
-            // Set download URL using API_BASE
-            const downloadBtn = document.getElementById('download-hooks-btn');
-            if (downloadBtn && window.API_BASE) {
-                downloadBtn.href = `${window.API_BASE}/challenges/week2/hooks-challenge.zip`;
-            } else if (downloadBtn) {
-                // Fallback for local development
-                downloadBtn.href = '/challenges/week2/hooks-challenge.zip';
-            }
-
-            // Check login first - will redirect if not logged in
-            const isLoggedIn = await checkLoginStatus();
-            if (!isLoggedIn) return;
-
-            // Check challenge status - will redirect if not started
-            await loadPersonalStatus();
-
-            // Load submission history
-            await loadSubmissionHistory();
-        });
-
-        function updateTimer() {
-            if (!personalStartTime) return;
-            const startDate = new Date(personalStartTime);
-            const elapsed = Math.floor((Date.now() - startDate.getTime()) / 1000);
-            const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
-            const seconds = (elapsed % 60).toString().padStart(2, '0');
-            document.getElementById('timerDisplay').textContent = `${minutes}:${seconds}`;
-        }
-
-        function showChallengeForm() {
-            // Hide the "Challenge Details Locked" message
-            const beforeTimerMsg = document.getElementById('beforeTimerMessage');
-            if (beforeTimerMsg) beforeTimerMsg.classList.add('hidden');
-
-            // Show hidden sections
-            const stages = document.getElementById('stagesSection');
-            const claudemd = document.getElementById('claudemdSection');
-            const scoring = document.getElementById('scoringSection');
-            if (stages) stages.classList.remove('hidden');
-            if (claudemd) claudemd.classList.remove('hidden');
-            if (scoring) scoring.classList.remove('hidden');
-
-            // Show submission form elements
-            const instructions = document.getElementById('instructionsContainer');
-            const githubUrl = document.getElementById('githubUrlContainer');
-            const submitBtn = document.getElementById('submitBtn');
-            if (instructions) instructions.classList.remove('hidden');
-            if (githubUrl) githubUrl.classList.remove('hidden');
-            if (submitBtn) submitBtn.classList.remove('hidden');
-
-            const hint = document.getElementById('timerNotStartedHint');
-            if (hint) hint.classList.add('hidden');
-        }
-
-        async function startChallenge() {
-            if (!currentUser) {
-                showStatus('Please login first', 'text-amber-400');
-                return;
-            }
-
-            const token = localStorage.getItem('auth_token');
-
-            try {
-                const response = await fetch(`${API_BASE}/api/challenge/${WEEK}/start-personal`, {
-                    method: 'POST',
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    personalStartTime = data.started_at;
-
-                    document.getElementById('timerContainer').classList.remove('hidden');
-                    timerInterval = setInterval(updateTimer, 1000);
-                    updateTimer();
-
-                    document.getElementById('startBtn').disabled = true;
-                    document.getElementById('startBtn').classList.add('opacity-50', 'cursor-not-allowed');
-                    document.getElementById('startBtn').innerHTML = 'Timer Started';
-
-                    showChallengeForm();
-
-                    showStatus('Timer started! Good luck!', 'text-green-400');
-                } else {
-                    const error = await response.json();
-                    showStatus(error.detail || 'Failed to start timer', 'text-red-400');
-                }
-            } catch (e) {
-                showStatus('Connection error', 'text-red-400');
-            }
-        }
-
-        document.getElementById('submitForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            if (!currentUser) {
-                showStatus('Please login first', 'text-amber-400');
-                return;
-            }
-
-            const githubUrl = document.getElementById('githubUrl').value;
-
-            if (!githubUrl) {
-                showStatus('Please enter GitHub URL', 'text-amber-400');
-                return;
-            }
-
-            try {
-                const token = localStorage.getItem('auth_token');
-                const response = await fetch(`${API_BASE}/api/submissions/submit`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({
-                        week: WEEK,
-                        github_url: githubUrl
-                    })
-                });
-
-                // Timer continues running after submit (don't stop it)
-                // if (timerInterval) clearInterval(timerInterval);
-
-                if (response.ok) {
-                    const data = await response.json();
-                    const submissionNum = data.submission_number || 1;
-                    const isResubmission = data.is_resubmission || submissionNum > 1;
-
-                    // Show success message with leaderboard link
-                    const statusEl = document.getElementById('statusMessage');
-                    statusEl.innerHTML = `
-                        <div class="text-green-400 font-medium mb-2">
-                            ${isResubmission ? `Resubmission #${submissionNum} complete!` : 'Submission complete!'}
-                        </div>
-                        <div class="text-gray-300 mb-3">
-                            Elapsed time: <span class="font-bold">${data.elapsed_minutes?.toFixed(1) || '-'}</span> minutes
-                        </div>
-                        <div class="bg-purple-500/10 border border-purple-500/30 rounded-xl p-4 inline-block">
-                            <div class="text-purple-400 mb-2">Your entry is now on the leaderboard!</div>
-                            <a href="leaderboard" class="inline-flex items-center gap-2 bg-purple-500 hover:bg-purple-500/80 text-white font-medium px-4 py-2 rounded-lg transition-all">
-                                <span>🏆</span> View Leaderboard
-                            </a>
-                        </div>
-                        <div class="text-gray-500 text-sm mt-3">
-                            Evaluation in progress... Results will appear shortly.
-                        </div>
-                    `;
-                    statusEl.className = 'mt-6 text-center';
-                    statusEl.classList.remove('hidden');
-
-                    // Keep button enabled for resubmission
-                    document.getElementById('submitBtn').innerHTML = '🔄 Resubmit';
-
-                    // Refresh submission history
-                    await loadSubmissionHistory();
-                } else {
-                    const error = await response.json();
-                    // If authentication error, redirect to login
-                    if (response.status === 401) {
-                        localStorage.removeItem('auth_token');
-                        alert('Your session has expired. Please login again.');
-                        window.location.href = '/';
-                        return;
-                    }
-                    showStatus('Submission failed: ' + (error.detail || 'Unknown error'), 'text-red-400');
-                }
-
-            } catch (error) {
-                showStatus('Submission failed: ' + error.message, 'text-red-400');
-            }
-        });
-
-        function showStatus(message, colorClass) {
-            const el = document.getElementById('statusMessage');
-            el.textContent = message;
-            el.className = `mt-6 text-center text-lg font-medium ${colorClass}`;
-            el.classList.remove('hidden');
-        }
-
-        // Submission History Functions
-        async function loadSubmissionHistory() {
-            if (!currentUser) return;
-
-            try {
-                const response = await fetch(`${API_BASE}/api/submissions/${WEEK}/${currentUser.user_id}/history`);
-                if (response.ok) {
-                    const data = await response.json();
-                    displaySubmissionHistory(data.submission_history || []);
-                }
-            } catch (error) {
-                console.error('Failed to load submission history:', error);
-            }
-        }
-
-        function displaySubmissionHistory(history) {
-            const container = document.getElementById('submissionHistory');
-            const list = document.getElementById('submissionHistoryList');
-
-            if (!history || history.length === 0) {
-                container.classList.add('hidden');
-                return;
-            }
-
-            container.classList.remove('hidden');
-            list.innerHTML = '';
-
-            const ordinals = ['1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th', '10th'];
-
-            history.forEach((submission, index) => {
-                const isLatest = index === history.length - 1;
-                const ordinal = ordinals[index] || `${index + 1}th`;
-                const submittedAt = new Date(submission.submitted_at);
-                const timeStr = submittedAt.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-                const dateStr = submittedAt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-
-                const card = document.createElement('div');
-                card.className = `p-4 rounded-xl ${isLatest ? 'bg-purple-500/10 border border-purple-500/30' : 'bg-dark-800/50 border border-white/5'}`;
-
-                let scoreHtml = '';
-                const evalData = submission.evaluation;
-                if (evalData && evalData.total !== undefined && evalData.total !== null) {
-                    scoreHtml = `
-                        <div class="mt-3 pt-3 border-t border-white/10">
-                            <div class="flex justify-between items-center">
-                                <span class="text-gray-400 text-sm">Score</span>
-                                <span class="font-bold text-lg ${evalData.total >= 80 ? 'text-green-400' : evalData.total >= 60 ? 'text-purple-400' : 'text-amber-400'}">
-                                    ${evalData.total} pts
-                                </span>
-                            </div>
-                            <div class="text-xs text-gray-500 mt-1">
-                                Rubric: ${evalData.rubric || 0} + Time Bonus: ${evalData.time_rank_bonus || 0}
-                            </div>
-                        </div>
-                    `;
-                } else if (isLatest) {
-                scoreHtml = '<div class="mt-3 pt-3 border-t border-white/10 text-sm text-amber-400">⏳ Pending review</div>';
-                }
-
-                card.innerHTML = `
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <div class="flex items-center gap-2">
-                                <span class="font-semibold ${isLatest ? 'text-purple-400' : 'text-gray-300'}">${ordinal} Try</span>
-                                ${isLatest ? '<span class="text-xs bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded-full">Latest</span>' : ''}
-                            </div>
-                            <div class="text-sm text-gray-500 mt-1">${dateStr} at ${timeStr}</div>
-                        </div>
-                        <div class="text-right">
-                            <div class="font-mono text-lg ${isLatest ? 'text-white' : 'text-gray-400'}">${submission.elapsed_minutes?.toFixed(1) || '-'} min</div>
-                        </div>
-                    </div>
-                    ${scoreHtml}
-                `;
-
-                list.appendChild(card);
-            });
-        }
+        const WEEK_CONFIG = {
+            week: 2,
+            allowResubmit: true,
+            hasChallengeStatusCheck: false,
+            hasEvaluation: false,
+            revealSectionIds: ['stagesSection', 'claudemdSection', 'scoringSection'],
+            downloadBtn: { id: 'download-hooks-btn', url: '/challenges/week2/hooks-challenge.zip' },
+            leaderboardBox: {
+                bgClass: 'bg-purple-500/10',
+                borderClass: 'border-purple-500/30',
+                textClass: 'text-purple-400',
+                btnBgClass: 'bg-purple-500',
+                btnHoverClass: 'bg-purple-500/80',
+                btnTextClass: 'text-white',
+            },
+        };
     </script>
+    <script src="week-common.js"></script>
 </body>
 </html>

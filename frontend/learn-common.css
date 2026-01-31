@@ -1,0 +1,145 @@
+/*
+ * learn-common.css - Shared styles for week learn pages (week1-5-learn.html)
+ *
+ * Each page must define CSS custom properties:
+ *   --accent-rgb: R, G, B (e.g., 244, 114, 182)
+ *   --accent-from: hex (e.g., #f472b6)
+ *   --accent-to: hex (e.g., #db2777)
+ * And a page-specific .hero-gradient rule.
+ */
+
+* { font-family: 'Outfit', sans-serif; }
+code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
+html { scroll-behavior: smooth; }
+
+.nav-blur {
+    background: rgba(10, 10, 15, 0.85);
+    backdrop-filter: blur(20px);
+}
+
+.card {
+    background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
+    border: 1px solid rgba(255,255,255,0.06);
+}
+
+.lesson-card {
+    background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
+    border: 1px solid rgba(255,255,255,0.06);
+    transition: all 0.3s ease;
+}
+.lesson-card:hover {
+    border-color: rgba(var(--accent-rgb), 0.3);
+}
+.lesson-card.open {
+    border-color: rgba(var(--accent-rgb), 0.5);
+}
+
+.lesson-header { cursor: pointer; }
+
+.lesson-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease;
+}
+.lesson-content.open {
+    max-height: 5000px;
+}
+
+.chevron {
+    transition: transform 0.3s ease;
+}
+.chevron.open {
+    transform: rotate(180deg);
+}
+
+.code-block {
+    background: #0d1117;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    overflow: hidden;
+}
+.code-block-header {
+    background: rgba(255,255,255,0.03);
+    padding: 10px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    font-size: 0.75rem;
+    color: #8b949e;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+.code-block pre {
+    padding: 16px;
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: #c9d1d9;
+    overflow-x: auto;
+}
+.code-comment { color: #6e7681; }
+.code-keyword { color: #ff7b72; }
+.code-string { color: #a5d6ff; }
+.code-function { color: #d2a8ff; }
+
+.tip-box {
+    background: rgba(var(--accent-rgb), 0.1);
+    border: 1px solid rgba(var(--accent-rgb), 0.3);
+    border-radius: 12px;
+    padding: 16px;
+}
+
+.warning-box {
+    background: rgba(251, 191, 36, 0.1);
+    border: 1px solid rgba(251, 191, 36, 0.3);
+    border-radius: 12px;
+    padding: 16px;
+}
+
+.quiz-option {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.quiz-option:hover {
+    border-color: rgba(var(--accent-rgb), 0.5);
+    background: rgba(var(--accent-rgb), 0.05);
+}
+.quiz-option.selected {
+    border-color: rgba(var(--accent-rgb), 0.8);
+    background: rgba(var(--accent-rgb), 0.1);
+}
+.quiz-option.correct {
+    border-color: rgba(52, 211, 153, 0.8);
+    background: rgba(52, 211, 153, 0.1);
+}
+.quiz-option.incorrect {
+    border-color: rgba(248, 113, 113, 0.8);
+    background: rgba(248, 113, 113, 0.1);
+}
+
+.progress-bar {
+    background: rgba(255,255,255,0.1);
+    border-radius: 9999px;
+    overflow: hidden;
+}
+.progress-fill {
+    background: linear-gradient(90deg, var(--accent-from) 0%, var(--accent-to) 100%);
+    height: 100%;
+    border-radius: 9999px;
+    transition: width 0.5s ease;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--accent-from) 0%, var(--accent-to) 100%);
+    transition: all 0.3s ease;
+}
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px -10px rgba(var(--accent-rgb), 0.5);
+}
+
+.btn-secondary {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    transition: all 0.3s ease;
+}
+.btn-secondary:hover {
+    background: rgba(255,255,255,0.1);
+}

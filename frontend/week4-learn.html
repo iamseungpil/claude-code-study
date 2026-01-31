@@ -21,146 +21,12 @@
             }
         }
     </script>
+    <link rel="stylesheet" href="learn-common.css">
     <style>
-        * { font-family: 'Outfit', sans-serif; }
-        code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
-        html { scroll-behavior: smooth; }
-
+        :root { --accent-rgb: 52, 211, 153; --accent-from: #34d399; --accent-to: #10b981; }
         .hero-gradient {
             background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(52, 211, 153, 0.2) 0%, transparent 50%),
                         linear-gradient(180deg, #0f172a 0%, #0a0a0f 100%);
-        }
-
-        .nav-blur {
-            background: rgba(10, 10, 15, 0.85);
-            backdrop-filter: blur(20px);
-        }
-
-        .card {
-            background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
-            border: 1px solid rgba(255,255,255,0.06);
-        }
-
-        .lesson-card {
-            background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
-            border: 1px solid rgba(255,255,255,0.06);
-            transition: all 0.3s ease;
-        }
-        .lesson-card:hover {
-            border-color: rgba(52, 211, 153, 0.3);
-        }
-        .lesson-card.open {
-            border-color: rgba(52, 211, 153, 0.5);
-        }
-
-        .lesson-header { cursor: pointer; }
-
-        .lesson-content {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.4s ease;
-        }
-        .lesson-content.open {
-            max-height: 5000px;
-        }
-
-        .chevron {
-            transition: transform 0.3s ease;
-        }
-        .chevron.open {
-            transform: rotate(180deg);
-        }
-
-        .code-block {
-            background: #0d1117;
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 12px;
-            overflow: hidden;
-        }
-        .code-block-header {
-            background: rgba(255,255,255,0.03);
-            padding: 10px 16px;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            font-size: 0.75rem;
-            color: #8b949e;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-        .code-block pre {
-            padding: 16px;
-            font-size: 0.875rem;
-            line-height: 1.6;
-            color: #c9d1d9;
-            overflow-x: auto;
-        }
-        .code-comment { color: #6e7681; }
-        .code-keyword { color: #ff7b72; }
-        .code-string { color: #a5d6ff; }
-        .code-function { color: #d2a8ff; }
-
-        .tip-box {
-            background: rgba(52, 211, 153, 0.1);
-            border: 1px solid rgba(52, 211, 153, 0.3);
-            border-radius: 12px;
-            padding: 16px;
-        }
-
-        .warning-box {
-            background: rgba(251, 191, 36, 0.1);
-            border: 1px solid rgba(251, 191, 36, 0.3);
-            border-radius: 12px;
-            padding: 16px;
-        }
-
-        .quiz-option {
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        .quiz-option:hover {
-            border-color: rgba(52, 211, 153, 0.5);
-            background: rgba(52, 211, 153, 0.05);
-        }
-        .quiz-option.selected {
-            border-color: rgba(52, 211, 153, 0.8);
-            background: rgba(52, 211, 153, 0.1);
-        }
-        .quiz-option.correct {
-            border-color: rgba(52, 211, 153, 0.8);
-            background: rgba(52, 211, 153, 0.1);
-        }
-        .quiz-option.incorrect {
-            border-color: rgba(248, 113, 113, 0.8);
-            background: rgba(248, 113, 113, 0.1);
-        }
-
-        .progress-bar {
-            background: rgba(255,255,255,0.1);
-            border-radius: 9999px;
-            overflow: hidden;
-        }
-        .progress-fill {
-            background: linear-gradient(90deg, #34d399 0%, #10b981 100%);
-            height: 100%;
-            border-radius: 9999px;
-            transition: width 0.5s ease;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
-            transition: all 0.3s ease;
-        }
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px -10px rgba(52, 211, 153, 0.5);
-        }
-
-        .btn-secondary {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-            transition: all 0.3s ease;
-        }
-        .btn-secondary:hover {
-            background: rgba(255,255,255,0.1);
         }
     </style>
 </head>
@@ -191,10 +57,10 @@
             </div>
 
             <h1 class="text-4xl md:text-5xl font-bold mb-4 tracking-tight">
-                MCP & Advanced Automation
+                MCP Servers & Advanced Automation
             </h1>
             <p class="text-xl text-gray-400 mb-8 max-w-2xl">
-                Master MCP server integration, leverage subagents for parallel development, and automate workflows with custom commands and headless mode.
+                Master MCP server integration with popular servers like Playwright, GitHub, and PostgreSQL. Automate workflows with custom commands and headless mode.
             </p>
 
             <!-- Progress Tracker -->
@@ -220,14 +86,14 @@
             <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-6">LESSONS</h2>
 
             <div class="space-y-4">
-                <!-- Lesson 1: MCP Basics & Server Overview -->
+                <!-- Lesson 1: MCP Fundamentals -->
                 <div id="lesson1" class="lesson-card rounded-2xl overflow-hidden">
                     <div class="lesson-header p-6 flex items-center justify-between" onclick="toggleLesson(1)">
                         <div class="flex items-center gap-4">
                             <div class="w-12 h-12 rounded-xl bg-accent/20 flex items-center justify-center text-2xl">1</div>
                             <div>
-                                <h3 class="font-bold text-xl">MCP Basics & Server Overview</h3>
-                                <p class="text-gray-400 text-sm">What is MCP, adding servers, and the ecosystem</p>
+                                <h3 class="font-bold text-xl">MCP Fundamentals</h3>
+                                <p class="text-gray-400 text-sm">What is MCP, architecture, why it matters, built-in capabilities</p>
                             </div>
                         </div>
                         <div class="flex items-center gap-3">
@@ -241,56 +107,66 @@
                         <div class="px-6 pb-6 space-y-6">
                             <div class="tip-box">
                                 <p class="text-emerald-200 font-medium">What is MCP?</p>
-                                <p class="text-sm mt-1 text-gray-300"><strong>MCP (Model Context Protocol)</strong> is a standard protocol that connects Claude to external services and tools. MCP servers expose capabilities that Claude can use seamlessly.</p>
+                                <p class="text-sm mt-1 text-gray-300"><strong>MCP (Model Context Protocol)</strong> is an open protocol that standardizes how AI assistants connect to external data sources and tools. Think of it as a "USB for AI" -- a universal way to plug in capabilities.</p>
                             </div>
 
-                            <h4 class="font-bold text-lg text-accent">Adding MCP Servers</h4>
+                            <h4 class="font-bold text-lg text-accent">MCP Architecture</h4>
                             <div class="code-block">
-                                <div class="code-block-header">Terminal Commands</div>
-                                <pre><code class="text-green-400 text-sm"><span class="code-comment"># Add an MCP server</span>
-claude mcp add &lt;server-name&gt;
-
-<span class="code-comment"># View connected MCP servers</span>
-/mcp
-
-<span class="code-comment"># Example: Add Playwright for browser automation</span>
-claude mcp add playwright</code></pre>
+                                <div class="code-block-header">MCP Architecture Diagram</div>
+                                <pre><code class="text-green-400 text-sm">┌─────────────────────────────────────────────────────────────┐
+│                      Claude Code (Host)                      │
+│                                                              │
+│   ┌─────────────┐    ┌─────────────┐    ┌─────────────┐    │
+│   │ MCP Client  │    │ MCP Client  │    │ MCP Client  │    │
+│   └──────┬──────┘    └──────┬──────┘    └──────┬──────┘    │
+└──────────┼──────────────────┼──────────────────┼────────────┘
+           │                  │                  │
+           ▼                  ▼                  ▼
+    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
+    │  Playwright  │    │  Database   │    │   Custom    │
+    │   Server    │    │   Server    │    │   Server    │
+    └─────────────┘    └─────────────┘    └─────────────┘</code></pre>
                             </div>
 
-                            <h4 class="font-bold text-lg mt-6 text-accent">Popular MCP Servers</h4>
-                            <div class="space-y-4 mt-4">
+                            <h4 class="font-bold text-lg mt-6 text-accent">Why MCP Matters</h4>
+                            <p class="text-gray-300">Before MCP, every AI integration required custom code. MCP provides a standard interface for:</p>
+                            <ul class="list-disc list-inside space-y-2 ml-4 text-gray-300">
+                                <li><span class="text-accent">Tools</span> - Functions the AI can call (search, database queries, API calls)</li>
+                                <li><span class="text-accent">Resources</span> - Data the AI can read (files, databases, web content)</li>
+                                <li><span class="text-accent">Prompts</span> - Pre-defined prompt templates for specific tasks</li>
+                            </ul>
+
+                            <h4 class="font-bold text-lg mt-6 text-accent">Built-in MCP Capabilities</h4>
+                            <div class="grid md:grid-cols-2 gap-4 mt-4">
                                 <div class="card rounded-xl p-4">
-                                    <div class="flex items-center gap-3 mb-2">
-                                        <span class="text-xl">Notion</span>
-                                        <h5 class="font-semibold text-accent">Notion MCP</h5>
-                                    </div>
-                                    <p class="text-sm text-gray-400 mb-2">Page/database CRUD, team workspace integration</p>
-                                    <code class="text-xs bg-dark-600 px-2 py-1 rounded">claude mcp add notion</code>
+                                    <h5 class="font-semibold text-accent mb-2">Tools</h5>
+                                    <p class="text-sm text-gray-400">Functions the AI can call -- search, database queries, API calls, shell commands.</p>
                                 </div>
                                 <div class="card rounded-xl p-4">
-                                    <div class="flex items-center gap-3 mb-2">
-                                        <span class="text-xl">Playwright</span>
-                                        <h5 class="font-semibold text-accent">Playwright MCP</h5>
-                                    </div>
-                                    <p class="text-sm text-gray-400 mb-2">Browser automation, web scraping, E2E testing</p>
-                                    <code class="text-xs bg-dark-600 px-2 py-1 rounded">claude mcp add playwright</code>
+                                    <h5 class="font-semibold text-accent mb-2">Resources</h5>
+                                    <p class="text-sm text-gray-400">Data the AI can read -- files, databases, web content, project context.</p>
                                 </div>
                                 <div class="card rounded-xl p-4">
-                                    <div class="flex items-center gap-3 mb-2">
-                                        <span class="text-xl">GitHub</span>
-                                        <h5 class="font-semibold text-accent">GitHub MCP</h5>
-                                    </div>
-                                    <p class="text-sm text-gray-400 mb-2">PR/Issue management, code review automation</p>
-                                    <code class="text-xs bg-dark-600 px-2 py-1 rounded">claude mcp add github</code>
+                                    <h5 class="font-semibold text-accent mb-2">Prompts</h5>
+                                    <p class="text-sm text-gray-400">Pre-defined prompt templates for specific tasks and workflows.</p>
                                 </div>
                                 <div class="card rounded-xl p-4">
-                                    <div class="flex items-center gap-3 mb-2">
-                                        <span class="text-xl">Database</span>
-                                        <h5 class="font-semibold text-accent">PostgreSQL MCP</h5>
-                                    </div>
-                                    <p class="text-sm text-gray-400 mb-2">Database queries, schema management, migrations</p>
-                                    <code class="text-xs bg-dark-600 px-2 py-1 rounded">claude mcp add postgres</code>
+                                    <h5 class="font-semibold text-accent mb-2">Sampling</h5>
+                                    <p class="text-sm text-gray-400">Server-initiated AI interactions for automated decision-making.</p>
                                 </div>
+                            </div>
+
+                            <h4 class="font-bold text-lg mt-6 text-accent">Checking MCP Status</h4>
+                            <div class="code-block">
+                                <div class="code-block-header">/mcp command</div>
+                                <pre><code class="text-green-400 text-sm"><span class="code-comment"># In Claude Code, check connected MCP servers</span>
+> /mcp
+
+Connected MCP Servers:
+- filesystem (built-in)
+- Fetch (built-in)
+- postgres (custom) - 5 tools available
+- slack (custom) - 3 tools available</code></pre>
                             </div>
 
                             <button onclick="completeLesson(1)" class="btn-secondary px-6 py-3 rounded-xl text-sm font-medium">
@@ -300,14 +176,14 @@ claude mcp add playwright</code></pre>
                     </div>
                 </div>
 
-                <!-- Lesson 2: MCP 실전 Patterns -->
+                <!-- Lesson 2: Adding & Configuring MCP Servers -->
                 <div id="lesson2" class="lesson-card rounded-2xl overflow-hidden">
                     <div class="lesson-header p-6 flex items-center justify-between" onclick="toggleLesson(2)">
                         <div class="flex items-center gap-4">
                             <div class="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center text-2xl">2</div>
                             <div>
-                                <h3 class="font-bold text-xl">MCP 실전 Patterns</h3>
-                                <p class="text-gray-400 text-sm">Multi-server setup and real-world workflows</p>
+                                <h3 class="font-bold text-xl">Adding & Configuring MCP Servers</h3>
+                                <p class="text-gray-400 text-sm">claude mcp add, multi-server config, and /mcp status</p>
                             </div>
                         </div>
                         <div class="flex items-center gap-3">
@@ -320,11 +196,27 @@ claude mcp add playwright</code></pre>
                     <div class="lesson-content">
                         <div class="px-6 pb-6 space-y-6">
                             <div class="tip-box">
-                                <p class="text-emerald-200 font-medium">MCP in Practice</p>
-                                <p class="text-sm mt-1 text-gray-300">Real-world projects often use multiple MCP servers together. Configure them in <code class="bg-dark-600 px-1 rounded text-xs">settings.local.json</code> and let Claude orchestrate data between services seamlessly.</p>
+                                <p class="text-emerald-200 font-medium">Adding MCP Servers</p>
+                                <p class="text-sm mt-1 text-gray-300">Use <code class="bg-dark-600 px-1 rounded text-xs">claude mcp add</code> to connect external services. Configure multiple servers in <code class="bg-dark-600 px-1 rounded text-xs">settings.local.json</code> and let Claude orchestrate data between them.</p>
                             </div>
 
-                            <h4 class="font-bold text-lg text-accent">Multi-Server Configuration</h4>
+                            <h4 class="font-bold text-lg text-accent">Adding via CLI</h4>
+                            <div class="code-block">
+                                <div class="code-block-header">Terminal Commands</div>
+                                <pre><code class="text-green-400 text-sm"><span class="code-comment"># Add an MCP server with npx</span>
+claude mcp add postgres -- npx -y @modelcontextprotocol/server-postgres
+
+<span class="code-comment"># Add Playwright for browser automation</span>
+claude mcp add playwright -- npx -y @anthropic-ai/mcp-server-playwright
+
+<span class="code-comment"># Add with environment variables</span>
+claude mcp add slack -- npx -y @anthropic-ai/mcp-server-slack
+
+<span class="code-comment"># View connected MCP servers</span>
+/mcp</code></pre>
+                            </div>
+
+                            <h4 class="font-bold text-lg mt-6 text-accent">Multi-Server Configuration</h4>
                             <div class="code-block">
                                 <div class="code-block-header">.claude/settings.local.json</div>
                                 <pre><code class="text-green-400 text-sm">{
@@ -345,22 +237,6 @@ claude mcp add playwright</code></pre>
     }
   }
 }</code></pre>
-                            </div>
-
-                            <h4 class="font-bold text-lg mt-6 text-accent">Quick Overview</h4>
-                            <div class="grid md:grid-cols-3 gap-4 mt-4">
-                                <div class="card rounded-xl p-4">
-                                    <h5 class="font-semibold text-accent mb-2">Notion MCP</h5>
-                                    <p class="text-sm text-gray-400">Database/page CRUD, workspace search, team documentation 관리</p>
-                                </div>
-                                <div class="card rounded-xl p-4">
-                                    <h5 class="font-semibold text-accent mb-2">Playwright MCP</h5>
-                                    <p class="text-sm text-gray-400">Browser automation, web scraping, screenshot, E2E testing 지원</p>
-                                </div>
-                                <div class="card rounded-xl p-4">
-                                    <h5 class="font-semibold text-accent mb-2">GitHub MCP</h5>
-                                    <p class="text-sm text-gray-400">Repos, PRs, issues, code search, review automation 처리</p>
-                                </div>
                             </div>
 
                             <h4 class="font-bold text-lg mt-6 text-accent">Multi-MCP Pipeline Example</h4>
@@ -390,14 +266,14 @@ Claude uses notion.update_page with competitor insights
                     </div>
                 </div>
 
-                <!-- Lesson 3: Subagents & Task Tool -->
+                <!-- Lesson 3: Popular MCP Servers & Skills -->
                 <div id="lesson3" class="lesson-card rounded-2xl overflow-hidden">
                     <div class="lesson-header p-6 flex items-center justify-between" onclick="toggleLesson(3)">
                         <div class="flex items-center gap-4">
                             <div class="w-12 h-12 rounded-xl bg-amber-500/20 flex items-center justify-center text-2xl">3</div>
                             <div>
-                                <h3 class="font-bold text-xl">Subagents & Task Tool</h3>
-                                <p class="text-gray-400 text-sm">Parallel development with specialized agents</p>
+                                <h3 class="font-bold text-xl">Popular MCP Servers & Skills</h3>
+                                <p class="text-gray-400 text-sm">Real-world showcase of most-used servers and community skills</p>
                             </div>
                         </div>
                         <div class="flex items-center gap-3">
@@ -410,107 +286,142 @@ Claude uses notion.update_page with competitor insights
                     <div class="lesson-content">
                         <div class="px-6 pb-6 space-y-6">
                             <div class="tip-box">
-                                <p class="text-emerald-200 font-medium">Parallel Development with Subagents</p>
-                                <p class="text-sm mt-1 text-gray-300">Subagents enable assigning different roles for parallel work. Each subagent is an independent Claude instance that can explore, build, or plan simultaneously -- dramatically speeding up complex tasks like MVP development.</p>
+                                <p class="text-emerald-200 font-medium">The MCP Ecosystem</p>
+                                <p class="text-sm mt-1 text-gray-300">The MCP ecosystem has grown rapidly with servers for databases, browsers, collaboration tools, and more. Here are the most popular and useful servers and skills for real-world development.</p>
                             </div>
 
-                            <h4 class="font-bold text-lg text-accent">What are Subagents?</h4>
-                            <p class="text-gray-300 text-sm">Subagents are specialized Claude instances spawned via the <strong>Task tool</strong>. Each subagent runs independently with its own context and tools, allowing Claude to tackle multiple parts of a problem in parallel.</p>
-
-                            <h4 class="font-bold text-lg mt-6 text-accent">Subagent Types</h4>
-                            <div class="grid md:grid-cols-2 gap-4 mt-4">
+                            <h4 class="font-bold text-lg text-accent">Popular MCP Servers</h4>
+                            <div class="space-y-4 mt-4">
                                 <div class="card rounded-xl p-4">
-                                    <h5 class="font-semibold text-accent mb-2">Explore</h5>
-                                    <p class="text-sm text-gray-400">Codebase search and file discovery. Uses Glob, Grep, Read tools to find patterns and answer structural questions.</p>
+                                    <div class="flex items-center gap-3 mb-2">
+                                        <h5 class="font-semibold text-accent">GitHub MCP</h5>
+                                    </div>
+                                    <p class="text-sm text-gray-400 mb-2">Repository management, PR review, issue tracking, code search</p>
+                                    <code class="text-xs bg-dark-600 px-2 py-1 rounded">claude mcp add github -- npx -y @modelcontextprotocol/server-github</code>
                                 </div>
                                 <div class="card rounded-xl p-4">
-                                    <h5 class="font-semibold text-accent mb-2">Bash</h5>
-                                    <p class="text-sm text-gray-400">Command execution specialist. Git operations, running tests, package management, build scripts.</p>
+                                    <div class="flex items-center gap-3 mb-2">
+                                        <h5 class="font-semibold text-accent">Playwright MCP</h5>
+                                    </div>
+                                    <p class="text-sm text-gray-400 mb-2">Browser automation, E2E testing, web scraping, screenshot capture</p>
+                                    <code class="text-xs bg-dark-600 px-2 py-1 rounded">claude mcp add playwright -- npx -y @anthropic-ai/mcp-server-playwright</code>
                                 </div>
                                 <div class="card rounded-xl p-4">
-                                    <h5 class="font-semibold text-accent mb-2">Plan</h5>
-                                    <p class="text-sm text-gray-400">Architecture design and implementation planning. Identifies files to change, considers trade-offs, creates action plans.</p>
+                                    <div class="flex items-center gap-3 mb-2">
+                                        <h5 class="font-semibold text-accent">PostgreSQL MCP</h5>
+                                    </div>
+                                    <p class="text-sm text-gray-400 mb-2">Database queries, schema management, migration assistance</p>
+                                    <code class="text-xs bg-dark-600 px-2 py-1 rounded">claude mcp add postgres -- npx -y @modelcontextprotocol/server-postgres</code>
                                 </div>
                                 <div class="card rounded-xl p-4">
-                                    <h5 class="font-semibold text-accent mb-2">General-Purpose</h5>
-                                    <p class="text-sm text-gray-400">Complex multi-step tasks. Research, code generation, analysis -- uses all available tools.</p>
+                                    <div class="flex items-center gap-3 mb-2">
+                                        <h5 class="font-semibold text-accent">Notion MCP</h5>
+                                    </div>
+                                    <p class="text-sm text-gray-400 mb-2">Workspace management, page/database CRUD, team documentation</p>
+                                    <code class="text-xs bg-dark-600 px-2 py-1 rounded">claude mcp add notion -- npx -y @anthropic-ai/mcp-server-notion</code>
+                                </div>
+                                <div class="card rounded-xl p-4">
+                                    <div class="flex items-center gap-3 mb-2">
+                                        <h5 class="font-semibold text-accent">Figma MCP</h5>
+                                    </div>
+                                    <p class="text-sm text-gray-400 mb-2">Design-to-code, Dev Mode integration, component inspection</p>
+                                    <code class="text-xs bg-dark-600 px-2 py-1 rounded">claude mcp add figma -- npx -y figma-developer-mcp --figma-api-key=$FIGMA_API_KEY</code>
+                                </div>
+                                <div class="card rounded-xl p-4">
+                                    <div class="flex items-center gap-3 mb-2">
+                                        <h5 class="font-semibold text-accent">Sequential Thinking</h5>
+                                    </div>
+                                    <p class="text-sm text-gray-400 mb-2">Structured reasoning for complex problems, step-by-step analysis</p>
+                                    <code class="text-xs bg-dark-600 px-2 py-1 rounded">claude mcp add thinking -- npx -y @modelcontextprotocol/server-sequential-thinking</code>
+                                </div>
+                                <div class="card rounded-xl p-4">
+                                    <div class="flex items-center gap-3 mb-2">
+                                        <h5 class="font-semibold text-accent">Context7</h5>
+                                    </div>
+                                    <p class="text-sm text-gray-400 mb-2">Up-to-date library docs fetched at query time, always current API references</p>
+                                    <code class="text-xs bg-dark-600 px-2 py-1 rounded">claude mcp add context7 -- npx -y @upstash/context7-mcp</code>
+                                </div>
+                                <div class="card rounded-xl p-4">
+                                    <div class="flex items-center gap-3 mb-2">
+                                        <h5 class="font-semibold text-accent">Slack MCP</h5>
+                                    </div>
+                                    <p class="text-sm text-gray-400 mb-2">Channel summaries, message automation, team communication</p>
+                                    <code class="text-xs bg-dark-600 px-2 py-1 rounded">claude mcp add slack -- npx -y @anthropic-ai/mcp-server-slack</code>
                                 </div>
                             </div>
 
-                            <h4 class="font-bold text-lg mt-6 text-accent">Task Tool Usage</h4>
+                            <h4 class="font-bold text-lg mt-6 text-accent">Popular Community Skills</h4>
+                            <div class="space-y-4 mt-4">
+                                <div class="card rounded-xl p-4">
+                                    <div class="flex items-center gap-3 mb-2">
+                                        <span class="text-xs bg-accent/20 text-accent px-2 py-0.5 rounded">built-in</span>
+                                        <h5 class="font-semibold text-white">commit</h5>
+                                    </div>
+                                    <p class="text-sm text-gray-400">Auto-generate commit messages from staged changes. Usage: <code class="text-xs bg-dark-600 px-1 rounded">/commit</code></p>
+                                </div>
+                                <div class="card rounded-xl p-4">
+                                    <div class="flex items-center gap-3 mb-2">
+                                        <span class="text-xs bg-accent/20 text-accent px-2 py-0.5 rounded">built-in</span>
+                                        <h5 class="font-semibold text-white">review-pr</h5>
+                                    </div>
+                                    <p class="text-sm text-gray-400">Structured PR review with security and style checks. Usage: <code class="text-xs bg-dark-600 px-1 rounded">/review-pr 123</code></p>
+                                </div>
+                                <div class="card rounded-xl p-4">
+                                    <div class="flex items-center gap-3 mb-2">
+                                        <span class="text-xs bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded">community</span>
+                                        <h5 class="font-semibold text-white">code-review</h5>
+                                    </div>
+                                    <p class="text-sm text-gray-400">Team-standard code review with severity levels (critical, warning, suggestion)</p>
+                                </div>
+                                <div class="card rounded-xl p-4">
+                                    <div class="flex items-center gap-3 mb-2">
+                                        <span class="text-xs bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded">community</span>
+                                        <h5 class="font-semibold text-white">test-generator</h5>
+                                    </div>
+                                    <p class="text-sm text-gray-400">Auto-generate unit tests for functions with edge case coverage</p>
+                                </div>
+                                <div class="card rounded-xl p-4">
+                                    <div class="flex items-center gap-3 mb-2">
+                                        <span class="text-xs bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded">community</span>
+                                        <h5 class="font-semibold text-white">doc-generator</h5>
+                                    </div>
+                                    <p class="text-sm text-gray-400">Generate JSDoc/docstring documentation for codebases</p>
+                                </div>
+                                <div class="card rounded-xl p-4">
+                                    <div class="flex items-center gap-3 mb-2">
+                                        <span class="text-xs bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded">community</span>
+                                        <h5 class="font-semibold text-white">security-audit</h5>
+                                    </div>
+                                    <p class="text-sm text-gray-400">OWASP Top 10 vulnerability scan with remediation suggestions</p>
+                                </div>
+                                <div class="card rounded-xl p-4">
+                                    <div class="flex items-center gap-3 mb-2">
+                                        <span class="text-xs bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded">community</span>
+                                        <h5 class="font-semibold text-white">changelog</h5>
+                                    </div>
+                                    <p class="text-sm text-gray-400">Generate changelog from git history with conventional commit parsing</p>
+                                </div>
+                            </div>
+
+                            <h4 class="font-bold text-lg mt-6 text-accent">Example Skill SKILL.md</h4>
                             <div class="code-block">
-                                <div class="code-block-header">Task Tool Example</div>
-                                <pre><code class="text-green-400 text-sm"><span class="code-comment"># Claude spawns a subagent using the Task tool</span>
-Task tool:
-  subagent_type: "Explore"
-  prompt: "Find all API endpoint definitions in the codebase.
-           Search for patterns like router.get, app.post,
-           @app.route, etc. Return a list of endpoints
-           with their file locations."
+                                <div class="code-block-header">.claude/skills/security-audit/SKILL.md</div>
+                                <pre><code class="text-green-400 text-sm">---
+name: security-audit
+description: Scan codebase for OWASP Top 10 vulnerabilities
+user-invocable: true
+allowed-tools: [Read, Glob, Grep]
+---
 
-<span class="code-comment"># The subagent works independently and returns results</span></code></pre>
-                            </div>
+Scan the codebase for common security vulnerabilities:
+1. SQL injection in database queries
+2. XSS in user-facing output
+3. Hardcoded secrets and credentials
+4. Insecure deserialization
+5. Missing authentication checks
 
-                            <h4 class="font-bold text-lg mt-6 text-accent">Parallel Subagents</h4>
-                            <div class="code-block">
-                                <div class="code-block-header">Launching Multiple Agents Simultaneously</div>
-                                <pre><code class="text-green-400 text-sm"><span class="code-comment"># Send multiple Task tool calls in a single message</span>
-User: "Analyze this React app - check components,
-       find unused imports, and list all API calls"
-
-<span class="code-comment"># Claude spawns 3 agents simultaneously:</span>
-Agent 1 (Explore): Search for component definitions
-Agent 2 (Explore): Find unused imports with grep
-Agent 3 (Explore): Locate all fetch/axios calls
-
-<span class="code-comment"># All 3 run in parallel, results combined</span></code></pre>
-                            </div>
-
-                            <h4 class="font-bold text-lg mt-6 text-accent">Subagents for MVP Development</h4>
-                            <div class="tip-box">
-                                <p class="text-emerald-200 font-medium">MVP Parallel Roles</p>
-                                <p class="text-sm mt-1 text-gray-300">For MVP development, assign each subagent a different role: one plans architecture, another implements backend, another creates frontend, and another writes tests -- all working simultaneously.</p>
-                            </div>
-                            <div class="code-block mt-4">
-                                <div class="code-block-header">MVP Development with Parallel Tasks</div>
-                                <pre><code class="text-green-400 text-sm"><span class="code-comment"># Multiple Task tool calls sent in a single message:</span>
-
-<span class="code-comment"># Task 1: Architect</span>
-Task tool:
-  subagent_type: "Plan"
-  prompt: "Design the architecture for a todo-app MVP.
-           Define folder structure, data models, and API routes."
-
-<span class="code-comment"># Task 2: Backend Developer</span>
-Task tool:
-  subagent_type: "general-purpose"
-  prompt: "Implement the Express.js backend with REST API
-           for CRUD operations on todos."
-
-<span class="code-comment"># Task 3: Frontend Developer</span>
-Task tool:
-  subagent_type: "general-purpose"
-  prompt: "Create a React frontend with components for
-           listing, adding, and completing todos."
-
-<span class="code-comment"># Task 4: QA Engineer</span>
-Task tool:
-  subagent_type: "general-purpose"
-  prompt: "Write Jest tests for the API endpoints
-           and React component unit tests."</code></pre>
-                            </div>
-
-                            <h4 class="font-bold text-lg mt-6 text-accent">Background Agents</h4>
-                            <div class="code-block">
-                                <div class="code-block-header">run_in_background</div>
-                                <pre><code class="text-green-400 text-sm"><span class="code-comment"># For long-running tasks, use background execution</span>
-Task tool:
-  subagent_type: "general-purpose"
-  run_in_background: true
-  prompt: "Run the full test suite and report failures"
-
-<span class="code-comment"># Continue working while the agent runs</span>
-<span class="code-comment"># Results available when the agent completes</span></code></pre>
+Output a severity-ranked report with file locations
+and suggested fixes for each finding.</code></pre>
                             </div>
 
                             <button onclick="completeLesson(3)" class="btn-secondary px-6 py-3 rounded-xl text-sm font-medium">
@@ -800,24 +711,13 @@ jobs:
                 </details>
                 <details class="card rounded-xl p-4 cursor-pointer">
                     <summary class="font-bold text-white flex items-center justify-between">
-                        Subagent
+                        MCP Tool Search
                         <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                         </svg>
                     </summary>
                     <p class="text-gray-400 text-sm mt-3">
-                        Independent Claude instance spawned via the Task tool for parallel work. Types include Explore, Bash, Plan, and General-Purpose, each optimized for different tasks.
-                    </p>
-                </details>
-                <details class="card rounded-xl p-4 cursor-pointer">
-                    <summary class="font-bold text-white flex items-center justify-between">
-                        Task Tool
-                        <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                        </svg>
-                    </summary>
-                    <p class="text-gray-400 text-sm mt-3">
-                        The tool used to create subagents with specific types and prompts. Multiple Task tool calls can be sent in a single message for parallel execution.
+                        Lazy loading mechanism for MCP server tools. Instead of loading all tools at startup, Claude discovers and loads tools on-demand when needed, reducing initialization time.
                     </p>
                 </details>
                 <details class="card rounded-xl p-4 cursor-pointer">
@@ -850,7 +750,7 @@ jobs:
             <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-6">KNOWLEDGE CHECK</h2>
             <div class="card rounded-2xl p-8">
                 <div class="flex items-center justify-between mb-6">
-                    <h3 class="font-bold text-2xl">Quiz: MCP & Advanced Automation</h3>
+                    <h3 class="font-bold text-2xl">Quiz: MCP Servers & Advanced Automation</h3>
                     <span id="quizProgress" class="text-sm text-gray-400">Question 1/10</span>
                 </div>
 
@@ -883,7 +783,7 @@ jobs:
                 <div class="flex flex-col md:flex-row items-center justify-between gap-6">
                     <div>
                         <h3 class="text-2xl font-bold mb-2">Ready for the Challenge?</h3>
-                        <p class="text-gray-400">Build an MVP using MCP servers, subagents, and advanced automation techniques.</p>
+                        <p class="text-gray-400">Build an MVP using MCP servers, custom commands, and advanced automation techniques.</p>
                     </div>
                     <a id="challengeBtn" href="week4" class="btn-primary px-8 py-4 rounded-xl font-bold text-lg flex items-center gap-3 whitespace-nowrap">
                         Start Challenge
@@ -907,49 +807,18 @@ jobs:
 
     <script src="config.js"></script>
     <script>
-        // Challenge Status Check
-        const API_BASE = window.API_BASE || '';
-        const WEEK = 4;
+        const LEARN_CONFIG = {
+            week: 4,
+            totalLessons: 5,
+            lessonStart: 1,
+            storageKey: 'week4_learn_state',
+            challengeUrl: 'week4',
+            quizLabels: { correct: 'Correct', incorrect: 'Wrong', correctAnswer: 'Correct Answer' },
+            resultEmoji: function(score) {
+                return score >= 7 ? 'Excellent!' : score >= 5 ? 'Good job!' : 'Keep learning!';
+            },
+        };
 
-        async function checkChallengeStatus() {
-            try {
-                const response = await fetch(`${API_BASE}/api/challenge/${WEEK}/status`);
-                if (response.ok) {
-                    const data = await response.json();
-
-                    if (data.status !== 'started') {
-                        // Disable all challenge buttons
-                        const challengeButtons = [
-                            document.getElementById('challengeNavBtn'),
-                            document.getElementById('challengeQuizBtn'),
-                            document.getElementById('challengeBtn')
-                        ];
-
-                        challengeButtons.forEach(btn => {
-                            if (btn) {
-                                btn.classList.add('opacity-50', 'cursor-not-allowed', 'pointer-events-none');
-                            }
-                        });
-
-                        // Add warning message after main CTA button
-                        const mainBtn = document.getElementById('challengeBtn');
-                        if (mainBtn && mainBtn.parentElement) {
-                            const existingMsg = mainBtn.parentElement.querySelector('.challenge-warning');
-                            if (!existingMsg) {
-                                const msg = document.createElement('p');
-                                msg.className = 'challenge-warning text-sm text-amber-400 mt-2 text-center w-full';
-                                msg.textContent = 'Challenge not started by admin yet';
-                                mainBtn.parentElement.appendChild(msg);
-                            }
-                        }
-                    }
-                }
-            } catch (e) {
-                console.error('Failed to check challenge status:', e);
-            }
-        }
-
-        // Quiz Data
         const quizQuestions = [
             {
                 question: "What command adds an MCP server to Claude Code?",
@@ -957,24 +826,24 @@ jobs:
                 correct: 1
             },
             {
-                question: "Which MCP server enables browser automation?",
+                question: "Which MCP server enables browser automation and E2E testing?",
                 options: ["Notion MCP", "GitHub MCP", "Playwright MCP", "PostgreSQL MCP"],
                 correct: 2
             },
             {
-                question: "What is a subagent in Claude Code?",
-                options: ["A plugin that adds new UI elements", "An independent Claude instance spawned via the Task tool for parallel work", "A configuration file for MCP servers", "A special model variant"],
+                question: "What does MCP stand for?",
+                options: ["Machine Code Processor", "Model Context Protocol", "Multi-Channel Protocol", "Model Compute Platform"],
                 correct: 1
             },
             {
-                question: "Which subagent type is best for finding files and searching code?",
-                options: ["Bash", "Plan", "Explore", "General-Purpose"],
-                correct: 2
+                question: "Which MCP server provides up-to-date library documentation at query time?",
+                options: ["Sequential Thinking", "Context7", "Figma MCP", "Slack MCP"],
+                correct: 1
             },
             {
-                question: "What parameter runs a subagent in the background?",
-                options: ["async: true", "background: true", "run_in_background: true", "detach: true"],
-                correct: 2
+                question: "Where do you configure multiple MCP servers together?",
+                options: ["package.json", ".claude/settings.local.json", ".env file", "tsconfig.json"],
+                correct: 1
             },
             {
                 question: "Where are custom commands defined?",
@@ -997,197 +866,12 @@ jobs:
                 correct: 2
             },
             {
-                question: "How do you run multiple subagents in parallel?",
-                options: ["Use the --parallel flag", "Send multiple Task tool calls in a single message", "Run claude in multiple terminals", "Use the /parallel command"],
+                question: "Which command checks the status of connected MCP servers?",
+                options: ["/servers", "/mcp", "/list-tools", "/connections"],
                 correct: 1
             }
         ];
-
-        let currentQuestion = 0;
-        let score = 0;
-        let answeredQuestions = new Array(quizQuestions.length).fill(null);
-        let completedLessons = new Set();
-
-        function loadState() {
-            const saved = sessionStorage.getItem('week4_learn_state');
-            if (saved) {
-                const state = JSON.parse(saved);
-                completedLessons = new Set(state.completedLessons || []);
-                score = state.quizScore || 0;
-                answeredQuestions = state.answeredQuestions || new Array(quizQuestions.length).fill(null);
-                currentQuestion = state.currentQuestion || 0;
-            }
-            updateProgress();
-            updateLessonStatuses();
-            renderQuiz();
-        }
-
-        function saveState() {
-            const state = {
-                completedLessons: Array.from(completedLessons),
-                quizScore: score,
-                answeredQuestions: answeredQuestions,
-                currentQuestion: currentQuestion
-            };
-            sessionStorage.setItem('week4_learn_state', JSON.stringify(state));
-        }
-
-        function toggleLesson(num) {
-            const lesson = document.getElementById(`lesson${num}`);
-            const content = lesson.querySelector('.lesson-content');
-            const chevron = lesson.querySelector('.chevron');
-
-            document.querySelectorAll('.lesson-card').forEach(card => {
-                if (card.id !== `lesson${num}`) {
-                    card.classList.remove('open');
-                    card.querySelector('.lesson-content').classList.remove('open');
-                    card.querySelector('.chevron').classList.remove('open');
-                }
-            });
-
-            lesson.classList.toggle('open');
-            content.classList.toggle('open');
-            chevron.classList.toggle('open');
-        }
-
-        function completeLesson(num) {
-            completedLessons.add(num);
-            saveState();
-            updateLessonStatuses();
-            updateProgress();
-
-            if (num < 5) {
-                setTimeout(() => toggleLesson(num + 1), 300);
-            }
-        }
-
-        function updateLessonStatuses() {
-            for (let i = 1; i <= 5; i++) {
-                const status = document.getElementById(`lesson${i}-status`);
-                if (completedLessons.has(i)) {
-                    status.textContent = 'Completed';
-                    status.className = 'text-xs px-3 py-1 rounded-full bg-green-500/20 text-green-400';
-                }
-            }
-        }
-
-        function updateProgress() {
-            const lessonProgress = completedLessons.size;
-            const progressPercent = (lessonProgress / 5) * 100;
-
-            document.getElementById('progressText').textContent = `${lessonProgress}/5 Lessons`;
-            document.getElementById('progressFill').style.width = `${progressPercent}%`;
-            document.getElementById('quizScoreDisplay').textContent = score;
-
-            if (lessonProgress === 5 && score >= 7) {
-                document.getElementById('completionStatus').classList.remove('hidden');
-            }
-        }
-
-        function renderQuiz() {
-            const container = document.getElementById('quizContainer');
-            const results = document.getElementById('quizResults');
-
-            if (answeredQuestions.every(a => a !== null)) {
-                container.classList.add('hidden');
-                results.classList.remove('hidden');
-                document.getElementById('finalScore').textContent = score;
-                document.getElementById('resultEmoji').textContent = score >= 7 ? 'Excellent!' : score >= 5 ? 'Good job!' : 'Keep learning!';
-                return;
-            }
-
-            container.classList.remove('hidden');
-            results.classList.add('hidden');
-
-            const q = quizQuestions[currentQuestion];
-            document.getElementById('quizProgress').textContent = `Question ${currentQuestion + 1}/10`;
-
-            container.innerHTML = `
-                <div class="mb-6">
-                    <p class="text-lg font-medium mb-6">${q.question}</p>
-                    <div class="space-y-3">
-                        ${q.options.map((opt, i) => `
-                            <div class="quiz-option card rounded-xl p-4 ${answeredQuestions[currentQuestion] === i ? (i === q.correct ? 'correct' : 'incorrect') : ''}"
-                                 onclick="selectAnswer(${i})" ${answeredQuestions[currentQuestion] !== null ? 'style="pointer-events: none;"' : ''}>
-                                <div class="flex items-center gap-3">
-                                    <div class="w-8 h-8 rounded-lg bg-dark-600 flex items-center justify-center text-sm font-bold">
-                                        ${String.fromCharCode(65 + i)}
-                                    </div>
-                                    <span>${opt}</span>
-                                    ${answeredQuestions[currentQuestion] === i ? (i === q.correct ? '<span class="ml-auto text-green-400">Correct</span>' : '<span class="ml-auto text-red-400">Wrong</span>') : ''}
-                                    ${answeredQuestions[currentQuestion] !== null && i === q.correct && answeredQuestions[currentQuestion] !== i ? '<span class="ml-auto text-green-400">Correct Answer</span>' : ''}
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-                <div class="flex justify-between items-center">
-                    <button onclick="prevQuestion()" class="btn-secondary px-4 py-2 rounded-xl text-sm" ${currentQuestion === 0 ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>
-                        Previous
-                    </button>
-                    <div class="flex gap-1">
-                        ${quizQuestions.map((_, i) => `
-                            <div class="w-2 h-2 rounded-full ${i === currentQuestion ? 'bg-accent' : answeredQuestions[i] !== null ? (answeredQuestions[i] === quizQuestions[i].correct ? 'bg-green-500' : 'bg-red-500') : 'bg-gray-600'}"></div>
-                        `).join('')}
-                    </div>
-                    <button onclick="nextQuestion()" class="btn-primary px-4 py-2 rounded-xl text-sm" ${answeredQuestions[currentQuestion] === null ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>
-                        ${currentQuestion === quizQuestions.length - 1 ? 'Finish' : 'Next'}
-                    </button>
-                </div>
-            `;
-        }
-
-        function selectAnswer(index) {
-            if (answeredQuestions[currentQuestion] !== null) return;
-
-            answeredQuestions[currentQuestion] = index;
-            if (index === quizQuestions[currentQuestion].correct) {
-                score++;
-            }
-            saveState();
-            updateProgress();
-            renderQuiz();
-        }
-
-        function nextQuestion() {
-            if (answeredQuestions[currentQuestion] === null) return;
-            if (currentQuestion < quizQuestions.length - 1) {
-                currentQuestion++;
-                saveState();
-                renderQuiz();
-            } else {
-                renderQuiz();
-            }
-        }
-
-        function prevQuestion() {
-            if (currentQuestion > 0) {
-                currentQuestion--;
-                saveState();
-                renderQuiz();
-            }
-        }
-
-        function retakeQuiz() {
-            currentQuestion = 0;
-            score = 0;
-            answeredQuestions = new Array(quizQuestions.length).fill(null);
-            saveState();
-            updateProgress();
-            renderQuiz();
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            loadState();
-            for (let i = 1; i <= 5; i++) {
-                if (!completedLessons.has(i)) {
-                    toggleLesson(i);
-                    break;
-                }
-            }
-            // Check challenge status
-            checkChallengeStatus();
-        });
     </script>
+    <script src="learn-common.js"></script>
 </body>
 </html>

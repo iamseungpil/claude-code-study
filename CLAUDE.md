@@ -332,3 +332,65 @@ npx playwright test registration.spec.ts --project=site-tests
 ### Webhook Test: 2026-01-20 22:21:51
 
 ### Auto-Deploy Verified: 2026-01-20 22:25:22
+
+## Frontend Modularity Guidelines (2026-01-31)
+
+### Shared Code Architecture
+```
+frontend/
+├── config.js              # API base URL detection (localhost vs Cloudflare)
+├── week-common.js         # Week challenge pages: auth, timer, submission, history
+├── week-common.css        # Week challenge pages: nav-blur, card, buttons, timer
+├── learn-common.js        # Learn pages: quiz engine, lesson toggle, progress, state
+├── learn-common.css       # Learn pages: lesson cards, code blocks, quiz options
+├── week1.html … week5.html        # Challenge pages (WEEK_CONFIG + week-common.js)
+└── week1-learn.html … week5-learn.html  # Learn pages (LEARN_CONFIG + learn-common.js)
+```
+
+### Script Load Order (Critical)
+```
+config.js → <inline> CONFIG object + data </inline> → common.js
+```
+- `config.js` sets `window.API_BASE`
+- Inline script declares `WEEK_CONFIG` or `LEARN_CONFIG` + page data (e.g., `quizQuestions`)
+- `week-common.js` / `learn-common.js` reads the config and initializes behavior
+
+### Adding a New Week Page
+1. Copy an existing `weekN.html` and update `WEEK_CONFIG` values (week number, colors, feature flags)
+2. Copy an existing `weekN-learn.html` and update:
+   - `LEARN_CONFIG` (week, totalLessons, lessonStart, storageKey, challengeUrl, quizLabels, resultEmoji)
+   - CSS custom properties (`--accent-rgb`, `--accent-from`, `--accent-to`)
+   - `quizQuestions` array
+3. No changes needed to common JS/CSS files unless adding new shared behavior
+
+### Week-Specific Overrides
+- If a page needs custom behavior, load `week-common.js` first, then override functions in a subsequent inline `<script>` block
+- Example: `week1.html` overrides `displaySubmissionHistory()` and adds `checkExistingEvaluation()`
+
+### WEEK_CONFIG Properties
+| Property | Type | Description |
+|----------|------|-------------|
+| `week` | number | Week number (1-5) |
+| `allowResubmit` | boolean | Enable resubmit button (week1-2: true) |
+| `hasChallengeStatusCheck` | boolean | Check if challenge started (week3-5: true) |
+| `hasEvaluation` | boolean | Show evaluation feedback (week1 only) |
+| `revealSectionIds` | string[] | Section IDs to show when timer starts |
+| `downloadBtn` | object/null | `{ id, url }` for download button, or null |
+| `leaderboardBox` | object | Tailwind color classes for leaderboard card |
+
+### LEARN_CONFIG Properties
+| Property | Type | Description |
+|----------|------|-------------|
+| `week` | number | Week number (1-5) |
+| `totalLessons` | number | Number of lessons (5 or 6) |
+| `lessonStart` | number | First lesson index (0 for week1, 1 for week2-5) |
+| `storageKey` | string | sessionStorage key for state persistence |
+| `challengeUrl` | string | URL path for challenge button |
+| `quizLabels` | object | `{ correct, incorrect, correctAnswer }` display text |
+| `resultEmoji` | function | `(score) => string` for quiz result display |
+
+### Backend Helper Functions
+- `validate_week(week)`: Validates week parameter is 1-5, raises HTTPException if not
+- `get_challenge(week)`: Loads challenges data and returns `(challenges, week_data, week_key)` tuple
+- `ensure_submission_history(metadata)`: Ensures backward-compatible `submission_history` array exists
+- `ALLOWED_STATIC_ASSETS`: Dict mapping JS/CSS filenames to media types for static serving

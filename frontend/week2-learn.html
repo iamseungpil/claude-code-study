@@ -21,146 +21,12 @@
             }
         }
     </script>
+    <link rel="stylesheet" href="learn-common.css">
     <style>
-        * { font-family: 'Outfit', sans-serif; }
-        code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
-        html { scroll-behavior: smooth; }
-
+        :root { --accent-rgb: 168, 85, 247; --accent-from: #a855f7; --accent-to: #9333ea; }
         .hero-gradient {
-            background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(167, 139, 250, 0.2) 0%, transparent 50%),
+            background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(168, 85, 247, 0.2) 0%, transparent 50%),
                         linear-gradient(180deg, #0f172a 0%, #0a0a0f 100%);
-        }
-
-        .nav-blur {
-            background: rgba(10, 10, 15, 0.85);
-            backdrop-filter: blur(20px);
-        }
-
-        .card {
-            background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
-            border: 1px solid rgba(255,255,255,0.06);
-        }
-
-        .lesson-card {
-            background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
-            border: 1px solid rgba(255,255,255,0.06);
-            transition: all 0.3s ease;
-        }
-        .lesson-card:hover {
-            border-color: rgba(167, 139, 250, 0.3);
-        }
-        .lesson-card.open {
-            border-color: rgba(167, 139, 250, 0.5);
-        }
-
-        .lesson-header { cursor: pointer; }
-
-        .lesson-content {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.4s ease;
-        }
-        .lesson-content.open {
-            max-height: 3000px;
-        }
-
-        .chevron {
-            transition: transform 0.3s ease;
-        }
-        .chevron.open {
-            transform: rotate(180deg);
-        }
-
-        .code-block {
-            background: #0d1117;
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 12px;
-            overflow: hidden;
-        }
-        .code-block-header {
-            background: rgba(255,255,255,0.03);
-            padding: 10px 16px;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            font-size: 0.75rem;
-            color: #8b949e;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-        .code-block pre {
-            padding: 16px;
-            font-size: 0.875rem;
-            line-height: 1.6;
-            color: #c9d1d9;
-            overflow-x: auto;
-        }
-        .code-comment { color: #6e7681; }
-        .code-keyword { color: #ff7b72; }
-        .code-string { color: #a5d6ff; }
-        .code-function { color: #d2a8ff; }
-
-        .tip-box {
-            background: rgba(167, 139, 250, 0.1);
-            border: 1px solid rgba(167, 139, 250, 0.3);
-            border-radius: 12px;
-            padding: 16px;
-        }
-
-        .warning-box {
-            background: rgba(251, 191, 36, 0.1);
-            border: 1px solid rgba(251, 191, 36, 0.3);
-            border-radius: 12px;
-            padding: 16px;
-        }
-
-        .quiz-option {
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        .quiz-option:hover {
-            border-color: rgba(167, 139, 250, 0.5);
-            background: rgba(167, 139, 250, 0.05);
-        }
-        .quiz-option.selected {
-            border-color: rgba(167, 139, 250, 0.8);
-            background: rgba(167, 139, 250, 0.1);
-        }
-        .quiz-option.correct {
-            border-color: rgba(52, 211, 153, 0.8);
-            background: rgba(52, 211, 153, 0.1);
-        }
-        .quiz-option.incorrect {
-            border-color: rgba(248, 113, 113, 0.8);
-            background: rgba(248, 113, 113, 0.1);
-        }
-
-        .progress-bar {
-            background: rgba(255,255,255,0.1);
-            border-radius: 9999px;
-            overflow: hidden;
-        }
-        .progress-fill {
-            background: linear-gradient(90deg, #a78bfa 0%, #8b5cf6 100%);
-            height: 100%;
-            border-radius: 9999px;
-            transition: width 0.5s ease;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%);
-            transition: all 0.3s ease;
-        }
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px -10px rgba(167, 139, 250, 0.5);
-        }
-
-        .btn-secondary {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-            transition: all 0.3s ease;
-        }
-        .btn-secondary:hover {
-            background: rgba(255,255,255,0.1);
         }
     </style>
 </head>
@@ -618,16 +484,16 @@ main();</code></pre>
                                     <div>
                                         <div class="font-medium text-accent mb-1">Boris Cherny's Claude Code Tips</div>
                                         <p class="text-sm text-gray-300">
-                                            Anthropic Developer Relations의 Boris Cherny가 공유한 실전 팁들입니다.
+                                            Practical tips shared by Boris Cherny from Anthropic Developer Relations.
                                         </p>
                                     </div>
                                 </div>
                             </div>
 
                             <div>
-                                <h4 class="font-bold text-lg mb-3 text-pink-400">Tip 9: PostToolUse로 코드 포매팅</h4>
+                                <h4 class="font-bold text-lg mb-3 text-pink-400">Tip 9: Code Formatting with PostToolUse</h4>
                                 <p class="text-gray-300 mb-4">
-                                    Claude가 파일을 수정할 때마다 자동으로 Prettier를 실행하여 코드 스타일을 일관되게 유지합니다.
+                                    Automatically runs Prettier every time Claude modifies a file, keeping code style consistent.
                                 </p>
                                 <div class="code-block mb-4">
                                     <div class="code-block-header">settings.local.json</div>
@@ -650,33 +516,33 @@ main();</code></pre>
                             </div>
 
                             <div>
-                                <h4 class="font-bold text-lg mb-3 text-pink-400">Tip 10: /permissions로 권한 관리</h4>
+                                <h4 class="font-bold text-lg mb-3 text-pink-400">Tip 10: Permission Management with /permissions</h4>
                                 <p class="text-gray-300 mb-4">
-                                    <code class="bg-dark-800 px-2 py-1 rounded">/permissions</code> 명령어로 현재 세션의 권한을 확인하고 관리할 수 있습니다.
+                                    Use the <code class="bg-dark-800 px-2 py-1 rounded">/permissions</code> command to check and manage the current session's permissions.
                                 </p>
                                 <div class="grid md:grid-cols-2 gap-4">
                                     <div class="card rounded-xl p-4">
-                                        <div class="font-bold text-green-400 mb-2">권한 확인</div>
-                                        <p class="text-sm text-gray-400">현재 허용된 도구와 경로를 확인</p>
+                                        <div class="font-bold text-green-400 mb-2">Check Permissions</div>
+                                        <p class="text-sm text-gray-400">View currently allowed tools and paths</p>
                                         <code class="text-xs bg-dark-800 px-2 py-1 rounded mt-2 inline-block">/permissions</code>
                                     </div>
                                     <div class="card rounded-xl p-4">
-                                        <div class="font-bold text-yellow-400 mb-2">권한 추가</div>
-                                        <p class="text-sm text-gray-400">특정 작업에 대한 권한 승인</p>
+                                        <div class="font-bold text-yellow-400 mb-2">Add Permissions</div>
+                                        <p class="text-sm text-gray-400">Approve permissions for specific operations</p>
                                         <code class="text-xs bg-dark-800 px-2 py-1 rounded mt-2 inline-block">/allowed-tools</code>
                                     </div>
                                 </div>
                             </div>
 
                             <div>
-                                <h4 class="font-bold text-lg mb-3 text-pink-400">Tip 12: ralph-loop 플러그인 (장시간 작업)</h4>
+                                <h4 class="font-bold text-lg mb-3 text-pink-400">Tip 12: ralph-loop Plugin (Long-running Tasks)</h4>
                                 <p class="text-gray-300 mb-4">
-                                    Claude가 작업을 완료한 후 자동으로 다시 시작하는 자기참조 루프를 구현합니다.
-                                    백그라운드 에이전트와 함께 사용하면 장시간 작업을 자동화할 수 있습니다.
+                                    Implements a self-referencing loop that automatically restarts Claude after task completion.
+                                    Can be used with background agents to automate long-running tasks.
                                 </p>
                                 <div class="code-block mb-4">
-                                    <div class="code-block-header">Stop Hook - 자동 재시작</div>
-                                    <pre><code><span class="code-comment"># Stop 훅에서 Claude를 다시 호출</span>
+                                    <div class="code-block-header">Stop Hook - Auto Restart</div>
+                                    <pre><code><span class="code-comment"># Re-invoke Claude from the Stop hook</span>
 {
   <span class="code-string">"hooks"</span>: {
     <span class="code-string">"Stop"</span>: [
@@ -704,12 +570,12 @@ main();</code></pre>
                                             <h5 class="font-bold text-accent">hookify</h5>
                                         </div>
                                         <p class="text-sm text-gray-400 mb-3">
-                                            커스텀 훅을 쉽게 생성하고 관리할 수 있는 플러그인입니다.
+                                            A plugin for easily creating and managing custom hooks.
                                         </p>
-                                        <pre class="text-xs"><code class="text-green-400"># 설치
+                                        <pre class="text-xs"><code class="text-green-400"># Install
 claude plugins add github:anthropics/hookify
 
-# 훅 생성 마법사 실행
+# Run hook creation wizard
 /hookify:create</code></pre>
                                     </div>
                                     <div class="card rounded-xl p-4">
@@ -718,13 +584,13 @@ claude plugins add github:anthropics/hookify
                                             <h5 class="font-bold text-accent">ralph-loop</h5>
                                         </div>
                                         <p class="text-sm text-gray-400 mb-3">
-                                            자기참조 반복 루프를 구현하는 플러그인입니다. 장시간 작업을 백그라운드에서 자동화합니다.
+                                            A plugin that implements self-referencing loop cycles. Automates long-running tasks in the background.
                                         </p>
-                                        <pre class="text-xs"><code class="text-green-400"># 설치
+                                        <pre class="text-xs"><code class="text-green-400"># Install
 claude plugins add github:anthropics/ralph-loop
 
-# 장시간 작업 시작
-/ralph-loop:start "대규모 리팩토링 수행"</code></pre>
+# Start long-running task
+/ralph-loop:start "Perform large-scale refactoring"</code></pre>
                                     </div>
                                 </div>
                             </div>
@@ -740,71 +606,71 @@ claude plugins add github:anthropics/ralph-loop
 
         <!-- Terminology Section -->
         <section class="mb-16">
-            <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-4">용어 설명</h2>
+            <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-4">TERMINOLOGY</h2>
             <div class="space-y-3">
                 <details class="card rounded-xl p-4 cursor-pointer">
                     <summary class="font-bold text-white flex items-center justify-between">
-                        PreToolUse 훅
+                        PreToolUse Hook
                         <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                         </svg>
                     </summary>
                     <p class="text-gray-400 text-sm mt-3">
-                        도구가 실행되기 <strong class="text-white">전에</strong> 트리거되는 훅입니다.
-                        exit code 2를 반환하면 도구 실행을 차단할 수 있습니다.
-                        .env 파일 읽기 차단, 위험한 명령어 실행 방지 등에 사용됩니다.
+                        A hook triggered <strong class="text-white">before</strong> a tool executes.
+                        Returning exit code 2 can block the tool from running.
+                        Used for blocking .env file reads, preventing dangerous command execution, etc.
                     </p>
                 </details>
                 <details class="card rounded-xl p-4 cursor-pointer">
                     <summary class="font-bold text-white flex items-center justify-between">
-                        PostToolUse 훅
+                        PostToolUse Hook
                         <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                         </svg>
                     </summary>
                     <p class="text-gray-400 text-sm mt-3">
-                        도구가 실행된 <strong class="text-white">후에</strong> 트리거되는 훅입니다.
-                        차단 기능은 없지만, Claude에게 피드백을 제공할 수 있습니다.
-                        코드 포매팅, 타입 체크, 로깅 등에 사용됩니다.
+                        A hook triggered <strong class="text-white">after</strong> a tool executes.
+                        Cannot block actions, but can provide feedback to Claude.
+                        Used for code formatting, type checking, logging, etc.
                     </p>
                 </details>
                 <details class="card rounded-xl p-4 cursor-pointer">
                     <summary class="font-bold text-white flex items-center justify-between">
-                        Exit Code (종료 코드)
+                        Exit Code
                         <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                         </svg>
                     </summary>
                     <p class="text-gray-400 text-sm mt-3">
-                        훅 스크립트가 반환하는 종료 코드입니다.<br>
-                        <span class="text-green-400">0</span> = 도구 실행 허용<br>
-                        <span class="text-red-400">2</span> = 도구 실행 차단 (PreToolUse에서만)<br>
-                        stderr로 출력한 메시지는 Claude에게 피드백으로 전달됩니다.
+                        The exit code returned by a hook script.<br>
+                        <span class="text-green-400">0</span> = Allow tool execution<br>
+                        <span class="text-red-400">2</span> = Block tool execution (PreToolUse only)<br>
+                        Messages printed to stderr are passed to Claude as feedback.
                     </p>
                 </details>
                 <details class="card rounded-xl p-4 cursor-pointer">
                     <summary class="font-bold text-white flex items-center justify-between">
-                        백그라운드 에이전트
+                        Background Agent
                         <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                         </svg>
                     </summary>
                     <p class="text-gray-400 text-sm mt-3">
-                        Claude가 백그라운드에서 실행되어 작업이 완료되면 알림을 보내는 모드입니다.
-                        긴 작업을 시작해두고 다른 일을 하다가 완료 시점에 확인할 수 있습니다.
-                        <code class="bg-dark-800 px-2 py-1 rounded text-xs">run_in_background: true</code>로 활성화합니다.
+                        A mode where Claude runs in the background and sends a notification when the task is complete.
+                        Start a long task and check back when it finishes.
+                        Activated with <code class="bg-dark-800 px-2 py-1 rounded text-xs">run_in_background: true</code>.
                     </p>
                 </details>
                 <details class="card rounded-xl p-4 cursor-pointer">
                     <summary class="font-bold text-white flex items-center justify-between">
-                        에이전트 Stop 훅
+                        Agent Stop Hook
                         <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                         </svg>
                     </summary>
                     <p class="text-gray-400 text-sm mt-3">
-                        Claude가 응답을 완료했을 때 트리거되는 훅입니다.
-                        자동 알림, 로깅, 또는 자기참조 루프(ralph-loop)를 구현하는 데 사용됩니다.
+                        A hook triggered when Claude finishes responding.
+                        Used for automatic notifications, logging, or implementing self-referencing loops (ralph-loop).
                     </p>
                 </details>
             </div>
@@ -872,49 +738,18 @@ claude plugins add github:anthropics/ralph-loop
 
     <script src="config.js"></script>
     <script>
-        // Challenge Status Check
-        const API_BASE = window.API_BASE || '';
-        const WEEK = 2;
+        const LEARN_CONFIG = {
+            week: 2,
+            totalLessons: 5,
+            lessonStart: 1,
+            storageKey: 'week2_learn_state',
+            challengeUrl: 'week2',
+            quizLabels: { correct: '✓', incorrect: '✗', correctAnswer: '✓' },
+            resultEmoji: function(score) {
+                return score >= 8 ? '🎉' : score >= 5 ? '👍' : '📚';
+            },
+        };
 
-        async function checkChallengeStatus() {
-            try {
-                const response = await fetch(`${API_BASE}/api/challenge/${WEEK}/status`);
-                if (response.ok) {
-                    const data = await response.json();
-
-                    if (data.status !== 'started') {
-                        // Disable all challenge buttons
-                        const challengeButtons = [
-                            document.getElementById('challengeNavBtn'),
-                            document.getElementById('challengeQuizBtn'),
-                            document.getElementById('challengeBtn')
-                        ];
-
-                        challengeButtons.forEach(btn => {
-                            if (btn) {
-                                btn.classList.add('opacity-50', 'cursor-not-allowed', 'pointer-events-none');
-                            }
-                        });
-
-                        // Add warning message after main CTA button
-                        const mainBtn = document.getElementById('challengeBtn');
-                        if (mainBtn && mainBtn.parentElement) {
-                            const existingMsg = mainBtn.parentElement.querySelector('.challenge-warning');
-                            if (!existingMsg) {
-                                const msg = document.createElement('p');
-                                msg.className = 'challenge-warning text-sm text-amber-400 mt-2 text-center w-full';
-                                msg.textContent = 'Challenge not started by admin yet';
-                                mainBtn.parentElement.appendChild(msg);
-                            }
-                        }
-                    }
-                }
-            } catch (e) {
-                console.error('Failed to check challenge status:', e);
-            }
-        }
-
-        // Quiz Data
         const quizQuestions = [
             {
                 question: "What is the primary difference between PreToolUse and PostToolUse hooks?",
@@ -997,197 +832,7 @@ claude plugins add github:anthropics/ralph-loop
                 correct: 1
             }
         ];
-
-        let currentQuestion = 0;
-        let score = 0;
-        let answeredQuestions = new Array(quizQuestions.length).fill(null);
-        let completedLessons = new Set();
-
-        // Load saved state from sessionStorage
-        function loadState() {
-            const saved = sessionStorage.getItem('week2_learn_state');
-            if (saved) {
-                const state = JSON.parse(saved);
-                completedLessons = new Set(state.completedLessons || []);
-                score = state.quizScore || 0;
-                answeredQuestions = state.answeredQuestions || new Array(quizQuestions.length).fill(null);
-                currentQuestion = state.currentQuestion || 0;
-            }
-            updateProgress();
-            updateLessonStatuses();
-            renderQuiz();
-        }
-
-        // Save state to sessionStorage
-        function saveState() {
-            const state = {
-                completedLessons: Array.from(completedLessons),
-                quizScore: score,
-                answeredQuestions: answeredQuestions,
-                currentQuestion: currentQuestion
-            };
-            sessionStorage.setItem('week2_learn_state', JSON.stringify(state));
-        }
-
-        // Lesson Functions
-        function toggleLesson(num) {
-            const lesson = document.getElementById(`lesson${num}`);
-            const content = lesson.querySelector('.lesson-content');
-            const chevron = lesson.querySelector('.chevron');
-
-            document.querySelectorAll('.lesson-card').forEach(card => {
-                if (card.id !== `lesson${num}`) {
-                    card.classList.remove('open');
-                    card.querySelector('.lesson-content').classList.remove('open');
-                    card.querySelector('.chevron').classList.remove('open');
-                }
-            });
-
-            lesson.classList.toggle('open');
-            content.classList.toggle('open');
-            chevron.classList.toggle('open');
-        }
-
-        function completeLesson(num) {
-            completedLessons.add(num);
-            saveState();
-            updateLessonStatuses();
-            updateProgress();
-
-            if (num < 5) {
-                setTimeout(() => toggleLesson(num + 1), 300);
-            }
-        }
-
-        function updateLessonStatuses() {
-            for (let i = 1; i <= 5; i++) {
-                const status = document.getElementById(`lesson${i}-status`);
-                if (completedLessons.has(i)) {
-                    status.textContent = 'Completed';
-                    status.className = 'text-xs px-3 py-1 rounded-full bg-green-500/20 text-green-400';
-                }
-            }
-        }
-
-        function updateProgress() {
-            const lessonProgress = completedLessons.size;
-            const progressPercent = (lessonProgress / 5) * 100;
-
-            document.getElementById('progressText').textContent = `${lessonProgress}/5 Lessons`;
-            document.getElementById('progressFill').style.width = `${progressPercent}%`;
-            document.getElementById('quizScoreDisplay').textContent = score;
-
-            if (lessonProgress === 5 && score >= 7) {
-                document.getElementById('completionStatus').classList.remove('hidden');
-            }
-        }
-
-        // Quiz Functions
-        function renderQuiz() {
-            const container = document.getElementById('quizContainer');
-            const results = document.getElementById('quizResults');
-
-            if (answeredQuestions.every(a => a !== null)) {
-                container.classList.add('hidden');
-                results.classList.remove('hidden');
-                document.getElementById('finalScore').textContent = score;
-                document.getElementById('resultEmoji').textContent = score >= 7 ? '🎉' : score >= 5 ? '👍' : '📚';
-                return;
-            }
-
-            container.classList.remove('hidden');
-            results.classList.add('hidden');
-
-            const q = quizQuestions[currentQuestion];
-            document.getElementById('quizProgress').textContent = `Question ${currentQuestion + 1}/10`;
-
-            container.innerHTML = `
-                <div class="mb-6">
-                    <p class="text-lg font-medium mb-6">${q.question}</p>
-                    <div class="space-y-3">
-                        ${q.options.map((opt, i) => `
-                            <div class="quiz-option card rounded-xl p-4 ${answeredQuestions[currentQuestion] === i ? (i === q.correct ? 'correct' : 'incorrect') : ''}"
-                                 onclick="selectAnswer(${i})" ${answeredQuestions[currentQuestion] !== null ? 'style="pointer-events: none;"' : ''}>
-                                <div class="flex items-center gap-3">
-                                    <div class="w-8 h-8 rounded-lg bg-dark-600 flex items-center justify-center text-sm font-bold">
-                                        ${String.fromCharCode(65 + i)}
-                                    </div>
-                                    <span>${opt}</span>
-                                    ${answeredQuestions[currentQuestion] === i ? (i === q.correct ? '<span class="ml-auto text-green-400">✓</span>' : '<span class="ml-auto text-red-400">✗</span>') : ''}
-                                    ${answeredQuestions[currentQuestion] !== null && i === q.correct && answeredQuestions[currentQuestion] !== i ? '<span class="ml-auto text-green-400">✓ Correct</span>' : ''}
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-                <div class="flex justify-between items-center">
-                    <button onclick="prevQuestion()" class="btn-secondary px-4 py-2 rounded-xl text-sm" ${currentQuestion === 0 ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>
-                        Previous
-                    </button>
-                    <div class="flex gap-1">
-                        ${quizQuestions.map((_, i) => `
-                            <div class="w-2 h-2 rounded-full ${i === currentQuestion ? 'bg-accent' : answeredQuestions[i] !== null ? (answeredQuestions[i] === quizQuestions[i].correct ? 'bg-green-500' : 'bg-red-500') : 'bg-gray-600'}"></div>
-                        `).join('')}
-                    </div>
-                    <button onclick="nextQuestion()" class="btn-primary px-4 py-2 rounded-xl text-sm" ${answeredQuestions[currentQuestion] === null ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>
-                        ${currentQuestion === quizQuestions.length - 1 ? 'Finish' : 'Next'}
-                    </button>
-                </div>
-            `;
-        }
-
-        function selectAnswer(index) {
-            if (answeredQuestions[currentQuestion] !== null) return;
-
-            answeredQuestions[currentQuestion] = index;
-            if (index === quizQuestions[currentQuestion].correct) {
-                score++;
-            }
-            saveState();
-            updateProgress();
-            renderQuiz();
-        }
-
-        function nextQuestion() {
-            if (answeredQuestions[currentQuestion] === null) return;
-            if (currentQuestion < quizQuestions.length - 1) {
-                currentQuestion++;
-                saveState();
-                renderQuiz();
-            } else {
-                renderQuiz();
-            }
-        }
-
-        function prevQuestion() {
-            if (currentQuestion > 0) {
-                currentQuestion--;
-                saveState();
-                renderQuiz();
-            }
-        }
-
-        function retakeQuiz() {
-            currentQuestion = 0;
-            score = 0;
-            answeredQuestions = new Array(quizQuestions.length).fill(null);
-            saveState();
-            updateProgress();
-            renderQuiz();
-        }
-
-        // Initialize on page load
-        document.addEventListener('DOMContentLoaded', () => {
-            loadState();
-            for (let i = 1; i <= 5; i++) {
-                if (!completedLessons.has(i)) {
-                    toggleLesson(i);
-                    break;
-                }
-            }
-            // Check challenge status
-            checkChallengeStatus();
-        });
     </script>
+    <script src="learn-common.js"></script>
 </body>
 </html>

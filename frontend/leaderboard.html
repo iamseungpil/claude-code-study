@@ -37,6 +37,8 @@
         .loading { animation: pulse 2s infinite; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
         .trophy-glow { filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.5)); }
+        .avatar { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255,255,255,0.1); }
+        .avatar-fallback { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; color: white; border: 2px solid rgba(255,255,255,0.1); }
     </style>
 </head>
 <body class="bg-dark-900 text-white min-h-screen">
@@ -123,10 +125,22 @@
 
     <script src="config.js"></script>
     <script>
-        // API Base URL (config.js에서 자동 설정됨)
         const API_BASE = window.API_BASE || '';
-        
         let currentTab = 'season';
+
+        const avatarColors = ['#4f8cff', '#a78bfa', '#fbbf24', '#34d399', '#fb7185', '#f97316', '#06b6d4', '#8b5cf6'];
+        function getAvatarColor(name) {
+            let hash = 0;
+            for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+            return avatarColors[Math.abs(hash) % avatarColors.length];
+        }
+        function renderAvatar(entry) {
+            const name = entry.full_name || entry.participant_id;
+            if (entry.profile_image) {
+                return `<img src="${entry.profile_image}" alt="${name}" class="avatar" onerror="this.outerHTML='<div class=\\'avatar-fallback\\' style=\\'background:${getAvatarColor(name)}\\'>${name.charAt(0).toUpperCase()}</div>'">`;
+            }
+            return `<div class="avatar-fallback" style="background:${getAvatarColor(name)}">${name.charAt(0).toUpperCase()}</div>`;
+        }
 
         async function loadLeaderboard(weekOrSeason) {
             currentTab = weekOrSeason;
@@ -191,6 +205,8 @@
             data.forEach((entry, i) => {
                 const isPending = entry.status === 'pending';
 
+                const displayName = entry.full_name || entry.participant_id;
+
                 // Pending entries have different rendering
                 if (isPending) {
                     html += `
@@ -198,9 +214,13 @@
                             <div class="w-16 text-center">
                                 <span class="text-2xl">⏳</span>
                             </div>
-                            <div class="flex-1">
-                                <span class="font-semibold text-lg">${entry.participant_id}</span>
-                    <span class="ml-3 text-xs text-yellow-500 bg-yellow-500/10 px-2 py-1 rounded-full">Pending review</span>
+                            <div class="flex-1 flex items-center gap-3">
+                                ${renderAvatar(entry)}
+                                <div>
+                                    <span class="font-semibold text-lg">${displayName}</span>
+                                    <span class="ml-3 text-xs text-yellow-500 bg-yellow-500/10 px-2 py-1 rounded-full">Pending review</span>
+                                    ${displayName !== entry.participant_id ? `<div class="text-xs text-gray-500">@${entry.participant_id}</div>` : ''}
+                                </div>
                             </div>
                             <div class="flex items-center gap-6 text-right">
                                 <div>
@@ -223,7 +243,7 @@
 
                 const rankClass = i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : '';
                 const medal = entry.medal || '';
-                const timeClass = entry.time_bonus > 0 ? 'text-emerald-400' : entry.time_bonus < 0 ? 'text-rose-400' : 'text-gray-500';
+                const timeClass = entry.time_rank_bonus > 0 ? 'text-emerald-400' : entry.time_rank_bonus < 0 ? 'text-rose-400' : 'text-gray-500';
 
                 html += `
                     <div class="flex items-center p-5 ${rankClass} border-l-4 ${i < 3 ? '' : 'border-transparent'}">
@@ -231,8 +251,12 @@
                             <span class="text-2xl">${medal}</span>
                             <span class="text-lg font-bold ${medal ? 'hidden' : ''}">${entry.rank}</span>
                         </div>
-                        <div class="flex-1">
-                            <span class="font-semibold text-lg">${entry.participant_id}</span>
+                        <div class="flex-1 flex items-center gap-3">
+                            ${renderAvatar(entry)}
+                            <div>
+                                <span class="font-semibold text-lg">${displayName}</span>
+                                ${displayName !== entry.participant_id ? `<div class="text-xs text-gray-500">@${entry.participant_id}</div>` : ''}
+                            </div>
                         </div>
                         <div class="flex items-center gap-6 text-right">
                             <div>
@@ -241,7 +265,7 @@
                             </div>
                             <div>
                                 <div class="text-xs text-gray-500 uppercase">Time</div>
-                                <div class="font-bold ${timeClass}">${entry.time_bonus > 0 ? '+' : ''}${entry.time_bonus}</div>
+                                <div class="font-bold ${timeClass}">${entry.time_rank_bonus > 0 ? '+' : ''}${entry.time_rank_bonus}</div>
                             </div>
                             <div class="min-w-[60px]">
                                 <div class="text-xs text-gray-500 uppercase">Total</div>
@@ -271,16 +295,21 @@
                 const title = entry.title || '';
                 const medals = ['🥇', '🥈', '🥉'];
                 const medal = medals[i] || '';
-                
+                const displayName = entry.full_name || entry.participant_id;
+
                 html += `
                     <div class="flex items-center p-5 ${rankClass} border-l-4 ${i < 3 ? '' : 'border-transparent'}">
                         <div class="w-16 text-center">
                             <span class="text-2xl">${medal}</span>
                             <span class="text-lg font-bold ${medal ? 'hidden' : ''}">${entry.season_rank}</span>
                         </div>
-                        <div class="flex-1">
-                            <span class="font-semibold text-lg">${entry.participant_id}</span>
-                            ${title ? `<span class="ml-3 text-sm text-accent-amber">${title}</span>` : ''}
+                        <div class="flex-1 flex items-center gap-3">
+                            ${renderAvatar(entry)}
+                            <div>
+                                <span class="font-semibold text-lg">${displayName}</span>
+                                ${title ? `<span class="ml-3 text-sm text-accent-amber">${title}</span>` : ''}
+                                ${displayName !== entry.participant_id ? `<div class="text-xs text-gray-500">@${entry.participant_id}</div>` : ''}
+                            </div>
                         </div>
                         <div class="flex items-center gap-6 text-right">
                             <div>
