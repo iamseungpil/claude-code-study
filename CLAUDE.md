@@ -395,6 +395,15 @@ config.js → <inline> CONFIG object + data </inline> → common.js
 - `ensure_submission_history(metadata)`: Ensures backward-compatible `submission_history` array exists
 - `ALLOWED_STATIC_ASSETS`: Dict mapping JS/CSS filenames to media types for static serving
 
+### Issue 15: ZIP Download Broken — Workers API Has No /challenges/ Route (2026-02-02)
+- **Cause**: `week-common.js` prefixed download URLs with `window.API_BASE` (Workers API), but Workers has no `/challenges/` route. The old FastAPI backend had this route, Workers doesn't.
+- **Symptom**: Clicking "Download UIGen Project" button → 404 or broken response from Workers API
+- **Solution**:
+  1. Placed ZIP files in `frontend/challenges/weekN/` so Cloudflare Pages serves them as static assets
+  2. Removed `API_BASE` prefix from download button href in `week-common.js` — now uses relative path `/challenges/weekN/file.zip`
+- **Files Modified**: `frontend/week-common.js`, added `frontend/challenges/week1/uigen.zip`, `frontend/challenges/week2/hooks-challenge.zip`
+- **Rule**: Static assets (ZIP, images) should be served from Cloudflare Pages (`frontend/`), NOT from Workers API
+
 ## Auto-Deploy via GitHub Actions (2026-02-01)
 
 ### How It Works
