@@ -1,11 +1,15 @@
 import { Hono } from 'hono';
-import type { Env } from '../types';
+import type { Env, AppVariables, Evaluation } from '../types';
+import { parseWeek, WEEK_VALIDATION_ERROR } from '../lib/validation';
 
-const app = new Hono<{ Bindings: Env }>();
+const app = new Hono<{ Bindings: Env; Variables: AppVariables }>();
 
 // ---------- GET /api/evaluations/:week/:pid ----------
 app.get('/api/evaluations/:week/:pid', async (c) => {
-  const week = parseInt(c.req.param('week'), 10);
+  const week = parseWeek(c.req.param('week'));
+  if (week === null) {
+    return c.json({ detail: WEEK_VALIDATION_ERROR }, 400);
+  }
   const pid = c.req.param('pid');
 
   // Get the latest completed evaluation for this user/week
@@ -16,45 +20,47 @@ app.get('/api/evaluations/:week/:pid', async (c) => {
      LIMIT 1`,
   )
     .bind(pid, week)
-    .first();
+    .first<Evaluation>();
 
-  if (!ev || (ev as Record<string, unknown>).status === 'pending_review') {
+  if (!ev || ev.status === 'pending_review') {
     return c.json({
       participant: pid,
       week,
       status: 'pending_review',
-      submission_number: ev ? (ev as Record<string, unknown>).submission_number : null,
+      submission_number: ev ? ev.submission_number : null,
     });
   }
 
-  const e = ev as Record<string, unknown>;
-
   // Parse JSON fields
-  let strengths: unknown = e.strengths;
-  let improvements: unknown = e.improvements;
+  let strengths: unknown = ev.strengths;
+  let improvements: unknown = ev.improvements;
+  let breakdown: unknown = ev.breakdown;
   try {
     if (typeof strengths === 'string') strengths = JSON.parse(strengths);
   } catch { /* keep as string */ }
   try {
     if (typeof improvements === 'string') improvements = JSON.parse(improvements);
   } catch { /* keep as string */ }
+  try {
+    if (typeof breakdown === 'string') breakdown = JSON.parse(breakdown);
+  } catch { /* keep as string */ }
 
   return c.json({
     participant: pid,
     week,
-    status: e.status,
+    status: ev.status,
     scores: {
-      rubric: e.rubric_score,
-      time_rank: e.time_rank,
-      time_rank_bonus: e.time_rank_bonus,
-      total: e.total_score,
+      rubric: ev.rubric_score,
+      time_rank: ev.time_rank,
+      time_rank_bonus: ev.time_rank_bonus,
+      total: ev.total_score,
     },
-    breakdown: {},
-    feedback: e.feedback || '',
+    breakdown: breakdown || {},
+    feedback: ev.feedback || '',
     strengths: strengths || [],
     improvements: improvements || [],
-    submission_number: e.submission_number,
-    evaluated_at: e.evaluated_at,
+    submission_number: ev.submission_number,
+    evaluated_at: ev.evaluated_at,
   });
 });
 

@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
-import type { Env, JwtPayload } from './types';
+import type { Env, AppVariables } from './types';
 import { authMiddleware } from './middleware/auth';
 
 import health from './routes/health';
@@ -12,7 +12,7 @@ import evaluations from './routes/evaluations';
 import admin from './routes/admin';
 import leaderboard from './routes/leaderboard';
 
-const app = new Hono<{ Bindings: Env; Variables: { user: JwtPayload } }>();
+const app = new Hono<{ Bindings: Env; Variables: AppVariables }>();
 
 // ---------- CORS ----------
 app.use(
@@ -28,7 +28,7 @@ app.use(
       'https://claude-code-study.pages.dev',
     ],
     allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowHeaders: ['Content-Type', 'Authorization'],
+    allowHeaders: ['Content-Type', 'Authorization', 'X-Admin-Key'],
     credentials: true,
   }),
 );

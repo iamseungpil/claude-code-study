@@ -2,6 +2,7 @@
  * Password hashing: PBKDF2 for new users, bcrypt-edge for verifying existing bcrypt hashes.
  */
 import { compareSync } from 'bcrypt-edge';
+import { timingSafeEqual } from 'hono/utils/buffer';
 
 const PBKDF2_ITERATIONS = 100_000;
 const SALT_LENGTH = 16;
@@ -60,7 +61,7 @@ export async function verifyPassword(password: string, stored: string): Promise<
       key,
       KEY_LENGTH * 8,
     );
-    return toHex(derived) === hashHex;
+    return timingSafeEqual(toHex(derived), hashHex);
   }
 
   return false;

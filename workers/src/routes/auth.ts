@@ -1,13 +1,11 @@
 import { Hono } from 'hono';
-import type { Env, JwtPayload, User } from '../types';
+import type { Env, AppVariables, User } from '../types';
 import { hashPassword, verifyPassword } from '../lib/crypto';
 import { signToken } from '../lib/jwt';
 import { requireAuth } from '../middleware/auth';
+import { PARTICIPANT_ID_RE, NAME_RE } from '../lib/validation';
 
-const PARTICIPANT_ID_RE = /^[a-zA-Z0-9_-]{3,30}$/;
-const NAME_RE = /^[a-zA-Z\uAC00-\uD7A3\s]{1,50}$/;
-
-const app = new Hono<{ Bindings: Env; Variables: { user: JwtPayload } }>();
+const app = new Hono<{ Bindings: Env; Variables: AppVariables }>();
 
 // ---------- Register ----------
 app.post('/api/auth/register', async (c) => {

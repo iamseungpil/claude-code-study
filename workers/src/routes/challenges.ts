@@ -1,7 +1,8 @@
 import { Hono } from 'hono';
-import type { Env, Challenge, PersonalTimer } from '../types';
+import type { Env, AppVariables, Challenge, PersonalTimer } from '../types';
+import { parseWeek, WEEK_VALIDATION_ERROR } from '../lib/validation';
 
-const app = new Hono<{ Bindings: Env }>();
+const app = new Hono<{ Bindings: Env; Variables: AppVariables }>();
 
 // ---------- GET /api/challenges/status ----------
 app.get('/api/challenges/status', async (c) => {
@@ -36,9 +37,9 @@ app.get('/api/challenges/status', async (c) => {
 
 // ---------- GET /api/challenge/:week/status ----------
 app.get('/api/challenge/:week/status', async (c) => {
-  const week = parseInt(c.req.param('week'), 10);
-  if (isNaN(week) || week < 1 || week > 5) {
-    return c.json({ detail: 'Week must be between 1 and 5' }, 400);
+  const week = parseWeek(c.req.param('week'));
+  if (week === null) {
+    return c.json({ detail: WEEK_VALIDATION_ERROR }, 400);
   }
 
   const ch = await c.env.DB.prepare('SELECT * FROM challenges WHERE week = ?')

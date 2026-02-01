@@ -14,6 +14,21 @@ export function calculateTimeRankBonus(rank: number): number {
   return RANK_POINTS[rank] ?? 5;
 }
 
+/** Season points awarded based on weekly leaderboard rank. */
+const SEASON_RANK_POINTS: Record<number, number> = {
+  1: 10,
+  2: 7,
+  3: 5,
+};
+const SEASON_DEFAULT_POINTS = 3;
+
+export function calculateSeasonPoints(rank: number): number {
+  return SEASON_RANK_POINTS[rank] ?? SEASON_DEFAULT_POINTS;
+}
+
+/** Sentinel value returned when a user has no ranked submission for the week. */
+const UNRANKED_POSITION = 999;
+
 /**
  * Get time rank for a user in a given week.
  * Considers only the LATEST submission for each user, ordered by elapsed_minutes ASC.
@@ -40,5 +55,5 @@ export async function getTimeRank(db: D1Database, week: number, userId: string):
       return i + 1;
     }
   }
-  return 999;
+  return UNRANKED_POSITION;
 }

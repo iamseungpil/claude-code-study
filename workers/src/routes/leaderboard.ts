@@ -1,7 +1,9 @@
 import { Hono } from 'hono';
-import type { Env, User } from '../types';
+import type { AppVariables, Env, User } from '../types';
+import { calculateSeasonPoints } from '../lib/scoring';
+import { parseWeek, WEEK_VALIDATION_ERROR } from '../lib/validation';
 
-const app = new Hono<{ Bindings: Env }>();
+const app = new Hono<{ Bindings: Env; Variables: AppVariables }>();
 
 // Helper: load user map for enrichment
 async function loadUserMap(db: D1Database): Promise<Map<string, { full_name: string; profile_image: string | null }>> {
@@ -14,7 +16,11 @@ async function loadUserMap(db: D1Database): Promise<Map<string, { full_name: str
 }
 
 // Helper: get week leaderboard data
-async function getWeekLeaderboardData(db: D1Database, week: number) {
+async function getWeekLeaderboardData(
+  db: D1Database,
+  week: number,
+  existingUserMap?: Map<string, { full_name: string; profile_image: string | null }>,
+) {
   // Get the latest completed evaluation for each user in this week
   const { results } = await db
     .prepare(
@@ -32,7 +38,7 @@ async function getWeekLeaderboardData(db: D1Database, week: number) {
     .bind(week)
     .all();
 
-  const userMap = await loadUserMap(db);
+  const userMap = existingUserMap ?? await loadUserMap(db);
 
   return results.map((row, i) => {
     const r = row as Record<string, unknown>;
@@ -58,13 +64,15 @@ async function getWeekLeaderboardData(db: D1Database, week: number) {
 
 // ---------- GET /api/leaderboard/season ----------
 app.get('/api/leaderboard/season', async (c) => {
+  const userMap = await loadUserMap(c.env.DB);
+
   const seasonScores = new Map<
     string,
     { participant_id: string; total_points: number; weeks_completed: number; weekly_scores: Record<string, unknown> }
   >();
 
   for (let week = 1; week <= 5; week++) {
-    const leaderboard = await getWeekLeaderboardData(c.env.DB, week);
+    const leaderboard = await getWeekLeaderboardData(c.env.DB, week, userMap);
 
     for (const entry of leaderboard) {
       if (!seasonScores.has(entry.participant_id)) {
@@ -78,11 +86,7 @@ app.get('/api/leaderboard/season', async (c) => {
 
       const record = seasonScores.get(entry.participant_id)!;
       const rank = entry.rank;
-      let points: number;
-      if (rank === 1) points = 10;
-      else if (rank === 2) points = 7;
-      else if (rank === 3) points = 5;
-      else points = 3;
+      const points = calculateSeasonPoints(rank);
 
       record.total_points += points;
       record.weeks_completed += 1;
@@ -95,8 +99,6 @@ app.get('/api/leaderboard/season', async (c) => {
   }
 
   const results = [...seasonScores.values()].sort((a, b) => b.total_points - a.total_points);
-
-  const userMap = await loadUserMap(c.env.DB);
 
   const enriched = results.map((r, i) => {
     const userInfo = userMap.get(r.participant_id);
@@ -119,9 +121,9 @@ app.get('/api/leaderboard/season', async (c) => {
 
 // ---------- GET /api/leaderboard/:week ----------
 app.get('/api/leaderboard/:week', async (c) => {
-  const week = parseInt(c.req.param('week'), 10);
-  if (isNaN(week)) {
-    return c.json({ detail: 'Invalid week' }, 400);
+  const week = parseWeek(c.req.param('week'));
+  if (week === null) {
+    return c.json({ detail: WEEK_VALIDATION_ERROR }, 400);
   }
   const data = await getWeekLeaderboardData(c.env.DB, week);
   return c.json(data);

@@ -1,27 +1,24 @@
 import { Hono } from 'hono';
-import type { Env, JwtPayload, Challenge, PersonalTimer } from '../types';
+import type { Env, AppVariables, Challenge, PersonalTimer } from '../types';
 import { requireAuth } from '../middleware/auth';
+import { parseWeek, WEEK_VALIDATION_ERROR, checkChallengeActive } from '../lib/validation';
 
-const app = new Hono<{ Bindings: Env; Variables: { user: JwtPayload } }>();
+const app = new Hono<{ Bindings: Env; Variables: AppVariables }>();
 
 // ---------- POST /api/challenge/:week/start-personal ----------
 app.post('/api/challenge/:week/start-personal', async (c) => {
   const user = requireAuth(c);
-  const week = parseInt(c.req.param('week'), 10);
-  if (isNaN(week) || week < 1 || week > 5) {
-    return c.json({ detail: 'Week must be between 1 and 5' }, 400);
+  const week = parseWeek(c.req.param('week'));
+  if (week === null) {
+    return c.json({ detail: WEEK_VALIDATION_ERROR }, 400);
   }
 
   const ch = await c.env.DB.prepare('SELECT * FROM challenges WHERE week = ?')
     .bind(week)
     .first<Challenge>();
 
-  if (!ch || ch.status === 'not_started') {
-    return c.json({ detail: 'Challenge has not started yet. Wait for admin to start.' }, 400);
-  }
-  if (ch.status === 'ended') {
-    return c.json({ detail: 'Challenge has ended. Cannot start personal timer.' }, 400);
-  }
+  const error = checkChallengeActive(ch, 'Challenge has ended. Cannot start personal timer.');
+  if (error) return c.json({ detail: error.detail }, error.status);
 
   // Check existing timer
   const existing = await c.env.DB.prepare(
@@ -58,9 +55,9 @@ app.post('/api/challenge/:week/start-personal', async (c) => {
 // ---------- GET /api/challenge/:week/my-status ----------
 app.get('/api/challenge/:week/my-status', async (c) => {
   const user = requireAuth(c);
-  const week = parseInt(c.req.param('week'), 10);
-  if (isNaN(week) || week < 1 || week > 5) {
-    return c.json({ detail: 'Week must be between 1 and 5' }, 400);
+  const week = parseWeek(c.req.param('week'));
+  if (week === null) {
+    return c.json({ detail: WEEK_VALIDATION_ERROR }, 400);
   }
 
   const ch = await c.env.DB.prepare('SELECT * FROM challenges WHERE week = ?')

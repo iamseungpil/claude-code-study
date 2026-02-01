@@ -1,18 +1,17 @@
 import { Hono } from 'hono';
-import type { Env, JwtPayload, Challenge, User } from '../types';
+import type { Env, AppVariables, Challenge, User } from '../types';
 import { requireAdmin } from '../middleware/auth';
 import { getTimeRank, calculateTimeRankBonus } from '../lib/scoring';
+import { parseWeek, WEEK_VALIDATION_ERROR, PARTICIPANT_ID_RE } from '../lib/validation';
 
-const PARTICIPANT_ID_RE = /^[a-zA-Z0-9_-]{3,30}$/;
-
-const app = new Hono<{ Bindings: Env; Variables: { user: JwtPayload } }>();
+const app = new Hono<{ Bindings: Env; Variables: AppVariables }>();
 
 // ---------- POST /api/admin/challenge/:week/start ----------
 app.post('/api/admin/challenge/:week/start', async (c) => {
-  const admin = requireAdmin(c);
-  const week = parseInt(c.req.param('week'), 10);
-  if (isNaN(week) || week < 1 || week > 5) {
-    return c.json({ detail: 'Week must be between 1 and 5' }, 400);
+  const admin = await requireAdmin(c);
+  const week = parseWeek(c.req.param('week'));
+  if (week === null) {
+    return c.json({ detail: WEEK_VALIDATION_ERROR }, 400);
   }
 
   const ch = await c.env.DB.prepare('SELECT * FROM challenges WHERE week = ?')
@@ -35,10 +34,10 @@ app.post('/api/admin/challenge/:week/start', async (c) => {
 
 // ---------- POST /api/admin/challenge/:week/end ----------
 app.post('/api/admin/challenge/:week/end', async (c) => {
-  requireAdmin(c);
-  const week = parseInt(c.req.param('week'), 10);
-  if (isNaN(week) || week < 1 || week > 5) {
-    return c.json({ detail: 'Week must be between 1 and 5' }, 400);
+  await requireAdmin(c);
+  const week = parseWeek(c.req.param('week'));
+  if (week === null) {
+    return c.json({ detail: WEEK_VALIDATION_ERROR }, 400);
   }
 
   const ch = await c.env.DB.prepare('SELECT * FROM challenges WHERE week = ?')
@@ -59,10 +58,10 @@ app.post('/api/admin/challenge/:week/end', async (c) => {
 
 // ---------- POST /api/admin/challenge/:week/restart ----------
 app.post('/api/admin/challenge/:week/restart', async (c) => {
-  requireAdmin(c);
-  const week = parseInt(c.req.param('week'), 10);
-  if (isNaN(week) || week < 1 || week > 5) {
-    return c.json({ detail: 'Week must be between 1 and 5' }, 400);
+  await requireAdmin(c);
+  const week = parseWeek(c.req.param('week'));
+  if (week === null) {
+    return c.json({ detail: WEEK_VALIDATION_ERROR }, 400);
   }
 
   // Count before deleting
@@ -99,28 +98,18 @@ app.post('/api/admin/challenge/:week/restart', async (c) => {
 
 // ---------- GET /api/admin/users ----------
 app.get('/api/admin/users', async (c) => {
-  requireAdmin(c);
+  await requireAdmin(c);
 
   const { results } = await c.env.DB.prepare(
     'SELECT user_id, full_name, first_name, last_name, role, profile_image, registered_at FROM users',
   ).all<User>();
 
-  return c.json(
-    results.map((u) => ({
-      user_id: u.user_id,
-      full_name: u.full_name,
-      first_name: u.first_name,
-      last_name: u.last_name,
-      role: u.role,
-      profile_image: u.profile_image,
-      registered_at: u.registered_at,
-    })),
-  );
+  return c.json(results);
 });
 
 // ---------- DELETE /api/admin/users/:user_id ----------
 app.delete('/api/admin/users/:user_id', async (c) => {
-  const admin = requireAdmin(c);
+  const admin = await requireAdmin(c);
   const userId = c.req.param('user_id');
 
   if (userId.toLowerCase() === admin.user_id.toLowerCase()) {
@@ -142,12 +131,12 @@ app.delete('/api/admin/users/:user_id', async (c) => {
 
 // ---------- POST /api/admin/evaluations/:week/:pid ----------
 app.post('/api/admin/evaluations/:week/:pid', async (c) => {
-  const admin = requireAdmin(c);
-  const week = parseInt(c.req.param('week'), 10);
+  const admin = await requireAdmin(c);
+  const week = parseWeek(c.req.param('week'));
   const pid = c.req.param('pid');
 
-  if (isNaN(week) || week < 1 || week > 5) {
-    return c.json({ detail: 'Week must be between 1 and 5' }, 400);
+  if (week === null) {
+    return c.json({ detail: WEEK_VALIDATION_ERROR }, 400);
   }
   if (!PARTICIPANT_ID_RE.test(pid)) {
     return c.json({ detail: 'Invalid participant ID format' }, 400);
@@ -159,6 +148,7 @@ app.post('/api/admin/evaluations/:week/:pid', async (c) => {
     feedback?: string;
     strengths?: string[];
     improvements?: string[];
+    breakdown?: Record<string, number>;
   }>();
 
   // Verify submission exists
@@ -181,8 +171,8 @@ app.post('/api/admin/evaluations/:week/:pid', async (c) => {
 
   // Upsert evaluation
   await c.env.DB.prepare(
-    `INSERT INTO evaluations (user_id, week, submission_number, rubric_score, time_rank, time_rank_bonus, total_score, feedback, strengths, improvements, status, evaluated_at, evaluated_by)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'completed', ?, ?)
+    `INSERT INTO evaluations (user_id, week, submission_number, rubric_score, time_rank, time_rank_bonus, total_score, feedback, strengths, improvements, breakdown, status, evaluated_at, evaluated_by)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'completed', ?, ?)
      ON CONFLICT(user_id, week, submission_number) DO UPDATE SET
        rubric_score = excluded.rubric_score,
        time_rank = excluded.time_rank,
@@ -191,6 +181,7 @@ app.post('/api/admin/evaluations/:week/:pid', async (c) => {
        feedback = excluded.feedback,
        strengths = excluded.strengths,
        improvements = excluded.improvements,
+       breakdown = excluded.breakdown,
        status = 'completed',
        evaluated_at = excluded.evaluated_at,
        evaluated_by = excluded.evaluated_by`,
@@ -206,6 +197,7 @@ app.post('/api/admin/evaluations/:week/:pid', async (c) => {
       body.feedback || '',
       body.strengths ? JSON.stringify(body.strengths) : null,
       body.improvements ? JSON.stringify(body.improvements) : null,
+      body.breakdown ? JSON.stringify(body.breakdown) : null,
       evaluatedAt,
       admin.user_id,
     )
