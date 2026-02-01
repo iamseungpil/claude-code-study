@@ -394,3 +394,100 @@ config.js → <inline> CONFIG object + data </inline> → common.js
 - `get_challenge(week)`: Loads challenges data and returns `(challenges, week_data, week_key)` tuple
 - `ensure_submission_history(metadata)`: Ensures backward-compatible `submission_history` array exists
 - `ALLOWED_STATIC_ASSETS`: Dict mapping JS/CSS filenames to media types for static serving
+
+## Auto-Deploy via GitHub Actions (2026-02-01)
+
+### How It Works
+- **`git push origin main`** triggers GitHub Actions automatically — no manual `wrangler deploy` needed
+- Two separate workflows handle Workers and Frontend:
+
+| Path Change | Workflow | Action |
+|-------------|----------|--------|
+| `workers/**` | `.github/workflows/deploy-worker.yml` | `wrangler deploy` (Workers) |
+| `frontend/**` | `.github/workflows/deploy-frontend.yml` | `wrangler pages deploy frontend` (Pages) |
+
+### Deployment Rule
+- **ALWAYS commit and push to deploy** — never run `wrangler deploy` manually
+- Manual deploy can cause confusion (local deploy succeeds but CI may fail due to uncommitted files)
+- Push ensures CI/CD validates the exact same code that gets deployed
+
+### Verifying Deployment
+```bash
+# Check GitHub Actions status after push
+gh run list --limit 3
+
+# View specific run details
+gh run view <run-id>
+```
+
+### Submission Collection (Central Repo)
+- Repo: `iamseungpil/claude-code-study-submissions`
+- When a student submits, Workers triggers `workflow_dispatch` → GitHub Actions clones student repo → commits to `weekN/user_id/`
+- Requires `GITHUB_PAT` wrangler secret (for triggering dispatch) and `SUBMISSIONS_PAT` repo secret (for cloning private repos)
+- Backfill existing submissions: `python backfill_submissions.py --week 1`
+
+## CLI Evaluation Workflow (2026-02-01)
+
+### Architecture
+```
+Browser → Cloudflare Workers → D1 (SQL)
+                ▲
+                │ evaluate.py calls Workers API
+                │
+         Local (Mac)
+         1. git clone
+         2. claude -p (headless eval)
+         3. POST result to Workers
+```
+
+- All production data lives in Workers D1 (users, submissions, evaluations)
+- Workers cannot run git clone → evaluation runs locally, posts results via API
+- Admin API authenticated via `X-Admin-Key` header (wrangler secret)
+
+### Usage
+```bash
+# Single evaluation
+python evaluate.py 1 iamseungpil
+
+# Dry run (preview, no save)
+python evaluate.py 1 iamseungpil --dry-run
+
+# All pending for a week
+python evaluate.py 1 --all
+
+# Keep cloned repo for debugging
+python evaluate.py 1 iamseungpil --keep
+```
+
+### Environment Variables
+```bash
+# In .env (project root)
+WORKERS_API_BASE=https://claude-code-study-api.iamseungpil.workers.dev
+ADMIN_API_KEY=<same value as wrangler secret>
+```
+
+### Evaluation Flow
+1. Fetch submission info from Workers API (`GET /api/submissions/{week}`)
+2. `git clone --depth 1` to temp directory
+3. Read rubric from `rubrics/weekN_rubric.md`
+4. Run `claude -p` with rubric + code path → JSON result
+5. Clean up temp directory (always, via `try/finally`)
+6. POST result to Workers Admin API (`POST /api/admin/evaluations/{week}/{pid}`)
+7. Server calculates time_rank_bonus and total_score
+
+### Admin API Key Setup
+```bash
+# Generate key
+openssl rand -hex 32
+
+# Register as wrangler secret (not in wrangler.toml)
+cd workers && npx wrangler secret put ADMIN_API_KEY
+
+# Add same key to .env for evaluate.py
+```
+
+## Test Accounts
+
+| Account | ID | Password | Purpose |
+|---------|-----|----------|---------|
+| Test Evaluator | `testeval3` | `testeval3` | E2E testing for evaluation pipeline (week 3) |

@@ -628,12 +628,52 @@
             }
         }
 
-        function toggleReview(week, participantId) {
+        async function toggleReview(week, participantId) {
             const el = document.getElementById(`review-${week}-${participantId}`);
             if (!el) return;
             el.classList.toggle('hidden');
             if (!el.classList.contains('hidden')) {
                 updateAttemptUrl(week, participantId);
+                await loadExistingEvaluation(week, participantId);
+            }
+        }
+
+        async function loadExistingEvaluation(week, participantId) {
+            try {
+                const response = await fetch(`${API_BASE}/api/evaluations/${week}/${participantId}`);
+                if (!response.ok) return;
+                const evalData = await response.json();
+                if (evalData.status !== 'completed') return;
+
+                // Pre-populate form fields
+                const rubricInput = document.getElementById(`rubric-${week}-${participantId}`);
+                const feedbackInput = document.getElementById(`feedback-${week}-${participantId}`);
+                const strengthsInput = document.getElementById(`strengths-${week}-${participantId}`);
+                const improvementsInput = document.getElementById(`improvements-${week}-${participantId}`);
+
+                if (rubricInput) rubricInput.value = evalData.scores?.rubric ?? '';
+                if (feedbackInput) feedbackInput.value = evalData.feedback || '';
+
+                const strengths = Array.isArray(evalData.strengths) ? evalData.strengths : [];
+                const improvements = Array.isArray(evalData.improvements) ? evalData.improvements : [];
+                if (strengthsInput) strengthsInput.value = strengths.map(s => `- ${s}`).join('\n');
+                if (improvementsInput) improvementsInput.value = improvements.map(i => `- ${i}`).join('\n');
+
+                // Show existing evaluation status
+                const el = document.getElementById(`review-${week}-${participantId}`);
+                const existingBadge = el.querySelector('.eval-status-badge');
+                if (existingBadge) existingBadge.remove();
+
+                const badge = document.createElement('div');
+                badge.className = 'eval-status-badge mb-4 p-3 bg-accent-emerald/10 border border-accent-emerald/30 rounded-xl text-sm';
+                badge.innerHTML = `
+                    <span class="text-accent-emerald font-bold">✓ Evaluation exists</span>
+                    <span class="text-gray-400 ml-2">Total: ${evalData.scores?.total ?? '-'} (Rubric: ${evalData.scores?.rubric ?? '-'} + Bonus: ${evalData.scores?.time_rank_bonus ?? 0})</span>
+                    <span class="text-gray-500 ml-2">Evaluated: ${evalData.evaluated_at ? new Date(evalData.evaluated_at).toLocaleString('en-US') : '-'}</span>
+                `;
+                el.prepend(badge);
+            } catch (e) {
+                // No existing evaluation, that's fine
             }
         }
 

@@ -74,8 +74,8 @@
             <div class="card rounded-2xl p-8">
                 <p class="text-lg text-gray-300 leading-relaxed">
                     You need a <strong class="text-white">quick literature review</strong> for a new research topic.
-                    Connect to the Semantic Scholar API via <strong class="text-accent">MCP (Model Context Protocol)</strong>,
-                    and build a workflow to automatically search and summarize related papers.
+                    Connect to the arXiv API via <strong class="text-accent">MCP (Model Context Protocol)</strong>,
+                    and build a workflow to automatically search, analyze, and write a structured survey.
                 </p>
             </div>
         </section>
@@ -97,7 +97,7 @@
                     <div class="step-number bg-accent/20 text-accent">1</div>
                     <div>
                         <h3 class="font-bold text-xl mb-2">Set Up MCP Server</h3>
-                        <p class="text-gray-400">Configure and connect to the Semantic Scholar MCP server.</p>
+                        <p class="text-gray-400">Configure and connect to the arXiv MCP server (<code>arxiv-mcp-server</code>).</p>
                     </div>
                 </div>
                 <div class="card rounded-2xl p-6 flex gap-5">
@@ -110,15 +110,15 @@
                 <div class="card rounded-2xl p-6 flex gap-5">
                     <div class="step-number bg-accent/20 text-accent">3</div>
                     <div>
-                        <h3 class="font-bold text-xl mb-2">Collect and Summarize Papers</h3>
-                        <p class="text-gray-400">Collect 10+ related papers and summarize each one.</p>
+                        <h3 class="font-bold text-xl mb-2">Collect and Analyze Papers</h3>
+                        <p class="text-gray-400">Collect 10+ related papers. Summarize and critically compare them.</p>
                     </div>
                 </div>
                 <div class="card rounded-2xl p-6 flex gap-5">
                     <div class="step-number bg-accent/20 text-accent">4</div>
                     <div>
                         <h3 class="font-bold text-xl mb-2">Write Survey Document</h3>
-                        <p class="text-gray-400">Create a systematic survey document based on the collected papers.</p>
+                        <p class="text-gray-400">Write a structured survey with introduction, critical analysis, and research insights.</p>
                     </div>
                 </div>
             </div>
@@ -143,9 +143,9 @@
                     <code class="text-xs bg-dark-600 px-3 py-1.5 rounded-lg text-accent">Use "Task tool"</code>
                 </div>
                 <div class="card rounded-2xl p-6">
-                    <div class="flex items-center gap-3 mb-3"><span class="text-2xl">📖</span><h3 class="font-bold text-lg">Semantic Scholar API</h3></div>
-                    <p class="text-gray-400 text-sm mb-3">Academic paper search and metadata retrieval</p>
-                    <code class="text-xs bg-dark-600 px-3 py-1.5 rounded-lg text-accent">Paper search, Citations</code>
+                    <div class="flex items-center gap-3 mb-3"><span class="text-2xl">📖</span><h3 class="font-bold text-lg">arXiv API</h3></div>
+                    <p class="text-gray-400 text-sm mb-3">Academic paper search, download, and analysis</p>
+                    <code class="text-xs bg-dark-600 px-3 py-1.5 rounded-lg text-accent">arxiv-mcp-server</code>
                 </div>
             </div>
         </section>
@@ -159,10 +159,10 @@
                         <div>
                             <h3 class="font-bold text-lg mb-1">survey.md</h3>
                             <ul class="text-gray-400 text-sm space-y-1">
-                                <li>• Research topic introduction</li>
-                                <li>• Per-paper summaries (10+)</li>
-                                <li>• Classification system</li>
-                                <li>• Insights and conclusions</li>
+                                <li>• Introduction &amp; scope</li>
+                                <li>• Critical analysis (10+ papers)</li>
+                                <li>• Research insights &amp; trends</li>
+                                <li>• Conclusion &amp; future directions</li>
                             </ul>
                         </div>
                     </div>
@@ -171,9 +171,28 @@
                         <div>
                             <h3 class="font-bold text-lg mb-1">references.bib</h3>
                             <ul class="text-gray-400 text-sm space-y-1">
-                                <li>• BibTeX format</li>
-                                <li>• 10+ papers</li>
-                                <li>• Accurate metadata</li>
+                                <li>• BibTeX format, 10+ entries</li>
+                                <li>• Matched with in-text citations</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <span class="text-4xl">🔌</span>
+                        <div>
+                            <h3 class="font-bold text-lg mb-1">.claude/settings.local.json</h3>
+                            <ul class="text-gray-400 text-sm space-y-1">
+                                <li>• arXiv MCP server config</li>
+                                <li>• Commit to repo</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <span class="text-4xl">⚡</span>
+                        <div>
+                            <h3 class="font-bold text-lg mb-1">.claude/skills/*/SKILL.md</h3>
+                            <ul class="text-gray-400 text-sm space-y-1">
+                                <li>• Custom survey-writer skill</li>
+                                <li>• YAML frontmatter + instructions</li>
                             </ul>
                         </div>
                     </div>
@@ -187,10 +206,9 @@
                 <table class="w-full">
                     <thead><tr class="bg-dark-600/50 text-left"><th class="px-6 py-4 font-semibold">Category</th><th class="px-6 py-4 font-semibold text-right">Points</th></tr></thead>
                     <tbody class="divide-y divide-white/5">
-                        <tr><td class="px-6 py-5"><div class="font-medium text-lg">MCP Setup</div><div class="text-sm text-gray-500 mt-1">Semantic Scholar MCP integration</div></td><td class="px-6 py-5 text-right"><span class="text-2xl font-bold text-accent">20</span></td></tr>
-                        <tr><td class="px-6 py-5"><div class="font-medium text-lg">Skills Usage</div><div class="text-sm text-gray-500 mt-1">Custom skills for document automation</div></td><td class="px-6 py-5 text-right"><span class="text-2xl font-bold text-accent">20</span></td></tr>
-                        <tr><td class="px-6 py-5"><div class="font-medium text-lg">Paper Collection</div><div class="text-sm text-gray-500 mt-1">10+ papers with summaries</div></td><td class="px-6 py-5 text-right"><span class="text-2xl font-bold text-accent">25</span></td></tr>
-                        <tr><td class="px-6 py-5"><div class="font-medium text-lg">Survey Document</div><div class="text-sm text-gray-500 mt-1">Structured survey with classification</div></td><td class="px-6 py-5 text-right"><span class="text-2xl font-bold text-accent">25</span></td></tr>
+                        <tr><td class="px-6 py-5"><div class="font-medium text-lg">A. Tool Setup</div><div class="text-sm text-gray-500 mt-1">arXiv MCP config + Custom Skill</div></td><td class="px-6 py-5 text-right"><span class="text-2xl font-bold text-accent">20</span></td></tr>
+                        <tr><td class="px-6 py-5"><div class="font-medium text-lg">B. Writing Structure</div><div class="text-sm text-gray-500 mt-1">Introduction, organization, references, conclusion</div></td><td class="px-6 py-5 text-right"><span class="text-2xl font-bold text-accent">35</span></td></tr>
+                        <tr><td class="px-6 py-5"><div class="font-medium text-lg">C. Research Insight</div><div class="text-sm text-gray-500 mt-1">Summaries, critical analysis, synthesis</div></td><td class="px-6 py-5 text-right"><span class="text-2xl font-bold text-accent">35</span></td></tr>
                         <tr class="bg-green-500/5"><td class="px-6 py-5"><div class="font-medium text-lg text-green-400">⏱️ Time Bonus</div></td><td class="px-6 py-5 text-right"><span class="text-2xl font-bold text-green-400">+10</span></td></tr>
                     </tbody>
                     <tfoot><tr class="bg-dark-600/30"><td class="px-6 py-4 font-bold text-lg">Total</td><td class="px-6 py-4 text-right"><span class="text-3xl font-bold bg-gradient-to-r from-accent to-yellow-300 bg-clip-text text-transparent">100</span></td></tr></tfoot>
@@ -220,7 +238,7 @@
                         </li>
                         <li class="flex gap-3">
                             <span class="bg-accent/20 text-accent w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">2</span>
-                            <span>Make sure <strong>survey.md</strong> and <strong>references.bib</strong> are included</span>
+                            <span>Include <strong>survey.md</strong>, <strong>references.bib</strong>, <strong>.claude/settings.local.json</strong>, and <strong>.claude/skills/*/SKILL.md</strong></span>
                         </li>
                         <li class="flex gap-3">
                             <span class="bg-accent/20 text-accent w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">3</span>
@@ -292,7 +310,7 @@
             week: 3,
             allowResubmit: false,
             hasChallengeStatusCheck: true,
-            hasEvaluation: false,
+            hasEvaluation: true,
             revealSectionIds: ['stagesSection', 'learningSection', 'deliverablesSection', 'scoringSection'],
             downloadBtn: null,
             leaderboardBox: {

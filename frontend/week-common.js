@@ -126,8 +126,8 @@ async function loadPersonalStatus() {
                     if (WEEK_CONFIG.allowResubmit) {
                         document.getElementById('submitBtn').innerHTML = '🔄 Resubmit';
                         showStatus('You have already submitted. You can resubmit to improve your score (time rank will be recalculated).', 'text-blue-400');
-                        // week1: check existing evaluation
-                        if (WEEK_CONFIG.hasEvaluation && typeof checkExistingEvaluation === 'function') {
+                        // Check existing evaluation
+                        if (WEEK_CONFIG.hasEvaluation) {
                             await checkExistingEvaluation();
                         }
                     } else {
@@ -148,11 +148,10 @@ async function loadPersonalStatus() {
 
 document.addEventListener('DOMContentLoaded', async () => {
     // Set download button URL if configured
+    // ZIP files are served from Cloudflare Pages (frontend/challenges/), not Workers API
     if (WEEK_CONFIG.downloadBtn) {
         const downloadEl = document.getElementById(WEEK_CONFIG.downloadBtn.id);
-        if (downloadEl && window.API_BASE) {
-            downloadEl.href = `${window.API_BASE}${WEEK_CONFIG.downloadBtn.url}`;
-        } else if (downloadEl) {
+        if (downloadEl) {
             downloadEl.href = WEEK_CONFIG.downloadBtn.url;
         }
     }
@@ -168,8 +167,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     await loadPersonalStatus();
 
-    // week1: check evaluation before history
-    if (WEEK_CONFIG.hasEvaluation && currentUser && typeof checkExistingEvaluation === 'function') {
+    // Check evaluation before history
+    if (WEEK_CONFIG.hasEvaluation && currentUser) {
         await checkExistingEvaluation();
     }
 
@@ -308,7 +307,7 @@ document.getElementById('submitForm').addEventListener('submit', async (e) => {
                     </a>
                 </div>
                 <div class="text-gray-500 text-sm mt-3">
-                    Evaluation in progress... Results will appear shortly.
+                    ⏳ Waiting for evaluation
                 </div>
             `;
             statusEl.className = 'mt-6 text-center';
@@ -429,4 +428,118 @@ function displaySubmissionHistory(history) {
 
         list.appendChild(card);
     });
+}
+
+// === Evaluation Display (generic, can be overridden per-week) ===
+
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+/**
+ * Generic displayEvaluationFeedback - works for all weeks.
+ * Week1 overrides this with a week1-specific breakdown layout.
+ */
+function displayEvaluationFeedback(evalData) {
+    // Build dynamic breakdown HTML from whatever keys exist
+    const breakdown = evalData.breakdown || {};
+    const breakdownEntries = Object.entries(breakdown);
+    let breakdownHtml = '';
+    if (breakdownEntries.length > 0) {
+        const items = breakdownEntries.map(([key, value]) => {
+            const label = key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+            return `<div class="flex justify-between p-2 bg-dark-900/30 rounded">
+                <span class="text-gray-400">${escapeHtml(label)}</span>
+                <span class="text-white">${value}</span>
+            </div>`;
+        }).join('');
+        breakdownHtml = `
+            <div class="mb-6">
+                <h4 class="font-semibold text-white mb-3">Score Breakdown</h4>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">${items}</div>
+            </div>`;
+    }
+
+    const feedbackHtml = `
+        <div class="mt-8 p-6 bg-dark-800/50 rounded-2xl border border-accent/30">
+            <h3 class="text-xl font-bold text-accent mb-4">Review Complete</h3>
+            <div class="grid grid-cols-3 gap-4 mb-6">
+                <div class="text-center p-4 bg-dark-900/50 rounded-xl">
+                    <div class="text-3xl font-bold text-white">${evalData.scores?.total || evalData.rubric_score || '-'}</div>
+                    <div class="text-sm text-gray-400">Total Score</div>
+                </div>
+                <div class="text-center p-4 bg-dark-900/50 rounded-xl">
+                    <div class="text-2xl font-bold text-white">${evalData.scores?.rubric || '-'}</div>
+                    <div class="text-sm text-gray-400">Rubric Score</div>
+                </div>
+                <div class="text-center p-4 bg-dark-900/50 rounded-xl">
+                    <div class="text-2xl font-bold text-purple-400">+${evalData.scores?.time_rank_bonus || 0}</div>
+                    <div class="text-sm text-gray-400">Time Bonus</div>
+                </div>
+            </div>
+            ${breakdownHtml}
+            <div class="mb-6">
+                <h4 class="font-semibold text-white mb-2">Feedback</h4>
+                <p class="text-gray-300">${escapeHtml(evalData.feedback || 'No feedback available')}</p>
+            </div>
+            <div class="grid md:grid-cols-2 gap-4">
+                <div>
+                    <h4 class="font-semibold text-green-400 mb-2">Strengths</h4>
+                    <ul class="text-sm text-gray-300 space-y-1">
+                        ${(evalData.strengths || []).map(s => `<li>• ${escapeHtml(s)}</li>`).join('')}
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-amber-400 mb-2">Areas for Improvement</h4>
+                    <ul class="text-sm text-gray-300 space-y-1">
+                        ${(evalData.improvements || []).map(i => `<li>• ${escapeHtml(i)}</li>`).join('')}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    `;
+
+    const statusEl = document.getElementById('statusMessage');
+    statusEl.innerHTML = 'Review Complete';
+    statusEl.className = 'mt-6 text-center text-lg font-medium text-green-400';
+
+    const existingFeedback = statusEl.parentNode.querySelectorAll('.evaluation-feedback-container');
+    existingFeedback.forEach(el => el.remove());
+
+    const feedbackContainer = document.createElement('div');
+    feedbackContainer.className = 'evaluation-feedback-container';
+    feedbackContainer.innerHTML = feedbackHtml;
+    statusEl.parentNode.appendChild(feedbackContainer);
+
+    const submitBtn = document.getElementById('submitBtn');
+    if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        submitBtn.innerHTML = '🔄 Resubmit';
+    }
+
+    loadSubmissionHistory();
+}
+
+/**
+ * Generic checkExistingEvaluation - works for all weeks.
+ * Week1 overrides this with week1-specific behavior.
+ */
+async function checkExistingEvaluation() {
+    if (!currentUser) return;
+
+    try {
+        const response = await fetch(`${API_BASE}/api/evaluations/${WEEK}/${currentUser.user_id}`);
+        if (response.ok) {
+            const evalData = await response.json();
+            if (evalData.status === 'completed') {
+                displayEvaluationFeedback(evalData);
+            }
+        }
+    } catch (error) {
+        // No evaluation yet, that's fine
+    }
 }
