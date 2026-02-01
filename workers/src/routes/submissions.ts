@@ -1,18 +1,20 @@
 import { Hono } from 'hono';
-import type { Env, JwtPayload, Challenge, PersonalTimer, Submission } from '../types';
+import type { Env, AppVariables, Challenge, PersonalTimer, Submission } from '../types';
 import { requireAuth } from '../middleware/auth';
+import { parseWeek, isValidWeek, WEEK_VALIDATION_ERROR, checkChallengeActive } from '../lib/validation';
+import { triggerSubmissionCollection } from '../lib/github';
 
 const GITHUB_URL_RE = /^https:\/\/github\.com\/[a-zA-Z0-9_-]+\/[a-zA-Z0-9_.-]+\/?$/;
 
-const app = new Hono<{ Bindings: Env; Variables: { user: JwtPayload } }>();
+const app = new Hono<{ Bindings: Env; Variables: AppVariables }>();
 
 // ---------- POST /api/submissions/submit ----------
 app.post('/api/submissions/submit', async (c) => {
   const user = requireAuth(c);
   const body = await c.req.json<{ week: number; github_url: string }>();
 
-  if (!body.week || body.week < 1 || body.week > 5) {
-    return c.json({ detail: 'Week must be between 1 and 5' }, 400);
+  if (!body.week || !isValidWeek(body.week)) {
+    return c.json({ detail: WEEK_VALIDATION_ERROR }, 400);
   }
   if (!GITHUB_URL_RE.test(body.github_url)) {
     return c.json({ detail: 'Invalid GitHub URL format' }, 400);
@@ -23,12 +25,10 @@ app.post('/api/submissions/submit', async (c) => {
     .bind(body.week)
     .first<Challenge>();
 
-  if (!ch || ch.status === 'not_started') {
-    return c.json({ detail: 'Challenge has not started yet. Wait for admin to start.' }, 400);
-  }
-  if (ch.status === 'ended') {
-    return c.json({ detail: 'Challenge has ended. No more submissions allowed.' }, 400);
-  }
+  const error = checkChallengeActive(ch, 'Challenge has ended. No more submissions allowed.');
+  if (error) return c.json({ detail: error.detail }, error.status);
+  // TypeScript narrowing: checkChallengeActive guarantees ch is non-null here
+  if (!ch) return c.json({ detail: 'Challenge not found' }, 404);
 
   // Check personal timer
   const timer = await c.env.DB.prepare(
@@ -94,6 +94,13 @@ app.post('/api/submissions/submit', async (c) => {
     .bind(user.user_id, body.week, submissionNumber)
     .run();
 
+  // Trigger submission collection (fire-and-forget)
+  if (c.env.GITHUB_PAT) {
+    c.executionCtx.waitUntil(
+      triggerSubmissionCollection(c.env.GITHUB_PAT, body.week, user.user_id, body.github_url),
+    );
+  }
+
   // Build submission history for response
   const { results: allSubs } = await c.env.DB.prepare(
     'SELECT * FROM submissions WHERE user_id = ? AND week = ? ORDER BY submission_number ASC',
@@ -123,7 +130,10 @@ app.post('/api/submissions/submit', async (c) => {
 
 // ---------- GET /api/submissions/:week ----------
 app.get('/api/submissions/:week', async (c) => {
-  const week = parseInt(c.req.param('week'), 10);
+  const week = parseWeek(c.req.param('week'));
+  if (week === null) {
+    return c.json({ detail: WEEK_VALIDATION_ERROR }, 400);
+  }
 
   const { results } = await c.env.DB.prepare(
     `SELECT s.*, pt.started_at as personal_start_from_timer
@@ -165,7 +175,7 @@ app.get('/api/submissions/:week', async (c) => {
       elapsed_minutes: data.latest.elapsed_minutes,
       status: 'cloned',
       submission_number: data.latest.submission_number,
-      submission_history: data.history.reverse(),
+      submission_history: [...data.history].reverse(),
     });
   }
 
@@ -174,7 +184,10 @@ app.get('/api/submissions/:week', async (c) => {
 
 // ---------- GET /api/submissions/:week/:pid/history ----------
 app.get('/api/submissions/:week/:pid/history', async (c) => {
-  const week = parseInt(c.req.param('week'), 10);
+  const week = parseWeek(c.req.param('week'));
+  if (week === null) {
+    return c.json({ detail: WEEK_VALIDATION_ERROR }, 400);
+  }
   const pid = c.req.param('pid');
 
   const { results: subs } = await c.env.DB.prepare(
@@ -211,6 +224,14 @@ app.get('/api/submissions/:week/:pid/history', async (c) => {
 
     const ev = evalMap.get(s.submission_number);
     if (ev) {
+      // Parse JSON fields
+      let strengths: unknown = ev.strengths;
+      let improvements: unknown = ev.improvements;
+      let breakdown: unknown = ev.breakdown;
+      try { if (typeof strengths === 'string') strengths = JSON.parse(strengths); } catch { /* keep */ }
+      try { if (typeof improvements === 'string') improvements = JSON.parse(improvements); } catch { /* keep */ }
+      try { if (typeof breakdown === 'string') breakdown = JSON.parse(breakdown); } catch { /* keep */ }
+
       entry.evaluation = {
         rubric: ev.rubric_score,
         time_rank: ev.time_rank,
@@ -218,6 +239,10 @@ app.get('/api/submissions/:week/:pid/history', async (c) => {
         total: ev.total_score,
         status: ev.status,
         evaluated_at: ev.evaluated_at,
+        feedback: ev.feedback || '',
+        strengths: strengths || [],
+        improvements: improvements || [],
+        breakdown: breakdown || {},
       };
     }
 
