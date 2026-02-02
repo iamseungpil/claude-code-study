@@ -231,6 +231,89 @@ User: "Write a survey document from these paper summaries"
 User: "/survey-writer"</code></pre>
                             </div>
 
+                            <h4 class="font-bold text-lg mt-6 text-accent">Step-by-Step Creation Walkthrough</h4>
+                            <p class="text-gray-300 text-sm">Follow these steps to create a skill from scratch:</p>
+                            <div class="card rounded-xl p-4 mt-4">
+                                <ol class="space-y-3 text-sm text-gray-300">
+                                    <li><span class="text-accent font-bold">1.</span> <strong class="text-white">Create the directory:</strong>
+                                        <code class="bg-dark-800 px-2 py-1 rounded text-xs block mt-1">mkdir -p .claude/skills/my-skill</code>
+                                    </li>
+                                    <li><span class="text-accent font-bold">2.</span> <strong class="text-white">Write SKILL.md</strong> with frontmatter + instructions (see examples above)</li>
+                                    <li><span class="text-accent font-bold">3.</span> <strong class="text-white">Test it</strong> — invoke with <code class="bg-dark-800 px-2 py-1 rounded text-xs">/my-skill</code> or ask Claude naturally (auto-discovery via description)</li>
+                                </ol>
+                            </div>
+
+                            <h4 class="font-bold text-lg mt-6 text-accent">$ARGUMENTS Substitution</h4>
+                            <p class="text-gray-300 text-sm">Use <code class="bg-dark-800 px-2 py-1 rounded text-xs">$ARGUMENTS</code> in your SKILL.md to capture whatever the user types after the slash command:</p>
+                            <div class="code-block mt-4">
+                                <div class="code-block-header">.claude/skills/review-file/SKILL.md</div>
+                                <pre><code class="text-green-400 text-sm">---
+name: review-file
+user-invocable: true
+---
+
+Review the file: $ARGUMENTS
+
+Check for:
+- Security issues
+- Code style violations
+- Potential bugs</code></pre>
+                            </div>
+                            <div class="card rounded-xl p-4 mt-4">
+                                <p class="text-sm text-gray-300"><strong class="text-white">Usage:</strong> <code class="bg-dark-800 px-2 py-1 rounded text-xs">/review-file src/main.py</code></p>
+                                <p class="text-sm text-gray-400 mt-1">Claude receives the instruction with <code class="bg-dark-800 px-1 rounded text-xs">$ARGUMENTS</code> replaced by <code class="bg-dark-800 px-1 rounded text-xs">src/main.py</code></p>
+                            </div>
+
+                            <h4 class="font-bold text-lg mt-6 text-accent">Supporting Files</h4>
+                            <p class="text-gray-300 text-sm">Skills can include additional files alongside SKILL.md — templates, examples, or reference data that the skill instructions can reference:</p>
+                            <div class="code-block mt-4">
+                                <div class="code-block-header">Skill with Supporting Files</div>
+                                <pre><code class="text-green-400 text-sm">.claude/skills/my-skill/
+├── SKILL.md           <span class="code-comment"># Main skill instructions</span>
+├── template.md        <span class="code-comment"># Referenced by SKILL.md</span>
+└── examples/
+    ├── good.py        <span class="code-comment"># Example of good output</span>
+    └── bad.py         <span class="code-comment"># Example of what to avoid</span></code></pre>
+                            </div>
+
+                            <h4 class="font-bold text-lg mt-6 text-accent">Key Frontmatter Fields</h4>
+                            <div class="overflow-x-auto mt-4">
+                                <table class="w-full text-sm text-left">
+                                    <thead>
+                                        <tr class="border-b border-white/10">
+                                            <th class="py-3 px-4 text-accent font-bold">Field</th>
+                                            <th class="py-3 px-4 text-accent font-bold">Description</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="text-gray-300">
+                                        <tr class="border-b border-white/5">
+                                            <td class="py-3 px-4"><code class="bg-dark-800 px-2 py-1 rounded text-xs">name</code></td>
+                                            <td class="py-3 px-4">Skill identifier (used for <code class="bg-dark-800 px-1 rounded text-xs">/name</code> invocation)</td>
+                                        </tr>
+                                        <tr class="border-b border-white/5">
+                                            <td class="py-3 px-4"><code class="bg-dark-800 px-2 py-1 rounded text-xs">description</code></td>
+                                            <td class="py-3 px-4">Used by Claude for auto-discovery when matching user requests</td>
+                                        </tr>
+                                        <tr class="border-b border-white/5">
+                                            <td class="py-3 px-4"><code class="bg-dark-800 px-2 py-1 rounded text-xs">user-invocable</code></td>
+                                            <td class="py-3 px-4">Enables <code class="bg-dark-800 px-1 rounded text-xs">/skill-name</code> slash command</td>
+                                        </tr>
+                                        <tr class="border-b border-white/5">
+                                            <td class="py-3 px-4"><code class="bg-dark-800 px-2 py-1 rounded text-xs">allowed-tools</code></td>
+                                            <td class="py-3 px-4">Restrict which tools the skill can access</td>
+                                        </tr>
+                                        <tr class="border-b border-white/5">
+                                            <td class="py-3 px-4"><code class="bg-dark-800 px-2 py-1 rounded text-xs">model</code></td>
+                                            <td class="py-3 px-4">Override model (opus / sonnet / haiku)</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="py-3 px-4"><code class="bg-dark-800 px-2 py-1 rounded text-xs">context</code></td>
+                                            <td class="py-3 px-4">Set to <code class="bg-dark-800 px-1 rounded text-xs">fork</code> for separate context window</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
                             <button onclick="completeLesson(2)" class="btn-secondary px-6 py-3 rounded-xl text-sm font-medium">
                                 Mark as Complete
                             </button>
@@ -308,6 +391,73 @@ Task tool:
                                     <li><span class="text-accent font-bold">3.</span> <strong class="text-white">Review and verification</strong> - Have a separate agent check your work</li>
                                     <li><span class="text-accent font-bold">4.</span> <strong class="text-white">Repetitive analysis</strong> - Apply the same analysis across many files</li>
                                 </ol>
+                            </div>
+
+                            <h4 class="font-bold text-lg mt-6 text-accent">Creating Custom Agents</h4>
+                            <p class="text-gray-300 text-sm">Beyond built-in agent types, you can define your own specialized agents in <code class="bg-dark-800 px-2 py-1 rounded text-xs">.claude/agents/</code>:</p>
+                            <div class="code-block mt-4">
+                                <div class="code-block-header">.claude/agents/debugger.md</div>
+                                <pre><code class="text-green-400 text-sm">---
+name: debugger
+description: Debug errors and test failures
+model: opus
+tools: [Read, Edit, Bash, Grep, Glob]
+---
+
+You are an expert debugger. When given an error:
+
+1. Reproduce the issue
+2. Identify the root cause using stack traces
+3. Search for related code patterns
+4. Propose and implement a fix
+5. Verify the fix resolves the issue</code></pre>
+                            </div>
+
+                            <h4 class="font-bold text-lg mt-6 text-accent">Agent Frontmatter Fields</h4>
+                            <div class="overflow-x-auto mt-4">
+                                <table class="w-full text-sm text-left">
+                                    <thead>
+                                        <tr class="border-b border-white/10">
+                                            <th class="py-3 px-4 text-accent font-bold">Field</th>
+                                            <th class="py-3 px-4 text-accent font-bold">Description</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="text-gray-300">
+                                        <tr class="border-b border-white/5">
+                                            <td class="py-3 px-4"><code class="bg-dark-800 px-2 py-1 rounded text-xs">name</code></td>
+                                            <td class="py-3 px-4">Agent identifier (used as <code class="bg-dark-800 px-1 rounded text-xs">subagent_type</code>)</td>
+                                        </tr>
+                                        <tr class="border-b border-white/5">
+                                            <td class="py-3 px-4"><code class="bg-dark-800 px-2 py-1 rounded text-xs">description</code></td>
+                                            <td class="py-3 px-4">When to use this agent (for auto-selection)</td>
+                                        </tr>
+                                        <tr class="border-b border-white/5">
+                                            <td class="py-3 px-4"><code class="bg-dark-800 px-2 py-1 rounded text-xs">model</code></td>
+                                            <td class="py-3 px-4">opus / sonnet / haiku</td>
+                                        </tr>
+                                        <tr class="border-b border-white/5">
+                                            <td class="py-3 px-4"><code class="bg-dark-800 px-2 py-1 rounded text-xs">tools</code></td>
+                                            <td class="py-3 px-4">List of available tools for this agent</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="py-3 px-4"><code class="bg-dark-800 px-2 py-1 rounded text-xs">permissionMode</code></td>
+                                            <td class="py-3 px-4"><code class="bg-dark-800 px-1 rounded text-xs">bypassPermissions</code> or <code class="bg-dark-800 px-1 rounded text-xs">default</code></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <h4 class="font-bold text-lg mt-6 text-accent">Using Custom Agents</h4>
+                            <div class="code-block mt-4">
+                                <div class="code-block-header">Invoking a Custom Agent</div>
+                                <pre><code class="text-green-400 text-sm"><span class="code-comment"># Reference your custom agent by name in the Task tool:</span>
+Task tool:
+  subagent_type: "debugger"
+  prompt: "The test in tests/api.test.js is failing
+           with a TypeError. Investigate and fix it."
+
+<span class="code-comment"># List all available agents (built-in + custom):</span>
+/agents</code></pre>
                             </div>
 
                             <button onclick="completeLesson(3)" class="btn-secondary px-6 py-3 rounded-xl text-sm font-medium">
@@ -442,73 +592,67 @@ Task tool:
                                 <p class="text-sm mt-1 text-gray-300">Skills are most powerful when they encode your team's best practices and automate repetitive workflows.</p>
                             </div>
 
-                            <h4 class="font-bold text-lg text-accent">Example: Code Review Skill</h4>
-                            <div class="code-block">
-                                <div class="code-block-header">.claude/skills/code-review/SKILL.md</div>
-                                <pre><code class="text-green-400 text-sm">---
-name: code-review
-description: Review code changes following team standards
-allowed-tools: [Read, Glob, Grep]
-model: sonnet
-user-invocable: true
----
+                            <h4 class="font-bold text-lg text-accent">Real-World: Remotion (Video Creation via React)</h4>
+                            <p class="text-gray-300 text-sm">Remotion publishes official Claude Code skills that teach Claude how to generate React-based video components following Remotion best practices:</p>
+                            <div class="code-block mt-4">
+                                <div class="code-block-header">Installing Remotion Skills</div>
+                                <pre><code class="text-green-400 text-sm"><span class="code-comment"># Install community skills with npx skills add</span>
+npx skills add remotion-dev/skills
 
-<span class="code-comment"># Code Review Skill</span>
-
-Review the code changes and check for:
-
-<span class="code-comment">## Security</span>
-- No hardcoded secrets
-- Input validation
-- SQL injection prevention
-
-<span class="code-comment">## Style</span>
-- Follows project conventions
-- Clear naming
-- Appropriate comments
-
-<span class="code-comment">## Output</span>
-Provide feedback as:
-1. Critical issues (must fix)
-2. Suggestions (nice to have)
-3. Questions (need clarification)</code></pre>
+<span class="code-comment"># This installs the remotion-best-practices skill into your project</span>
+<span class="code-comment"># Claude can now generate React video components following Remotion patterns</span></code></pre>
+                            </div>
+                            <div class="card rounded-xl p-4 mt-4">
+                                <p class="text-sm text-gray-300"><strong class="text-white">What it does:</strong> Installs a <code class="bg-dark-800 px-1 rounded text-xs">remotion-best-practices</code> skill so Claude understands Remotion's component patterns, animation APIs, and video rendering pipeline.</p>
+                                <p class="text-sm text-gray-400 mt-2">
+                                    <a href="https://www.remotion.dev/docs/ai/skills" target="_blank" class="text-accent hover:text-pink-300 transition-colors underline">Remotion AI Skills Documentation</a>
+                                </p>
                             </div>
 
-                            <h4 class="font-bold text-lg mt-6 text-accent">Example: Documentation Skill</h4>
-                            <div class="code-block">
-                                <div class="code-block-header">.claude/skills/doc-generator/SKILL.md</div>
-                                <pre><code class="text-green-400 text-sm">---
-name: doc-generator
-description: Generate documentation for functions
-user-invocable: true
----
-
-<span class="code-comment"># Documentation Generator</span>
-
-For each function in the specified file:
-1. Analyze the function signature
-2. Understand the implementation
-3. Generate JSDoc/docstring with:
-   - Description
-   - @param for each parameter
-   - @returns description
-   - @example usage</code></pre>
+                            <h4 class="font-bold text-lg mt-6 text-accent">Real-World: DSLab Research Toolkit</h4>
+                            <p class="text-gray-300 text-sm">Our own lab's skill and agent collection demonstrates multi-agent workflows for research and code quality:</p>
+                            <div class="grid md:grid-cols-2 gap-4 mt-4">
+                                <div class="card rounded-xl p-4">
+                                    <h5 class="font-semibold text-accent mb-2">iterative-code-review</h5>
+                                    <p class="text-sm text-gray-400">3-agent loop: task-planner-analyzer plans changes, modular-code-architect implements, code-reviewer validates. Repeats until quality passes.</p>
+                                </div>
+                                <div class="card rounded-xl p-4">
+                                    <h5 class="font-semibold text-accent mb-2">debugger agent</h5>
+                                    <p class="text-sm text-gray-400">Root cause analysis specialist. Reads errors, searches code patterns, proposes and verifies fixes automatically.</p>
+                                </div>
+                                <div class="card rounded-xl p-4">
+                                    <h5 class="font-semibold text-accent mb-2">code-reviewer agent</h5>
+                                    <p class="text-sm text-gray-400">Structured feedback with 3 severity levels: Critical (must fix), Warning (should fix), Suggestion (nice to have).</p>
+                                </div>
+                                <div class="card rounded-xl p-4">
+                                    <h5 class="font-semibold text-accent mb-2">academic-writing-assistant</h5>
+                                    <p class="text-sm text-gray-400">Helps write research papers following academic writing standards with proper structure and citations.</p>
+                                </div>
+                            </div>
+                            <div class="card rounded-xl p-4 mt-4">
+                                <p class="text-sm text-gray-400">
+                                    <a href="https://github.com/iamseungpil/claude-for-dslab.git" target="_blank" class="text-accent hover:text-pink-300 transition-colors underline">DSLab Skills Collection on GitHub</a>
+                                </p>
                             </div>
 
-                            <h4 class="font-bold text-lg mt-6 text-accent">Skills Project Structure</h4>
-                            <div class="code-block">
-                                <div class="code-block-header">Recommended Structure</div>
-                                <pre><code class="text-green-400 text-sm">my-project/
-+-- .claude/
-|   +-- skills/
-|       +-- code-review/
-|       |   +-- SKILL.md
-|       +-- doc-generator/
-|       |   +-- SKILL.md
-|       +-- test-generator/
-|           +-- SKILL.md
-+-- CLAUDE.md              <span class="code-comment"># Project context</span>
-+-- src/                   <span class="code-comment"># Your code</span></code></pre>
+                            <h4 class="font-bold text-lg mt-6 text-accent">Resource Links</h4>
+                            <div class="grid md:grid-cols-2 gap-4 mt-4">
+                                <a href="https://code.claude.com/docs/en/skills" target="_blank" class="card rounded-xl p-4 hover:border-accent/40 transition-colors block">
+                                    <h5 class="font-semibold text-accent mb-1">Official Skills Docs</h5>
+                                    <p class="text-xs text-gray-400">code.claude.com/docs/en/skills</p>
+                                </a>
+                                <a href="https://code.claude.com/docs/en/sub-agents" target="_blank" class="card rounded-xl p-4 hover:border-accent/40 transition-colors block">
+                                    <h5 class="font-semibold text-accent mb-1">Official Subagents Docs</h5>
+                                    <p class="text-xs text-gray-400">code.claude.com/docs/en/sub-agents</p>
+                                </a>
+                                <a href="https://github.com/iamseungpil/claude-for-dslab" target="_blank" class="card rounded-xl p-4 hover:border-accent/40 transition-colors block">
+                                    <h5 class="font-semibold text-accent mb-1">DSLab Skills Collection</h5>
+                                    <p class="text-xs text-gray-400">github.com/iamseungpil/claude-for-dslab</p>
+                                </a>
+                                <a href="https://www.remotion.dev/docs/ai/skills" target="_blank" class="card rounded-xl p-4 hover:border-accent/40 transition-colors block">
+                                    <h5 class="font-semibold text-accent mb-1">Remotion Skills</h5>
+                                    <p class="text-xs text-gray-400">remotion.dev/docs/ai/skills</p>
+                                </a>
                             </div>
 
                             <button onclick="completeLesson(5)" class="btn-secondary px-6 py-3 rounded-xl text-sm font-medium">
@@ -782,6 +926,42 @@ For each function in the specified file:
                         <strong class="text-white">Domain-specific Intelligence</strong> (embedded expertise).
                     </p>
                 </details>
+                <details class="card rounded-xl p-4 cursor-pointer">
+                    <summary class="font-bold text-white flex items-center justify-between">
+                        Custom Agent
+                        <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </summary>
+                    <p class="text-gray-400 text-sm mt-3">
+                        A markdown file in <code class="bg-dark-800 px-1 rounded text-xs">.claude/agents/</code> that defines a specialized subagent
+                        with its own name, model, tools, and instructions. Referenced via <code class="bg-dark-800 px-1 rounded text-xs">subagent_type</code> in the Task tool.
+                    </p>
+                </details>
+                <details class="card rounded-xl p-4 cursor-pointer">
+                    <summary class="font-bold text-white flex items-center justify-between">
+                        $ARGUMENTS
+                        <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </summary>
+                    <p class="text-gray-400 text-sm mt-3">
+                        A variable in SKILL.md that captures whatever text the user types after the slash command.
+                        For example, <code class="bg-dark-800 px-1 rounded text-xs">/review-file src/main.py</code> substitutes <code class="bg-dark-800 px-1 rounded text-xs">src/main.py</code> into the <code class="bg-dark-800 px-1 rounded text-xs">$ARGUMENTS</code> placeholder.
+                    </p>
+                </details>
+                <details class="card rounded-xl p-4 cursor-pointer">
+                    <summary class="font-bold text-white flex items-center justify-between">
+                        Supporting Files
+                        <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </summary>
+                    <p class="text-gray-400 text-sm mt-3">
+                        Additional files alongside SKILL.md (templates, examples, reference data) that the skill instructions
+                        can reference. Stored in the same skill directory, e.g., <code class="bg-dark-800 px-1 rounded text-xs">.claude/skills/my-skill/template.md</code>.
+                    </p>
+                </details>
             </div>
         </section>
 
@@ -862,14 +1042,14 @@ For each function in the specified file:
         const quizQuestions = [
             { question: "What file defines a Claude Code skill?", options: ["skill.json", "SKILL.md", "skill.yaml", "skill.config"], correct: 1 },
             { question: "Which frontmatter field enables slash command invocation?", options: ["invocable: true", "command: true", "user-invocable: true", "slash: true"], correct: 2 },
-            { question: "What is a subagent in Claude Code?", options: ["A plugin that adds new UI elements", "An independent Claude instance spawned via the Task tool", "A configuration file for settings", "A special model variant"], correct: 1 },
-            { question: "Which subagent type is best for finding files and searching code?", options: ["Bash", "Plan", "Explore", "General-Purpose"], correct: 2 },
-            { question: "What is the purpose of the 'description' field in SKILL.md?", options: ["Display in UI only", "Enable skill discovery by Claude", "Documentation purposes", "Version tracking"], correct: 1 },
+            { question: "What does $ARGUMENTS do in a SKILL.md file?", options: ["Defines required parameters", "Captures text typed after the slash command", "Lists available CLI flags", "Specifies environment variables"], correct: 1 },
+            { question: "Where do you place custom agent definitions?", options: [".claude/skills/", ".claude/agents/", ".claude/subagents/", "agents/"], correct: 1 },
+            { question: "How do you install community skills like Remotion's?", options: ["git clone the repo", "npx skills add <repo>", "pip install skills", "claude install <skill>"], correct: 1 },
+            { question: "Which agent frontmatter field specifies what tools an agent can use?", options: ["allowed-tools", "tools", "permissions", "capabilities"], correct: 1 },
             { question: "How do you run multiple subagents in parallel?", options: ["Use the --parallel flag", "Send multiple Task tool calls in a single message", "Run claude in multiple terminals", "Use the /parallel command"], correct: 1 },
             { question: "Where should project-specific skills be stored?", options: ["~/.claude/skills/", ".claude/skills/", "/etc/claude/skills/", "skills/"], correct: 1 },
             { question: "What parameter runs a subagent in the background?", options: ["async: true", "background: true", "run_in_background: true", "detach: true"], correct: 2 },
             { question: "What does 'allowed-tools: [Read, Glob]' restrict in a skill?", options: ["The skill can only read and search files", "The skill runs faster", "The skill uses less tokens", "The skill requires admin access"], correct: 0 },
-            { question: "Which subagent type is best for architecture design?", options: ["Explore", "Bash", "Plan", "General-Purpose"], correct: 2 },
             { question: "Which skill design pattern repeats a step until a quality threshold is met?", options: ["Sequential Workflow", "Multi-MCP Coordination", "Iterative Refinement", "Context-aware Tool Selection"], correct: 2 },
             { question: "What are the two approaches to start building a skill?", options: ["Top-down vs Bottom-up", "Problem-first vs Tool-first", "Code-first vs Design-first", "Manual vs Automated"], correct: 1 },
         ];
