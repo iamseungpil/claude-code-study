@@ -50,7 +50,7 @@
                 <span class="bg-gray-700 text-gray-300 px-3 py-1 rounded-full text-xs font-bold">Upcoming</span>
             </div>
             <h1 class="text-4xl md:text-5xl font-bold mb-4 tracking-tight">📚 Paper Survey (10+ papers)</h1>
-            <p class="text-xl text-gray-400 mb-8 max-w-2xl">Use Skills and MCP with Semantic Scholar API to survey 10+ papers on a specific topic.</p>
+            <p class="text-xl text-gray-400 mb-8 max-w-2xl">Use <strong class="text-white">Skills</strong>, <strong class="text-white">Subagents</strong>, and <strong class="text-white">MCP</strong> to survey 10+ papers on a specific topic.</p>
             <div class="flex flex-wrap gap-3">
                 <div class="bg-dark-700/60 border border-white/10 rounded-xl px-5 py-3 flex items-center gap-3">
                     <span class="text-2xl">⏱️</span>
@@ -74,8 +74,9 @@
             <div class="card rounded-2xl p-8">
                 <p class="text-lg text-gray-300 leading-relaxed">
                     You need a <strong class="text-white">quick literature review</strong> for a new research topic.
-                    Connect to the arXiv API via <strong class="text-accent">MCP (Model Context Protocol)</strong>,
-                    and build a workflow to automatically search, analyze, and write a structured survey.
+                    Use <strong class="text-accent">MCP</strong> to connect to academic paper APIs,
+                    <strong class="text-accent">Subagents</strong> to analyze papers in parallel,
+                    and create a <strong class="text-accent">Custom Skill</strong> to automate survey writing.
                 </p>
             </div>
         </section>
@@ -93,32 +94,48 @@
         <section id="stagesSection" class="mb-16 hidden">
             <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-4">WHAT TO DO</h2>
             <div class="space-y-4">
-                <div class="card rounded-2xl p-6 flex gap-5">
-                    <div class="step-number bg-accent/20 text-accent">1</div>
-                    <div>
-                        <h3 class="font-bold text-xl mb-2">Set Up MCP Server</h3>
-                        <p class="text-gray-400">Configure and connect to the arXiv MCP server (<code>arxiv-mcp-server</code>).</p>
+                <div class="card rounded-2xl p-6">
+                    <div class="flex gap-5 mb-4">
+                        <div class="step-number bg-accent/20 text-accent">1</div>
+                        <div>
+                            <h3 class="font-bold text-xl mb-2">Set Up MCP Server</h3>
+                            <p class="text-gray-400 mb-4">Install and configure an academic paper MCP server (choose one):</p>
+                        </div>
+                    </div>
+                    <div class="ml-11 space-y-4">
+                        <div class="bg-dark-800/50 rounded-xl p-4 border border-white/5">
+                            <div class="text-sm font-semibold text-accent mb-2">Option A: arXiv MCP (Recommended)</div>
+                            <div class="space-y-2">
+                                <code class="block bg-dark-900 text-green-400 px-3 py-2 rounded-lg text-sm font-mono">uv tool install arxiv-mcp-server</code>
+                                <code class="block bg-dark-900 text-green-400 px-3 py-2 rounded-lg text-sm font-mono">claude mcp add arxiv -- uv tool run arxiv-mcp-server</code>
+                            </div>
+                        </div>
+                        <div class="bg-dark-800/50 rounded-xl p-4 border border-white/5">
+                            <div class="text-sm font-semibold text-blue-400 mb-2">Option B: Semantic Scholar MCP</div>
+                            <code class="block bg-dark-900 text-green-400 px-3 py-2 rounded-lg text-sm font-mono">npx -y @smithery/cli@latest install @smithery-ai/semantic-scholar --client claude</code>
+                        </div>
+                        <p class="text-sm text-gray-500">💡 Verify installation: <code class="text-accent">claude mcp list</code></p>
                     </div>
                 </div>
                 <div class="card rounded-2xl p-6 flex gap-5">
                     <div class="step-number bg-accent/20 text-accent">2</div>
                     <div>
-                        <h3 class="font-bold text-xl mb-2">Design Search Queries</h3>
-                        <p class="text-gray-400">Develop effective search strategies for your research topic.</p>
+                        <h3 class="font-bold text-xl mb-2">Create Survey Writing Skill</h3>
+                        <p class="text-gray-400">Create a custom Skill in <code class="text-accent">.claude/skills/survey/SKILL.md</code> to automate survey generation.</p>
                     </div>
                 </div>
                 <div class="card rounded-2xl p-6 flex gap-5">
                     <div class="step-number bg-accent/20 text-accent">3</div>
                     <div>
-                        <h3 class="font-bold text-xl mb-2">Collect and Analyze Papers</h3>
-                        <p class="text-gray-400">Collect 10+ related papers. Summarize and critically compare them.</p>
+                        <h3 class="font-bold text-xl mb-2">Collect and Analyze Papers with Subagents</h3>
+                        <p class="text-gray-400">Use <strong class="text-white">Task tool</strong> to spawn subagents for parallel paper analysis. Collect 10+ papers.</p>
                     </div>
                 </div>
                 <div class="card rounded-2xl p-6 flex gap-5">
                     <div class="step-number bg-accent/20 text-accent">4</div>
                     <div>
                         <h3 class="font-bold text-xl mb-2">Write Survey Document</h3>
-                        <p class="text-gray-400">Write a structured survey with introduction, critical analysis, and research insights.</p>
+                        <p class="text-gray-400">Use your Skill to write a structured survey with introduction, critical analysis, and research insights.</p>
                     </div>
                 </div>
             </div>
@@ -127,24 +144,24 @@
         <section id="learningSection" class="mb-16">
             <h2 class="text-sm font-bold text-accent uppercase tracking-widest mb-4">WHAT YOU'LL LEARN</h2>
             <div class="grid md:grid-cols-2 gap-4">
-                <div class="card rounded-2xl p-6">
-                    <div class="flex items-center gap-3 mb-3"><span class="text-2xl">⚡</span><h3 class="font-bold text-lg">Skills</h3></div>
-                    <p class="text-gray-400 text-sm mb-3">Custom Skills for document automation</p>
-                    <code class="text-xs bg-dark-600 px-3 py-1.5 rounded-lg text-accent">/skill-name, SKILL.md</code>
+                <div class="card rounded-2xl p-6 border-2 border-accent/30">
+                    <div class="flex items-center gap-3 mb-3"><span class="text-2xl">⚡</span><h3 class="font-bold text-lg text-accent">Skills (Core)</h3></div>
+                    <p class="text-gray-400 text-sm mb-3">Create custom Skills for automated survey writing workflow</p>
+                    <code class="text-xs bg-dark-600 px-3 py-1.5 rounded-lg text-accent">.claude/skills/*/SKILL.md</code>
+                </div>
+                <div class="card rounded-2xl p-6 border-2 border-accent/30">
+                    <div class="flex items-center gap-3 mb-3"><span class="text-2xl">🤖</span><h3 class="font-bold text-lg text-accent">Subagents (Core)</h3></div>
+                    <p class="text-gray-400 text-sm mb-3">Use Task tool to spawn parallel agents for paper analysis</p>
+                    <code class="text-xs bg-dark-600 px-3 py-1.5 rounded-lg text-accent">Task tool with subagent_type</code>
                 </div>
                 <div class="card rounded-2xl p-6">
-                    <div class="flex items-center gap-3 mb-3"><span class="text-2xl">🔌</span><h3 class="font-bold text-lg">MCP (Model Context Protocol)</h3></div>
-                    <p class="text-gray-400 text-sm mb-3">Protocol for connecting external APIs with Claude</p>
+                    <div class="flex items-center gap-3 mb-3"><span class="text-2xl">🔌</span><h3 class="font-bold text-lg">MCP Setup</h3></div>
+                    <p class="text-gray-400 text-sm mb-3">Install and configure external API servers for Claude</p>
                     <code class="text-xs bg-dark-600 px-3 py-1.5 rounded-lg text-accent">claude mcp add</code>
                 </div>
                 <div class="card rounded-2xl p-6">
-                    <div class="flex items-center gap-3 mb-3"><span class="text-2xl">🤖</span><h3 class="font-bold text-lg">Subagents</h3></div>
-                    <p class="text-gray-400 text-sm mb-3">Subagents for distributing work in parallel</p>
-                    <code class="text-xs bg-dark-600 px-3 py-1.5 rounded-lg text-accent">Use "Task tool"</code>
-                </div>
-                <div class="card rounded-2xl p-6">
-                    <div class="flex items-center gap-3 mb-3"><span class="text-2xl">📖</span><h3 class="font-bold text-lg">arXiv API</h3></div>
-                    <p class="text-gray-400 text-sm mb-3">Academic paper search, download, and analysis</p>
+                    <div class="flex items-center gap-3 mb-3"><span class="text-2xl">📖</span><h3 class="font-bold text-lg">Academic APIs</h3></div>
+                    <p class="text-gray-400 text-sm mb-3">arXiv or Semantic Scholar for paper search (no hallucination)</p>
                     <code class="text-xs bg-dark-600 px-3 py-1.5 rounded-lg text-accent">arxiv-mcp-server</code>
                 </div>
             </div>
@@ -157,7 +174,7 @@
                     <div class="flex gap-4">
                         <span class="text-4xl">📄</span>
                         <div>
-                            <h3 class="font-bold text-lg mb-1">survey.md</h3>
+                            <h3 class="font-bold text-lg mb-1">survey.md <span class="text-xs text-accent">(Required)</span></h3>
                             <ul class="text-gray-400 text-sm space-y-1">
                                 <li>• Introduction &amp; scope</li>
                                 <li>• Critical analysis (10+ papers)</li>
@@ -169,30 +186,30 @@
                     <div class="flex gap-4">
                         <span class="text-4xl">📚</span>
                         <div>
-                            <h3 class="font-bold text-lg mb-1">references.bib</h3>
+                            <h3 class="font-bold text-lg mb-1">references.bib <span class="text-xs text-accent">(Required)</span></h3>
                             <ul class="text-gray-400 text-sm space-y-1">
                                 <li>• BibTeX format, 10+ entries</li>
-                                <li>• Matched with in-text citations</li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="flex gap-4">
-                        <span class="text-4xl">🔌</span>
-                        <div>
-                            <h3 class="font-bold text-lg mb-1">.claude/settings.local.json</h3>
-                            <ul class="text-gray-400 text-sm space-y-1">
-                                <li>• arXiv MCP server config</li>
-                                <li>• Commit to repo</li>
+                                <li>• Real papers only (arXiv ID or DOI)</li>
                             </ul>
                         </div>
                     </div>
                     <div class="flex gap-4">
                         <span class="text-4xl">⚡</span>
                         <div>
-                            <h3 class="font-bold text-lg mb-1">.claude/skills/*/SKILL.md</h3>
+                            <h3 class="font-bold text-lg mb-1">.claude/skills/*/SKILL.md <span class="text-xs text-accent">(Required)</span></h3>
                             <ul class="text-gray-400 text-sm space-y-1">
                                 <li>• Custom survey-writer skill</li>
                                 <li>• YAML frontmatter + instructions</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <span class="text-4xl">🔌</span>
+                        <div>
+                            <h3 class="font-bold text-lg mb-1">.claude/settings.local.json <span class="text-xs text-gray-500">(Optional)</span></h3>
+                            <ul class="text-gray-400 text-sm space-y-1">
+                                <li>• MCP server config (if used)</li>
+                                <li>• Bonus points for proper setup</li>
                             </ul>
                         </div>
                     </div>
@@ -206,13 +223,16 @@
                 <table class="w-full">
                     <thead><tr class="bg-dark-600/50 text-left"><th class="px-6 py-4 font-semibold">Category</th><th class="px-6 py-4 font-semibold text-right">Points</th></tr></thead>
                     <tbody class="divide-y divide-white/5">
-                        <tr><td class="px-6 py-5"><div class="font-medium text-lg">A. Tool Setup</div><div class="text-sm text-gray-500 mt-1">arXiv MCP config + Custom Skill</div></td><td class="px-6 py-5 text-right"><span class="text-2xl font-bold text-accent">20</span></td></tr>
+                        <tr><td class="px-6 py-5"><div class="font-medium text-lg">A. Tool Setup</div><div class="text-sm text-gray-500 mt-1">Custom Skill (10) + MCP config (5) + Subagent usage (5)</div></td><td class="px-6 py-5 text-right"><span class="text-2xl font-bold text-accent">20</span></td></tr>
                         <tr><td class="px-6 py-5"><div class="font-medium text-lg">B. Writing Structure</div><div class="text-sm text-gray-500 mt-1">Introduction, organization, references, conclusion</div></td><td class="px-6 py-5 text-right"><span class="text-2xl font-bold text-accent">35</span></td></tr>
                         <tr><td class="px-6 py-5"><div class="font-medium text-lg">C. Research Insight</div><div class="text-sm text-gray-500 mt-1">Summaries, critical analysis, synthesis</div></td><td class="px-6 py-5 text-right"><span class="text-2xl font-bold text-accent">35</span></td></tr>
                         <tr class="bg-green-500/5"><td class="px-6 py-5"><div class="font-medium text-lg text-green-400">⏱️ Time Bonus</div></td><td class="px-6 py-5 text-right"><span class="text-2xl font-bold text-green-400">+10</span></td></tr>
                     </tbody>
                     <tfoot><tr class="bg-dark-600/30"><td class="px-6 py-4 font-bold text-lg">Total</td><td class="px-6 py-4 text-right"><span class="text-3xl font-bold bg-gradient-to-r from-accent to-yellow-300 bg-clip-text text-transparent">100</span></td></tr></tfoot>
                 </table>
+            </div>
+            <div class="mt-4 p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl text-amber-400 text-sm">
+                <strong>⚠️ Note:</strong> Fake/hallucinated papers will result in 0 points for that paper. Use MCP to fetch real papers with arXiv ID or DOI.
             </div>
         </section>
 
@@ -238,7 +258,7 @@
                         </li>
                         <li class="flex gap-3">
                             <span class="bg-accent/20 text-accent w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">2</span>
-                            <span>Include <strong>survey.md</strong>, <strong>references.bib</strong>, <strong>.claude/settings.local.json</strong>, and <strong>.claude/skills/*/SKILL.md</strong></span>
+                            <span>Include <strong>survey.md</strong>, <strong>references.bib</strong>, and <strong>.claude/skills/*/SKILL.md</strong> (MCP config optional)</span>
                         </li>
                         <li class="flex gap-3">
                             <span class="bg-accent/20 text-accent w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">3</span>
