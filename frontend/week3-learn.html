@@ -231,6 +231,40 @@ User: "Write a survey document from these paper summaries"
 User: "/survey-writer"</code></pre>
                             </div>
 
+                            <div class="tip-box">
+                                <p class="text-pink-200 font-medium">Claude와 대화로 Skill 만들기</p>
+                                <p class="text-sm mt-1 text-gray-300">
+                                    파일을 직접 작성할 필요 없이 Claude에게 "이런 skill을 만들어줘"라고 요청하면 됩니다.
+                                    Claude가 적절한 frontmatter와 instructions를 갖춘 SKILL.md를 생성합니다.
+                                </p>
+                            </div>
+
+                            <div class="code-block mt-4">
+                                <div class="code-block-header">대화로 Skill 생성 예시</div>
+                                <pre><code class="text-green-400 text-sm">User: "코드 리뷰 skill을 만들어줘.
+       보안, 스타일, 버그를 체크하고
+       Critical/Warning/Suggestion으로 분류해줘"
+
+Claude: [.claude/skills/code-reviewer/SKILL.md 생성]</code></pre>
+                            </div>
+
+                            <h4 class="font-bold text-lg mt-6 text-accent">Skill Creator Skill</h4>
+                            <p class="text-gray-300 text-sm">
+                                대화형 skill 생성을 더 체계적으로 하려면 <code class="bg-dark-800 px-2 py-1 rounded text-xs">skill-creator</code>를 사용하세요:
+                            </p>
+                            <div class="code-block mt-4">
+                                <div class="code-block-header">Skill Creator 사용</div>
+                                <pre><code class="text-green-400 text-sm">User: "/skill-creator"
+Claude: "어떤 skill을 만들고 싶으신가요?
+         skill의 목적과 필요한 도구를 알려주세요."
+
+<span class="code-comment"># Claude가 대화를 통해:</span>
+<span class="code-comment"># - name, description 정의</span>
+<span class="code-comment"># - 필요한 tools 선택</span>
+<span class="code-comment"># - user-invocable 여부 결정</span>
+<span class="code-comment"># - 완성된 SKILL.md 생성</span></code></pre>
+                            </div>
+
                             <h4 class="font-bold text-lg mt-6 text-accent">Step-by-Step Creation Walkthrough</h4>
                             <p class="text-gray-300 text-sm">Follow these steps to create a skill from scratch:</p>
                             <div class="card rounded-xl p-4 mt-4">
@@ -391,6 +425,26 @@ Task tool:
                                     <li><span class="text-accent font-bold">3.</span> <strong class="text-white">Review and verification</strong> - Have a separate agent check your work</li>
                                     <li><span class="text-accent font-bold">4.</span> <strong class="text-white">Repetitive analysis</strong> - Apply the same analysis across many files</li>
                                 </ol>
+                            </div>
+
+                            <div class="tip-box">
+                                <p class="text-pink-200 font-medium">Claude와 대화로 Agent 만들기</p>
+                                <p class="text-sm mt-1 text-gray-300">
+                                    Agent도 직접 파일을 작성할 필요 없이 Claude에게 요청하면 됩니다.
+                                    "디버깅 전문 agent를 만들어줘"라고 하면 Claude가 적절한 tools와 model을 선택해서 생성합니다.
+                                </p>
+                            </div>
+
+                            <div class="code-block mt-4">
+                                <div class="code-block-header">대화로 Agent 생성 예시</div>
+                                <pre><code class="text-green-400 text-sm">User: "디버깅 전문 agent를 만들어줘.
+       에러를 받으면 root cause 분석하고
+       수정안을 제시하는 agent"
+
+Claude: [.claude/agents/debugger.md 생성]
+        - model: opus (복잡한 분석에 적합)
+        - tools: [Read, Edit, Bash, Grep, Glob]
+        - 상세한 디버깅 프로세스 포함</code></pre>
                             </div>
 
                             <h4 class="font-bold text-lg mt-6 text-accent">Creating Custom Agents</h4>
